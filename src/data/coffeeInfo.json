@@ -1,0 +1,24 @@
+[
+  {
+    "id": "ethiopia-sidamo",
+    "name": "エチオピア シダモ",
+    "roast": "浅煎り",
+    "weight": "100g",
+    "price": 1250,
+    "pricePerCup": "約160円",
+    "flavor": "グレープフルーツ、アプリコット、ベルガモット",
+    "description": "華やかで複雑なフレーバーに、優しい甘みのある味わい。朝の一杯に、ふとした感性が戻ってくるような珈琲です。",
+    "shopUrl": "https://mumucoffee.theshop.jp/items/127027333"
+  },
+  {
+    "id": "indonesia-mandheling",
+    "name": "インドネシア マンデリン",
+    "roast": "深煎り",
+    "weight": "100g",
+    "price": 1200,
+    "pricePerCup": "約160円",
+    "flavor": "ダークチョコレート、スパイス、深いコク",
+    "description": "しっかりとした苦味と重厚なコク。夜に灯台の光を眺めながら飲みたい、落ち着いた一杯。",
+    "shopUrl": "https://mumucoffee.theshop.jp/items/127225149"
+  }
+]

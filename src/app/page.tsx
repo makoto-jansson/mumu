@@ -1,13 +1,23 @@
 // トップページ
-// 灯台の珈琲焙煎所 mumu のメインビジュアルを表示する
+// Hero → 整える → 味わう → 読む → mumuについて の順に並べる
+
+import HeroSection from "@/components/home/HeroSection";
+import ToolsSection from "@/components/home/ToolsSection";
+import BeansSection from "@/components/home/BeansSection";
+import JournalSection from "@/components/home/JournalSection";
+import AboutSection from "@/components/home/AboutSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-amber-50">
-      {/* メインタイトル */}
-      <h1 className="text-4xl font-bold text-stone-800 tracking-widest">
-        灯台の珈琲焙煎所 mumu
-      </h1>
-    </main>
+    <>
+      {/* フルスクリーンのヒーロー */}
+      <HeroSection />
+
+      {/* 3つの柱 + mumuについてセクション */}
+      <ToolsSection />
+      <BeansSection />
+      <JournalSection />
+      <AboutSection />
+    </>
   );
 }
