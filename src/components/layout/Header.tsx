@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
   // スクロール位置を追跡して背景を切り替える
@@ -47,9 +48,19 @@ export default function Header() {
           {/* ロゴ */}
           <Link
             href="/"
-            className="text-[#e8e6e1] text-lg font-medium tracking-[0.2em] hover:text-[#EF9F27] transition-colors duration-300"
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity duration-300"
           >
-            mumu
+            <Image
+              src="/mumu_logo_white.png"
+              alt="灯台の珈琲焙煎所mumu"
+              width={0}
+              height={0}
+              sizes="100vw"
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-[#e8e6e1] text-lg font-medium tracking-[0.2em]">
+              mumu
+            </span>
           </Link>
 
           {/* デスクトップナビ */}

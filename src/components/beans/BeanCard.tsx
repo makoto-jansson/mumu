@@ -1,62 +1,66 @@
 "use client";
 
 // 珈琲豆カードコンポーネント
-// 豆の情報を受け取り、BASEの商品ページへ誘導するカードを表示する
+// レイアウト: 左=画像、右=テキスト（横並び）
+// カード全体がBASEの商品ページへのリンク
 
 import { motion } from "framer-motion";
-
-type Bean = {
-  id: string;
-  name: string;
-  roast: string;
-  weight: string;
-  price: number;
-  pricePerCup: string;
-  flavor: string;
-  description: string;
-  shopUrl: string;
-};
+import Image from "next/image";
+import type { Bean } from "@/libs/microcms";
 
 export default function BeanCard({ bean, index }: { bean: Bean; index: number }) {
   return (
-    <motion.div
+    <motion.a
+      href={bean.shopUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.8, delay: index * 0.15, ease: "easeOut" }}
-      className="border border-white/10 p-8 md:p-10"
+      className="group flex flex-col md:flex-row border border-white/10 hover:border-white/25 transition-colors duration-300 cursor-pointer"
     >
-      {/* 豆の名前・焙煎度・重量 */}
-      <div className="flex flex-col gap-2 mb-6">
-        <h2 className="text-[#e8e6e1] text-xl md:text-2xl font-light tracking-wide">
-          {bean.name}
-        </h2>
-        <p className="text-[#e8e6e1]/50 text-sm font-light tracking-wider">
-          {bean.roast} / {bean.weight} / ¥{bean.price.toLocaleString()}
+      {/* 左: 商品画像 */}
+      {bean.image && (
+        <div className="relative w-full aspect-[2/3] md:w-64 md:aspect-[2/3] shrink-0 overflow-hidden">
+          <Image
+            src={bean.image.url}
+            alt={bean.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 208px, 288px"
+          />
+        </div>
+      )}
+
+      {/* 右: テキスト情報 */}
+      <div className="flex flex-col justify-between p-6 md:p-8 flex-1 min-w-0">
+        <div>
+          {/* 豆の名前・焙煎度・価格 */}
+          <h2 className="text-[#e8e6e1] text-lg md:text-xl font-light tracking-wide mb-1">
+            {bean.name}
+          </h2>
+          <p className="text-[#e8e6e1]/50 text-xs font-light tracking-wider mb-4">
+            {bean.roast} / {bean.weight} / ¥{bean.price.toLocaleString()}
+          </p>
+
+          {/* フレーバー */}
+          <p className="text-[#EF9F27]/80 text-xs font-light tracking-wider mb-3">
+            {bean.flavor}
+          </p>
+
+          {/* 説明文 */}
+          <p className="text-[#e8e6e1]/60 text-sm font-light leading-relaxed">
+            {bean.description}
+          </p>
+        </div>
+
+        {/* ショップへのリンク表示 */}
+        <p className="mt-6 inline-flex items-center gap-1 text-[#e8e6e1]/40 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/70 transition-colors duration-300">
+          ショップで見る
+          <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
         </p>
       </div>
-
-      {/* フレーバー */}
-      <p className="text-[#EF9F27]/80 text-sm font-light tracking-wider mb-4">
-        {bean.flavor}
-      </p>
-
-      {/* 説明文 */}
-      <p className="text-[#e8e6e1]/60 text-sm font-light leading-relaxed mb-8">
-        {bean.description}
-      </p>
-
-      {/* BASEへのリンク */}
-      <a
-        href={bean.shopUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-[#e8e6e1]/60 text-sm font-light tracking-wider group hover:text-[#e8e6e1] transition-colors duration-300 relative"
-      >
-        ショップで見る
-        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-        <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#EF9F27] group-hover:w-full transition-all duration-300" />
-      </a>
-    </motion.div>
+    </motion.a>
   );
 }
