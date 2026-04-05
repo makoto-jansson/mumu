@@ -49,7 +49,7 @@ export default function RelaxDone({ mood, duration }: Props) {
         {/* タイトル */}
         <div>
           <p className="text-[#EF9F27]/60 text-xs font-light tracking-[0.4em] mb-3">
-            ☽ Slow drip
+            ☽ Relax
           </p>
           <h1 className="text-[#e8e6e1] text-2xl font-light tracking-wide mb-4">
             お疲れさまでした。

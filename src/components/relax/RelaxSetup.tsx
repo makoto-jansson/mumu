@@ -49,7 +49,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
 
         {/* ヘッダー */}
         <div className="mb-8">
-          <p className="text-[#EF9F27]/70 text-xs font-light tracking-[0.3em] mb-3">☽ Slow drip</p>
+          <p className="text-[#EF9F27]/70 text-xs font-light tracking-[0.3em] mb-3">☽ Relax</p>
           <h1 className="text-[#e8e6e1] text-xl font-light leading-relaxed tracking-wide mb-2">
             珈琲を淹れて、
             <br />

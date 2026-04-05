@@ -46,7 +46,7 @@ export default function SessionSummary({ sets, totalMinutes, task }: Props) {
         {/* タイトル */}
         <div>
           <p className="text-[#EF9F27]/60 text-xs font-light tracking-[0.4em] mb-3">
-            ☀ Focus brew
+            ☀ Focus
           </p>
           <h1 className="text-[#e8e6e1] text-2xl font-light tracking-wide mb-4">
             今日の集中
