@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS }: Props) {
-  const { formatted, isFinished, start } = useTimer(COFFEE_SEC);
+  const { isFinished, start } = useTimer(COFFEE_SEC);
 
   useEffect(() => {
     start();
@@ -67,21 +67,11 @@ export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS }: 
         </p>
       </motion.div>
 
-      {/* タイマー */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="text-[#EF9F27]/60 text-3xl font-light tracking-widest tabular-nums mb-12"
-      >
-        {formatted}
-      </motion.p>
-
       {/* スキップ */}
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 0.8 }}
         onClick={onSkip}
         className="border border-white/20 px-8 py-3 text-[#e8e6e1]/50 text-sm font-light tracking-wider hover:border-white/40 hover:text-[#e8e6e1]/80 transition-all duration-300"
       >
