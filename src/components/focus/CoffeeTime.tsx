@@ -34,7 +34,7 @@ export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS }: 
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center px-6"
+      className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center px-6 overflow-y-auto"
     >
       <StepBar steps={steps} current="coffee" />
       {/* コンテンツを縦中央に */}

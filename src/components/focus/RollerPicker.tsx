@@ -64,7 +64,7 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
   const pad = Math.floor(VISIBLE / 2);
 
   return (
-    <div className="relative flex flex-col items-center w-full">
+    <div className="relative flex flex-col items-center w-[60%] mx-auto">
       <p className="text-[#e8e6e1]/50 text-xs font-light tracking-[0.3em] mb-3">
         {label}
       </p>
