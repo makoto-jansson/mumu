@@ -1,0 +1,156 @@
+"use client";
+
+// 集中セッション画面
+// - フルスクリーン固定でBottomNavを隠す
+// - 残り時間を大きく表示
+// - 霧の海と灯台アニメーション
+// - 一時停止・終了ボタン
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTimer } from "@/hooks/useTimer";
+import FocusScene from "@/components/animations/FocusScene";
+import type { FocusConfig } from "./FocusSetup";
+
+type Props = {
+  config: FocusConfig;
+  onBreak: (actualMinutes: number) => void;
+};
+
+export default function FocusSession({ config, onBreak }: Props) {
+  const durationSec = config.duration * 60;
+  const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    start();
+  }, [start]);
+
+  useEffect(() => {
+    if (isFinished) {
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      onBreak(config.duration);
+    }
+  }, [isFinished, config.duration, onBreak]);
+
+  const handlePauseResume = () => {
+    if (isPaused) {
+      resume();
+      setIsPaused(false);
+    } else {
+      pause();
+      setIsPaused(true);
+    }
+  };
+
+  const handleEnd = () => {
+    const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
+    onBreak(elapsedMin);
+  };
+
+  const progress = timeLeft / durationSec;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6 }}
+      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+    >
+      {/* 残り時間（大きく） */}
+      <motion.p
+        className="text-[#e8e6e1] font-light tabular-nums tracking-widest mb-6"
+        style={{ fontSize: "clamp(3rem, 15vw, 5rem)" }}
+      >
+        {formatted}
+      </motion.p>
+
+      {/* 霧の海と灯台アニメーション */}
+      <div className="w-full max-w-sm">
+        <FocusScene />
+      </div>
+
+      {/* タスクメモ */}
+      {config.task ? (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ delay: 0.5 }}
+          className="text-[#e8e6e1]/40 text-sm font-light tracking-wider mt-3 mb-10"
+        >
+          {config.task}
+        </motion.p>
+      ) : (
+        <div className="mb-10" />
+      )}
+
+      {/* 進捗バー */}
+      <div className="w-32 h-px bg-white/10 mb-10">
+        <motion.div
+          className="h-full bg-[#EF9F27]/50"
+          style={{ width: `${(1 - progress) * 100}%` }}
+        />
+      </div>
+
+      {/* ボタン行（一時停止 + 終了） */}
+      <div className="flex items-start gap-10">
+
+        {/* 一時停止 / 再開 */}
+        <button
+          onClick={handlePauseResume}
+          className="flex flex-col items-center gap-2 group"
+        >
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-colors duration-300">
+            <AnimatePresence mode="wait">
+              {isPaused ? (
+                <motion.svg
+                  key="play"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  width="14" height="16" viewBox="0 0 14 16" fill="none"
+                >
+                  <path d="M1 1L13 8L1 15V1Z" fill="#e8e6e1" opacity="0.6" />
+                </motion.svg>
+              ) : (
+                <motion.svg
+                  key="pause"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  width="14" height="16" viewBox="0 0 14 16" fill="none"
+                >
+                  <rect x="1" y="1" width="4" height="14" fill="#e8e6e1" opacity="0.6" />
+                  <rect x="9" y="1" width="4" height="14" fill="#e8e6e1" opacity="0.6" />
+                </motion.svg>
+              )}
+            </AnimatePresence>
+          </div>
+          <span className="text-[#e8e6e1]/25 text-xs font-light tracking-wider">
+            {isPaused ? "再開" : "一時停止"}
+          </span>
+        </button>
+
+        {/* 終了 */}
+        <button
+          onClick={handleEnd}
+          className="flex flex-col items-center gap-2 group"
+        >
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-colors duration-300">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <rect x="1" y="1" width="10" height="10" rx="1" fill="#e8e6e1" opacity="0.6" />
+            </svg>
+          </div>
+          <span className="text-[#e8e6e1]/25 text-xs font-light tracking-wider">終了</span>
+        </button>
+
+      </div>
+
+      {/* BGMメモ */}
+      <p className="absolute bottom-8 text-[#e8e6e1]/15 text-xs font-light tracking-wider">
+        {`♪ ${config.ambient}`}
+      </p>
+    </motion.div>
+  );
+}

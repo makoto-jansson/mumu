@@ -3,8 +3,8 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
+import InstallBanner from "@/components/layout/InstallBanner";
 
 const BASE_URL = "https://mumucoffee-feel.com";
 
@@ -74,15 +74,18 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         {/* 構造化データ（JSON-LD） */}
+        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <ConditionalLayout>{children}</ConditionalLayout>
+        <InstallBanner />
       </body>
     </html>
   );

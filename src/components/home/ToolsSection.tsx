@@ -5,6 +5,7 @@
 // スクロールで画面に入った時にフェードイン（whileInView）
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function ToolsSection() {
   return (
@@ -31,10 +32,12 @@ export default function ToolsSection() {
             珈琲のある時間をつくるツール。
           </p>
 
-          {/* Coming soon バッジ（Phase 2でボタンに差し替える） */}
-          <span className="inline-block border border-[#e8e6e1]/20 text-[#e8e6e1]/40 text-xs font-light tracking-[0.3em] px-6 py-3">
-            Coming soon
-          </span>
+          <Link
+            href="/app"
+            className="inline-block border border-[#e8e6e1]/20 text-[#e8e6e1]/60 text-xs font-light tracking-[0.3em] px-6 py-3 hover:border-[#e8e6e1]/40 hover:text-[#e8e6e1] transition-all duration-300"
+          >
+            アプリを使ってみる →
+          </Link>
         </motion.div>
       </div>
     </section>
