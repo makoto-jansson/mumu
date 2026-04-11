@@ -216,12 +216,12 @@ export default function AppHome() {
           ))}
         </div>
 
-        {/* BASEへのリンク */}
+        {/* BASEへのリンク + HPに戻る */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-10 mb-4 text-center"
+          className="mt-10 mb-4 text-center flex flex-col items-center gap-3"
         >
           <a
             href="https://mumucoffee.theshop.jp/"
@@ -232,6 +232,12 @@ export default function AppHome() {
             mumuの珈琲豆はこちら
             <span>→</span>
           </a>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-[#e8e6e1]/20 text-xs font-light tracking-wider hover:text-[#e8e6e1]/45 transition-colors duration-300"
+          >
+            ← HPに戻る
+          </Link>
         </motion.div>
 
       </motion.div>
