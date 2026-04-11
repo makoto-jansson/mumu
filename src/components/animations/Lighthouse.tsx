@@ -11,20 +11,25 @@
 import { useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 
-const DURATION = 13.3; // 8秒 ÷ 0.6 = 約13.3秒（0.6倍速に）
+const DURATION = 13.3; // 通常速度
 
-export default function Lighthouse() {
+type Props = {
+  slow?: boolean; // trueにすると2倍遅い（Reclaim導入/完了用）
+};
+
+export default function Lighthouse({ slow = false }: Props) {
   const angle = useMotionValue(0);
+  const duration = slow ? DURATION * 2 : DURATION;
 
   useEffect(() => {
     const controls = animate(angle, 360, {
-      duration: DURATION,
+      duration,
       repeat: Infinity,
       ease: "linear",
       repeatType: "loop",
     });
     return controls.stop;
-  }, [angle]);
+  }, [angle, duration]);
 
   // 右ビーム: sin(θ) → θ=90で1、θ=0/180で0
   const rightOpacity = useTransform(angle, (a) =>

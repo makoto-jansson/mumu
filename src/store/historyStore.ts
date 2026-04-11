@@ -12,7 +12,7 @@ const SEVEN_DAYS  =  7 * 24 * 60 * 60 * 1000;
 
 export type SessionEntry = {
   id:        string;
-  type:      "focus" | "relax" | "walk";
+  type:      "focus" | "relax" | "walk" | "reclaim";
   date:      string;   // ISO 8601
   duration:  number;   // 分
   task?:     string;   // Focus のみ

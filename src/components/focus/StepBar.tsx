@@ -23,6 +23,15 @@ export const SPARK_STEPS: StepDef[] = [
   { key: "done",    label: "完了" },
 ];
 
+// Reclaim ステップ定義
+export const RECLAIM_STEPS: StepDef[] = [
+  { key: "intro",  label: "導入" },
+  { key: "sense",  label: "感覚" },
+  { key: "feel",   label: "対比" },
+  { key: "settle", label: "沈殿" },
+  { key: "done",   label: "完了" },
+];
+
 // Walk ステップ定義
 export const WALK_STEPS: StepDef[] = [
   { key: "setup", label: "準備" },

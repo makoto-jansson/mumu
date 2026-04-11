@@ -98,12 +98,12 @@ const modes = [
     available: true,
   },
   {
-    href: "#",
+    href: "/app/reclaim",
     icon: <IconReclaim />,
     name: "Reclaim",
     nameJa: "感性を取り戻す",
     description: "問いかけジャーナリングで、自分に戻る",
-    available: false,
+    available: true,
   },
 ];
 

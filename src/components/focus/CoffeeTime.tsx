@@ -15,9 +15,10 @@ type Props = {
   onComplete: () => void;
   onSkip: () => void;
   steps?: StepDef[];
+  stepKey?: string; // StepBar の current key（デフォルト "coffee"）
 };
 
-export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS }: Props) {
+export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, stepKey = "coffee" }: Props) {
   const { isFinished, start } = useTimer(COFFEE_SEC);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS }: 
       transition={{ duration: 0.8 }}
       className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center px-6 overflow-y-auto"
     >
-      <StepBar steps={steps} current="coffee" />
+      <StepBar steps={steps} current={stepKey} />
       {/* コンテンツを縦中央に */}
       <div className="flex-1 flex flex-col items-center justify-center pb-24">
 
