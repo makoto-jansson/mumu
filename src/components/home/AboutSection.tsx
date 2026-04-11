@@ -83,7 +83,7 @@ export default function AboutSection() {
                     灯台の珈琲焙煎所mumu。なぜ、つくるのか。
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[#e8e6e1]/35 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/60 transition-colors duration-300">
+                <div className="flex items-center gap-1.5 text-[#EF9F27]/60 text-xs font-light tracking-wider group-hover:text-[#EF9F27] transition-colors duration-300">
                   ストーリーを読む
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </div>

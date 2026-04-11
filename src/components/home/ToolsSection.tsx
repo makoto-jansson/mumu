@@ -73,13 +73,13 @@ export default function ToolsSection() {
                 <div className="flex flex-col gap-2">
                   <h2 className="text-[#e8e6e1]/85 text-xl font-light leading-relaxed tracking-wide">
                     集中。リラックス。<br />
-                    アイデアの爆発。感性の回復。
+                    クリエイティブ。感性の回復。
                   </h2>
                   <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
-                    珈琲のある時間をつくる、4つのモード。
+                    自分らしさを取り戻す、4つのモード。
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[#e8e6e1]/35 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/60 transition-colors duration-300">
+                <div className="flex items-center gap-1.5 text-[#EF9F27]/60 text-xs font-light tracking-wider group-hover:text-[#EF9F27] transition-colors duration-300">
                   アプリを使ってみる
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </div>

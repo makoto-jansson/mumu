@@ -74,7 +74,7 @@ export default function JournalSection() {
                     焙煎、集中、創造性。思考の余白になる文章を。
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[#e8e6e1]/35 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/60 transition-colors duration-300">
+                <div className="flex items-center gap-1.5 text-[#EF9F27]/60 text-xs font-light tracking-wider group-hover:text-[#EF9F27] transition-colors duration-300">
                   読み物を見る
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </div>
