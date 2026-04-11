@@ -1,15 +1,16 @@
 "use client";
 
 // アプリホーム画面
+// - 今日のルーティン（上部）
 // - 灯台アニメーション
-// - 4つのモードカード（Focus / Relax / Spark / Reclaim）
-// - Spark・Reclaimは Coming soon
+// - 4つのモードカード（全て有効）
 // - 下部にBASEへのリンク
 
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Lighthouse from "@/components/animations/Lighthouse";
 import Waves from "@/components/animations/Waves";
+import TodayRoutine from "@/components/app/TodayRoutine";
 
 // ─── モードアイコン ───────────────────────────────────
 // Focus brew: 同心楕円の干渉パターン（集中・深度）
@@ -110,6 +111,11 @@ const modes = [
 export default function AppHome() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center px-5 pt-4">
+
+      {/* 今日のルーティン */}
+      <div className="w-full max-w-sm">
+        <TodayRoutine />
+      </div>
 
       {/* 灯台アニメーション + キャッチコピー + 波 */}
       <motion.div
