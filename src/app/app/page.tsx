@@ -79,7 +79,7 @@ const modes = [
     icon: <IconFocus />,
     name: "Focus",
     nameJa: "集中する",
-    description: "珈琲とともに、深く集中する時間をつくる",
+    description: "深く集中する時間をつくる",
     available: true,
   },
   {
@@ -87,7 +87,7 @@ const modes = [
     icon: <IconRelax />,
     name: "Relax",
     nameJa: "リラックスする",
-    description: "呼吸を整え、ゆっくりとほぐれる時間",
+    description: "呼吸を整え、脳のゴミを排出する時間",
     available: true,
   },
   {
@@ -95,7 +95,7 @@ const modes = [
     icon: <IconSpark />,
     name: "Spark",
     nameJa: "アイデアを爆発させる",
-    description: "行き詰まりを突破する、感性の着火剤",
+    description: "思考をかき混ぜてクリエイティブを生む",
     available: true,
   },
   {
@@ -103,7 +103,7 @@ const modes = [
     icon: <IconReclaim />,
     name: "Reclaim",
     nameJa: "感性を取り戻す",
-    description: "問いかけジャーナリングで、自分に戻る",
+    description: "感性のメンテナンスをする",
     available: true,
   },
 ];
