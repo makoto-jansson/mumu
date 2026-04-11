@@ -62,7 +62,7 @@ export default function ToolsSection() {
             href="/app"
             className="group block border border-white/8 hover:border-white/18 transition-all duration-400 bg-[#0d0d0d] hover:bg-[#0f0f0f]"
           >
-            <div className="px-6 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
+            <div className="px-6 md:px-12 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
               {/* イラスト（PCでは左固定） */}
               <div className="shrink-0 md:w-28 flex justify-start">
                 <IllustTools />

@@ -69,7 +69,7 @@ export default function AboutSection() {
             href="/about"
             className="group block border border-white/8 hover:border-white/18 transition-all duration-400 bg-[#0e0e0e] hover:bg-[#101010]"
           >
-            <div className="px-6 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
+            <div className="px-6 md:px-12 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
               <div className="shrink-0 md:w-28 flex justify-start">
                 <IllustAbout />
               </div>
