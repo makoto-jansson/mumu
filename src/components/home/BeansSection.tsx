@@ -62,22 +62,24 @@ export default function BeansSection() {
             href="/beans"
             className="group block border border-white/8 hover:border-white/18 transition-all duration-400 bg-[#0e0e0e] hover:bg-[#101010]"
           >
-            <div className="px-6 pt-8 pb-6 flex flex-col gap-5">
-              <IllustBeans />
-
-              <div className="flex flex-col gap-2">
-                <h2 className="text-[#e8e6e1]/85 text-xl font-light leading-relaxed tracking-wide">
-                  スペシャルティコーヒーを、<br />
-                  ていねいに焙煎しています。
-                </h2>
-                <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
-                  産地・焙煎度・風味。一杯の物語を届けたい。
-                </p>
+            <div className="px-6 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
+              <div className="shrink-0 md:w-28 flex justify-start">
+                <IllustBeans />
               </div>
-
-              <div className="flex items-center gap-1.5 text-[#e8e6e1]/35 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/60 transition-colors duration-300">
-                珈琲豆を見る
-                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-[#e8e6e1]/85 text-xl font-light leading-relaxed tracking-wide">
+                    スペシャルティコーヒーを、<br />
+                    ていねいに焙煎しています。
+                  </h2>
+                  <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
+                    産地・焙煎度・風味。一杯の物語を届けたい。
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 text-[#e8e6e1]/35 text-xs font-light tracking-wider group-hover:text-[#e8e6e1]/60 transition-colors duration-300">
+                  珈琲豆を見る
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </div>
               </div>
             </div>
           </Link>
