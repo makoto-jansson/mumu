@@ -46,7 +46,7 @@ export default async function BeansPage() {
         {/* ページタイトル */}
         <div className="mb-20">
           <p className="text-[#e8e6e1]/40 text-xs font-light tracking-[0.4em] mb-6">
-            味わう
+            珈琲
           </p>
           <h1 className="text-[#e8e6e1] text-2xl md:text-3xl font-light leading-loose tracking-wide">
             スペシャルティコーヒーを、

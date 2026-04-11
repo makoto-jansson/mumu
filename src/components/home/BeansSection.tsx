@@ -55,7 +55,7 @@ export default function BeansSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <p className="text-[#e8e6e1]/30 text-[10px] font-light tracking-[0.45em] mb-6">
-            ── 味わう ──
+            ── 珈琲 ──
           </p>
 
           <Link

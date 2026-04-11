@@ -30,7 +30,8 @@ export default function Header() {
   }, [isMenuOpen]);
 
   const navLinks = [
-    { href: "/beans", label: "味わう" },
+    { href: "/app", label: "整える" },
+    { href: "/beans", label: "珈琲" },
     { href: "/journal", label: "読む" },
     { href: "/about", label: "about" },
   ];
