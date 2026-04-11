@@ -72,8 +72,8 @@ export default function ToolsSection() {
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <h2 className="text-[#e8e6e1]/85 text-xl font-light leading-relaxed tracking-wide">
-                    集中。リラックス。<br />
-                    クリエイティブ。感性の回復。
+                    集中。リラックス。クリエイティブ。<br />
+                    感性が回復する、アプリ。
                   </h2>
                   <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
                     自分らしさを取り戻す、4つのモード。
