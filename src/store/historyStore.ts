@@ -12,12 +12,15 @@ const SEVEN_DAYS  =  7 * 24 * 60 * 60 * 1000;
 
 export type SessionEntry = {
   id:        string;
-  type:      "focus" | "relax";
+  type:      "focus" | "relax" | "walk";
   date:      string;   // ISO 8601
   duration:  number;   // 分
   task?:     string;   // Focus のみ
   mood?:     string;   // Relax のみ
   sets?:     number;   // Focus のみ
+  theme?:    string;   // Walk のみ
+  scenes?:   string[]; // Walk のみ（シーンID配列）
+  memoCount?: number;  // Walk のみ
 };
 
 type HistoryState = {

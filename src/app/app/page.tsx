@@ -90,12 +90,12 @@ const modes = [
     available: true,
   },
   {
-    href: "#",
+    href: "/app/spark",
     icon: <IconSpark />,
     name: "Spark",
     nameJa: "アイデアを爆発させる",
     description: "行き詰まりを突破する、感性の着火剤",
-    available: false,
+    available: true,
   },
   {
     href: "#",

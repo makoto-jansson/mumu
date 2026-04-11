@@ -15,6 +15,21 @@ export const FOCUS_STEPS: StepDef[] = [
   { key: "summary", label: "完了" },
 ];
 
+// Spark ステップ定義
+export const SPARK_STEPS: StepDef[] = [
+  { key: "setup",   label: "準備" },
+  { key: "shuffle", label: "発想" },
+  { key: "mygrid",  label: "展開" },
+  { key: "done",    label: "完了" },
+];
+
+// Walk ステップ定義
+export const WALK_STEPS: StepDef[] = [
+  { key: "setup", label: "準備" },
+  { key: "walk",  label: "散歩" },
+  { key: "done",  label: "完了" },
+];
+
 // Relax ステップ定義
 export const RELAX_STEPS: StepDef[] = [
   { key: "setup",   label: "準備" },
