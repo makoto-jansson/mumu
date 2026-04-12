@@ -8,8 +8,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Lighthouse from "@/components/animations/Lighthouse";
-import Waves from "@/components/animations/Waves";
+import Lighthouse from "@/components/animations/LighthouseThin";
+import Waves from "@/components/animations/WavesThin";
 import TodayRoutine from "@/components/app/TodayRoutine";
 
 // ─── モードアイコン ───────────────────────────────────

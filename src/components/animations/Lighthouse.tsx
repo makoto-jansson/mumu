@@ -84,26 +84,27 @@ export default function Lighthouse({ slow = false }: Props) {
       {/* ── 灯台本体（光の前面に重ねて描画） ── */}
 
       {/* 基礎 */}
-      <rect x="60" y="270" width="80" height="10" rx="2" stroke="#e8e6e1" strokeWidth="1.5" />
+      <rect x="60" y="270" width="80" height="10" rx="2" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.40" />
 
       {/* 塔の胴体（台形） */}
       <path
         d="M72 270 L80 150 L120 150 L128 270 Z"
         stroke="#e8e6e1"
-        strokeWidth="1.5"
+        strokeWidth="0.9"
         strokeLinejoin="round"
+        opacity="0.45"
       />
 
       {/* 塔の横縞（装飾） */}
-      <line x1="74" y1="230" x2="126" y2="230" stroke="#e8e6e1" strokeWidth="1" opacity="0.4" />
-      <line x1="77" y1="200" x2="123" y2="200" stroke="#e8e6e1" strokeWidth="1" opacity="0.4" />
-      <line x1="79" y1="170" x2="121" y2="170" stroke="#e8e6e1" strokeWidth="1" opacity="0.4" />
+      <line x1="74" y1="230" x2="126" y2="230" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.28" />
+      <line x1="77" y1="200" x2="123" y2="200" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.28" />
+      <line x1="79" y1="170" x2="121" y2="170" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.28" />
 
       {/* 灯室台（肩の部分） */}
-      <rect x="74" y="138" width="52" height="14" rx="1" stroke="#e8e6e1" strokeWidth="1.5" />
+      <rect x="74" y="138" width="52" height="14" rx="1" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.45" />
 
       {/* 灯室（ガラス窓） */}
-      <rect x="82" y="100" width="36" height="38" rx="2" stroke="#e8e6e1" strokeWidth="1.5" />
+      <rect x="82" y="100" width="36" height="38" rx="2" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.50" />
 
       {/* 光源の輝き（常時点灯） */}
       <circle cx="100" cy="119" r="6" fill="#EF9F27" opacity="0.4" />
@@ -113,17 +114,18 @@ export default function Lighthouse({ slow = false }: Props) {
       <path
         d="M80 100 L100 78 L120 100 Z"
         stroke="#e8e6e1"
-        strokeWidth="1.5"
+        strokeWidth="0.9"
         strokeLinejoin="round"
+        opacity="0.45"
       />
 
       {/* 頂点の飾り */}
-      <line x1="100" y1="78" x2="100" y2="68" stroke="#e8e6e1" strokeWidth="1.5" />
-      <circle cx="100" cy="65" r="3" stroke="#e8e6e1" strokeWidth="1.5" />
+      <line x1="100" y1="78" x2="100" y2="68" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.45" />
+      <circle cx="100" cy="65" r="3" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.45" />
 
       {/* バルコニー縦手すり */}
-      <line x1="78" y1="138" x2="78" y2="100" stroke="#e8e6e1" strokeWidth="1" opacity="0.5" />
-      <line x1="122" y1="138" x2="122" y2="100" stroke="#e8e6e1" strokeWidth="1" opacity="0.5" />
+      <line x1="78" y1="138" x2="78" y2="100" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.35" />
+      <line x1="122" y1="138" x2="122" y2="100" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.35" />
     </svg>
   );
 }

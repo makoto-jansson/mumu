@@ -2,8 +2,8 @@
 
 ## Claude Code 実装ガイド
 
-**バージョン**: v2.1  
-**更新日**: 2026年4月7日  
+**バージョン**: v2.2  
+**更新日**: 2026年4月12日  
 **対象**: 灯台の珈琲焙煎所mumu Webアプリ (`/app/*`)
 
 ---
@@ -47,7 +47,9 @@ mumu/
 │   │       ├── focus/page.tsx       # Focusモード
 │   │       ├── relax/page.tsx       # Relaxモード
 │   │       ├── spark/page.tsx       # Sparkモード
-│   │       └── dashboard/page.tsx   # My cup（未実装）
+│   │       ├── dashboard/page.tsx   # My cup ダッシュボード
+│   │       ├── routine/page.tsx     # ルーティン設定
+│   │       └── reclaim/page.tsx     # Reclaimモード
 │   ├── components/
 │   │   ├── layout/
 │   │   │   ├── Header.tsx
@@ -82,8 +84,18 @@ mumu/
 │   │       ├── SparkAmbient.tsx         # アンビエント背景（オーブ＋呼吸グロー）
 │   │       ├── SparkMyGrid.tsx          # 自分テーマでオズボーン9マス入力
 │   │       └── SparkDone.tsx            # 完了画面（キープ一覧＋珈琲レコメンド）
+│   │   ├── reclaim/
+│   │   │   ├── ReclaimIntro.tsx         # 導入画面（珈琲あり/なし選択）
+│   │   │   ├── ReclaimSense.tsx         # Step 1: 感覚を開く（五感プロンプト）
+│   │   │   ├── ReclaimFeel.tsx          # Step 2: 対比カード（スワイプ/タップ）
+│   │   │   ├── ReclaimSettle.tsx        # Step 3: 沈殿（34秒、操作なし）
+│   │   │   ├── ReclaimDone.tsx          # 完了画面（スナップショット＋ひとこと）
+│   │   │   └── ReclaimSnapshot.tsx      # 感性スナップショットオーブ
+│   │   └── app/
+│   │       └── TodayRoutine.tsx         # 今日のルーティン表示（アプリホーム上部）
 │   ├── store/
 │   │   ├── historyStore.ts              # セッション履歴（Zustand persist）
+│   │   ├── routineStore.ts              # ルーティン設定（Zustand persist）
 │   │   └── sessionStore.ts              # 現在セッション状態
 │   ├── data/
 │   │   ├── sparkCardsV2.json            # Sparkカードデッキ（makingシーン 230テーマ）
@@ -152,13 +164,32 @@ export type MyGridResult = {
 ```typescript
 export type SessionEntry = {
   id: string;
-  type: "focus" | "relax";
+  type: "focus" | "relax" | "walk" | "spark" | "reclaim";
   date: string;      // ISO 8601
   duration: number;  // 分
   task?: string;     // Focus のみ
   mood?: string;     // Relax のみ
   sets?: number;     // Focus のみ
 };
+```
+
+### 2.5 ルーティンストア（routineStore.ts）
+
+```typescript
+export type TimeSlot = "朝" | "昼" | "夜";
+export type ModeType = "focus" | "relax" | "spark" | "reclaim";
+
+export type RoutineEntry = {
+  id: string;      // nanoid
+  day: number;     // 0=月 〜 6=日
+  slot: TimeSlot;
+  mode: ModeType;
+};
+
+// Zustand persist: name="mumu-routine"
+// actions:
+//   addEntry(day, slot, mode): void   → nanoid でID生成して追加
+//   removeEntry(id): void
 ```
 
 ---
@@ -178,33 +209,44 @@ export type SessionEntry = {
 │  感性を、取り戻す。          │
 │  つくる人の、集中とひらめき   │
 │                             │
+│  [今日のルーティン]          │  ← TodayRoutine（登録があれば表示）
+│  朝 → Focus / 夜 → Reclaim  │
+│                             │
 │  すべてのモード              │
 │  ┌──────────────────────┐   │
-│  │ Focus   集中する  →   │   │
+│  │ Focus  深く集中する → │   │
 │  └──────────────────────┘   │
 │  ┌──────────────────────┐   │
-│  │ Relax  リラックスする →│   │
+│  │ Relax  呼吸を整え...  │   │
 │  └──────────────────────┘   │
 │  ┌──────────────────────┐   │
-│  │ Spark  アイデアを爆発 →│  │
+│  │ Spark  思考をかき混ぜ →│  │
 │  └──────────────────────┘   │
 │  ┌──────────────────────┐   │
-│  │ Reclaim 感性を取り戻す│   │  ← coming soon（グレーアウト）
-│  │                 soon  │   │
+│  │ Reclaim 感性のメンテ  │   │
+│  │              ナンスを →│  │
 │  └──────────────────────┘   │
 │                             │
 │  mumuの珈琲豆はこちら →      │  ← BASEへ外部リンク
+│  ← HPに戻る                 │  ← ブランドサイト（/）へ
 │                             │
 ├─────────────────────────────┤
-│  🏠 ホーム  📊 My cup  ⚙     │  ← BottomNav
+│  🏠 ホーム  📊 My cup  🗓    │  ← BottomNav
 └─────────────────────────────┘
 ```
 
 **実装詳細**:
 - アニメーション: `<Lighthouse />` + `<Waves />`（SVG + Framer Motion）
-- Reclaimは `available: false` でグレーアウト、タップ不可
+- 全4モード有効（`available: true`）。Reclaimも通常リンクとして表示
+- モード説明文:
+  - Focus: 「深く集中する時間をつくる」
+  - Relax: 「呼吸を整え、脳のゴミを排出する時間」
+  - Spark: 「思考をかき混ぜてクリエイティブを生む」
+  - Reclaim: 「感性のメンテナンスをする」
 - BASEリンク: `https://mumucoffee.theshop.jp/`
-- BottomNav: ホーム(`/app`) / My cup(`/app/dashboard`) / ルーティン（未実装）
+- HPに戻るリンク: `/`（`← HP に戻る`）
+- TodayRoutine: `routineStore` から今日の曜日に登録されたエントリを表示。なければ非表示
+- BottomNav: ホーム(`/app`) / My cup(`/app/dashboard`) / ルーティン(`/app/routine`)
 
 ---
 
@@ -618,9 +660,216 @@ rearrange: lime-400, reverse: rose-400, combine: cyan-400
 
 ---
 
-### 3.5 Reclaimモード
+### 3.5 Reclaimモード（`/app/reclaim`）
 
-**状態**: 未実装（`/app` ホームで "soon" バッジ表示、タップ不可）
+**フロー**: `intro → sense → feel → settle → done`
+
+**実装ファイル**: `src/app/app/reclaim/page.tsx`（オーケストレーター）
+
+#### 3.5.1 導入画面（ReclaimIntro）
+
+珈琲あり/なしを選択して開始。
+
+```
+┌─────────────────────────────┐
+│  ✦ Reclaim                  │
+│  感性のメンテナンスをする      │
+│                             │
+│  [珈琲を用意する]            │
+│  [珈琲なしで始める]          │
+└─────────────────────────────┘
+```
+
+#### 3.5.2 感覚を開く（ReclaimSense）
+
+五感プロンプトを順番に表示。
+
+```
+┌─────────────────────────────┐
+│  感覚を開く                  │
+│                             │
+│  [五感プロンプト（日替わり）]  │
+│  「いま目に入るもので、       │
+│   一番古そうなものは？」      │
+│                             │
+│  [次へ →]                   │
+└─────────────────────────────┘
+```
+
+**実装詳細**:
+- `sensoryPrompts.json` から日付ハッシュで選択
+- 複数プロンプトを順番に表示（1〜3問）
+
+#### 3.5.3 対比カード（ReclaimFeel）
+
+対照的なキーワードペアを提示してスワイプ/タップで感情を記録。
+
+```
+┌─────────────────────────────┐
+│  いまの自分は？              │
+│                             │
+│    静か ←→ 賑やか           │
+│    重い ←→ 軽い             │
+│                             │
+│  [← 静か]  [賑やか →]       │
+└─────────────────────────────┘
+```
+
+**実装詳細**:
+- カードをスワイプ or ボタンタップで二択を選択
+- 選択内容を `answers` として蓄積
+- カード位置: `pt-20`（上部余白あり）
+
+#### 3.5.4 沈殿（ReclaimSettle）
+
+34秒間のアニメーション（操作なし）。答えが「沈殿」するビジュアル。
+
+```
+┌─────────────────────────────┐
+│  沈殿中...                   │
+│                             │
+│  [海底シーンSVGアニメーション] │
+│  ・海面→海底に沈むオーブ      │
+│  ・海藻が揺れる               │
+│  ・岩場が広がる               │
+│                             │
+│  [カウントダウンバー]         │
+│  スキップ →                  │  ← 常時表示
+└─────────────────────────────┘
+```
+
+**SVGの定数値**:
+```
+FLOOR_Y = 520  // 海底ライン（視覚的基準）
+SETTLE_Y = 535 // オーブが落ち着くY座標
+seafloor line: y = 542
+
+左側壁:   M 0 200 L 15 215 L 16 278 L 44 328 L 36 374 L 34 415 L 62 462 L 50 505 L 0 542
+右側壁:   M 360 200 L 345 215 L 344 278 L 316 328 L 324 374 L 326 415 L 298 462 L 310 505 L 360 542
+左岩場:   M 0 542 L 28 524 L 48 534 L 70 519 L 96 532 L 118 542
+右岩場:   M 242 542 L 268 527 L 292 537 L 318 522 L 344 533 L 360 542
+中央岩場: M 148 542 L 166 531 L 182 537 L 200 528 L 218 542
+砂層:     y = 553, 566, 580
+SeaWeed:  baseY = 542（4本配置）
+```
+
+**実装詳細**:
+- 34秒固定タイマー（`useTimer`）
+- `motion.circle` でオーブが Y=−50 から SETTLE_Y まで落下アニメーション
+- Framer Motion `as any` キャストで SVG属性アニメ対応
+- スキップボタンは常時表示（バーの下）
+
+#### 3.5.5 完了画面（ReclaimDone）
+
+感性スナップショット表示 + ひとこと入力。
+
+```
+┌─────────────────────────────┐
+│  ✦ Reclaim                  │
+│  お疲れさまでした。           │
+│                             │
+│  [ReclaimSnapshot オーブ]   │  ← 答えから生成した感性可視化
+│                             │
+│  今日の感性スナップショット   │
+│  静か / 軽い / ...           │  ← 選択した対比キーワード
+│                             │
+│  ひとこと（任意）             │
+│  ┌──────────────────────┐   │
+│  │                       │   │
+│  └──────────────────────┘   │
+│                             │
+│  ← ホームに戻る              │  ← /app
+└─────────────────────────────┘
+```
+
+**実装詳細**:
+- `ReclaimSnapshot`: 選択された答えを視覚化するオーブSVGアニメーション
+- `historyStore.addSession({ type: "reclaim", duration: ~1分 })` で記録
+- 珈琲補充提案は**表示しない**（感性回帰の場に商業要素NG）
+
+---
+
+### 3.6 ルーティン設定（`/app/routine`）
+
+**実装ファイル**: `src/app/app/routine/page.tsx`
+
+```
+┌─────────────────────────────┐
+│  ルーティン設定              │
+│                             │
+│  月  火  水  木  金  土  日  │  ← 7列グリッド（今日の曜日をアンバーハイライト）
+│  ┌──┐┌──┐┌──┐...           │
+│  │朝 ││朝 ││   │             │  ← EntryChip（mode色）
+│  │Focus││Relax│             │
+│  │昼 ││   ││   │             │
+│  │   ││   ││   │             │
+│  │夜 ││   ││夜 │             │
+│  │   ││   ││Rec│             │
+│  └──┘└──┘└──┘...           │
+└─────────────────────────────┘
+```
+
+**AddModal（曜日タップで表示）**:
+
+```
+┌─────────────────────────────┐
+│  〇曜日のルーティンを追加    │
+│                             │
+│  時間帯: [朝] [昼] [夜]     │
+│  モード: [Focus][Relax]      │
+│          [Spark][Reclaim]    │
+│                             │
+│  [追加する] [キャンセル]     │
+└─────────────────────────────┘
+```
+
+**実装詳細**:
+- `routineStore.addEntry(day, slot, mode)` で保存
+- EntryChipを長押し → `routineStore.removeEntry(id)` で削除
+- 今日の曜日: `(new Date().getDay() + 6) % 7`（月=0〜日=6に変換）
+- モードカラー:
+  - Focus: `amber-400`
+  - Relax: `teal-300`
+  - Spark: `sky-400`
+  - Reclaim: `violet-400`
+
+---
+
+### 3.7 ダッシュボード（`/app/dashboard`）
+
+**実装ファイル**: `src/app/app/dashboard/page.tsx`
+
+```
+┌─────────────────────────────┐
+│  My cup                     │
+│                             │
+│  ┌──────┐ ┌──────┐ ┌──────┐│
+│  │今日  │ │今週  │ │streak││  ← サマリーカード
+│  │1回   │ │5回   │ │3日   ││
+│  └──────┘ └──────┘ └──────┘│
+│                             │
+│  今週のカレンダー            │
+│  月  火  水  木  金  土  日  │  ← WeekCalendar（mode色ドット）
+│  ●  ●  ●  ─  ─  ─  ─    │
+│                             │
+│  ルーティン達成状況          │
+│  ○ 朝 Focus  ● 夜 Relax    │  ← RoutineStatus（○未実施 ●実施済）
+│                             │
+│  今週のモード内訳            │
+│  ████░░░  Focus   3回       │  ← モード別バーチャート
+│  ██░░░░░  Relax   2回       │
+│                             │
+│  ─────────────────────────  │
+│  mumuの珈琲豆を補充する →    │  ← BASEリンク
+└─────────────────────────────┘
+```
+
+**実装詳細**:
+- `historyStore` からデータ取得（今日 / 今週 / 連続日数）
+- WeekCalendar: 今週月〜日の7日分。その日のセッションを `type` に応じた色ドットで表示
+- RoutineStatus: `routineStore` の今日のエントリをプランとして表示、`historyStore` に該当セッションがあれば達成済みとマーク
+- 連続日数(streak): `historyStore` で直近の連続セッション日数を計算
+- BASEリンク常時表示
 
 ---
 
@@ -752,6 +1001,7 @@ export const SPARK_STEPS: StepDef[] = [
 ─────────────────────────────────────────
 history-store                    Zustand persist（セッション履歴）
 session-store                    Zustand persist（現在セッション）
+mumu-routine                     Zustand persist（ルーティン設定）
 mumu_spark_base_shown            SparkSave BASEリンク最終表示日時（ms）
 ```
 
@@ -775,12 +1025,17 @@ const withSerwist = withSerwistInit({
 
 ---
 
-## 8. 未実装・今後の予定
+## 8. 実装状況・今後の予定
 
 | 機能 | 状態 | 備考 |
 |------|------|------|
-| Reclaimモード | 未実装 | ホームで "soon" 表示 |
-| My cup（ダッシュボード） | 未実装 | `/app/dashboard` ルートあり |
-| ルーティン設定 | 未実装 | BottomNavに項目あり |
+| Focusモード | ✅ 実装済 | |
+| Relaxモード | ✅ 実装済 | BGM: pour.wav |
+| Sparkモード | ✅ 実装済 | オズボーン9視点 |
+| Reclaimモード | ✅ 実装済 | intro→sense→feel→settle→done |
+| My cup（ダッシュボード） | ✅ 実装済 | `/app/dashboard` |
+| ルーティン設定 | ✅ 実装済 | `/app/routine`、Zustand persist |
+| Focus/Relax BGM | △ 一部 | pour.wav のみ。focus BGM未実装 |
 | 週次AIレポート | 未着手 | Anthropic API Haiku 4.5 予定 |
 | Supabaseデータ永続化 | 未着手 | 現行はlocalStorageのみ |
+| プッシュ通知（ルーティン） | 未着手 | Web Push API が必要 |
