@@ -17,125 +17,189 @@ type Props = {
 };
 
 // ─────────────────────────────────────────────────
-// 灯台（呼吸の中心UIとして大きく表示）
-// scale: 呼吸サイクルのスケール値（1.0〜1.75）
-// brightness: 輝度（0〜1）
+// 花束（ペンプロッター風）
+// ローズ曲線 r = R·cos(n·θ) の花 + 茎 + 葉
+//
+// brightness → 吸う時に花が浮かび上がる
+// scaleMV   → 全体がわずかに拡縮
 // ─────────────────────────────────────────────────
-function BreathLighthouse({
+
+// ローズ曲線パスを生成（原点中心）
+function roseO(r: number, n: number, steps = 180): string {
+  const pts = Array.from({ length: steps + 1 }, (_, i) => {
+    const theta = (i / steps) * Math.PI * 2;
+    const rho = r * Math.cos(n * theta);
+    return `${(rho * Math.cos(theta)).toFixed(2)},${(rho * Math.sin(theta)).toFixed(2)}`;
+  });
+  return `M ${pts.join(" L ")} Z`;
+}
+
+function RelaxLandscape({
   scale: scaleMV,
   brightness,
 }: {
   scale:      ReturnType<typeof useBreath>["scale"];
   brightness: ReturnType<typeof useBreath>["brightness"];
 }) {
-  // ハロー半径（吸う→大きく / 吐く→小さく）
-  const outerR = useTransform(scaleMV, [1, 1.75], [48, 115]);
-  const midR   = useTransform(scaleMV, [1, 1.75], [28, 68]);
-  const innerR = useTransform(scaleMV, [1, 1.75], [14, 36]);
+  const glowScale = useTransform(scaleMV,   [1, 1.75], [0.95, 1.05]);
+  const glowOp    = useTransform(brightness, [0, 1],   [0,    0.06]);
+  const flowerOp  = useTransform(brightness, [0, 1],   [0.20, 0.62]);
+  const stemOp    = useTransform(brightness, [0, 1],   [0.10, 0.32]);
 
-  // ハロー不透明度（brightness と連動）
-  const outerOp  = useTransform(brightness, [0, 1], [0,    0.07]);
-  const midOp    = useTransform(brightness, [0, 1], [0,    0.14]);
-  const innerOp  = useTransform(brightness, [0, 1], [0.02, 0.26]);
-  const coreOp   = useTransform(brightness, [0, 1], [0.40, 1.00]);
-  const haloGlow = useTransform(brightness, [0, 1], [0,    0.18]);
+  const gTO = "0px 0px"; // transform-origin: ローカル原点
 
   return (
     <svg
-      viewBox="0 -70 280 450"
+      viewBox="0 0 360 240"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full"
     >
-      {/* ─── ハロー（呼吸で膨らむ） ─── */}
-      {/* ぼかしフィルタ */}
-      <defs>
-        <filter id="glowBlur" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="14" />
-        </filter>
-      </defs>
+      <rect width="360" height="240" fill="#0a0a0a" />
 
-      {/* アウターグロー（ぼかし付き） */}
-      <motion.circle cx="140" cy="95" r={outerR}
-        fill="#EF9F27" style={{ opacity: outerOp }} filter="url(#glowBlur)" />
+      {/* 全体がゆっくり浮遊 */}
+      <motion.g
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {/* (180, 120) を原点として全要素を配置 */}
+        <g transform="translate(180 120)">
 
-      {/* ミドルグロー */}
-      <motion.circle cx="140" cy="95" r={midR}
-        fill="#EF9F27" style={{ opacity: midOp }} />
+          {/* 呼吸グロー（最背面）*/}
+          <motion.circle cx="0" cy="-12" r="88"
+            fill="#e8e6e1"
+            style={{ opacity: glowOp, scale: glowScale }}
+          />
 
-      {/* インナーグロー */}
-      <motion.circle cx="140" cy="95" r={innerR}
-        fill="#EF9F27" style={{ opacity: innerOp }} />
+          {/* ── 茎・葉・ラッピング ── */}
+          <motion.g style={{ opacity: stemOp }}>
+            {/* 茎 — それぞれの花から根元(0,72)へ */}
+            <path d="M 0 -48 C 3 0 -2 40 0 72"
+              stroke="#e8e6e1" strokeWidth="0.55" strokeLinecap="round" />
+            <path d="M -40 -26 C -28 10 -12 45 0 72"
+              stroke="#e8e6e1" strokeWidth="0.50" strokeLinecap="round" />
+            <path d="M 40 -28 C 28 8 12 42 0 72"
+              stroke="#e8e6e1" strokeWidth="0.50" strokeLinecap="round" />
+            <path d="M -72 -2 C -48 22 -22 50 0 72"
+              stroke="#e8e6e1" strokeWidth="0.42" strokeLinecap="round" />
+            <path d="M 72 0 C 48 20 22 48 0 72"
+              stroke="#e8e6e1" strokeWidth="0.42" strokeLinecap="round" />
+            <path d="M -15 -5 C -10 22 -5 48 0 72"
+              stroke="#e8e6e1" strokeWidth="0.35" strokeLinecap="round" />
+            <path d="M 18 -2 C 14 24 8 50 0 72"
+              stroke="#e8e6e1" strokeWidth="0.35" strokeLinecap="round" />
 
-      {/* ガラス室周辺ハロー（常時わずかに光る） */}
-      <motion.circle cx="140" cy="95" r="20"
-        fill="#EF9F27" style={{ opacity: haloGlow }} />
+            {/* 葉 */}
+            <ellipse cx="-22" cy="18" rx="11" ry="4.5"
+              transform="rotate(-38 -22 18)"
+              stroke="#e8e6e1" strokeWidth="0.38" opacity="0.70" />
+            <ellipse cx="20" cy="20" rx="10" ry="4"
+              transform="rotate(32 20 20)"
+              stroke="#e8e6e1" strokeWidth="0.36" opacity="0.65" />
+            <ellipse cx="-42" cy="32" rx="8" ry="3.5"
+              transform="rotate(-22 -42 32)"
+              stroke="#e8e6e1" strokeWidth="0.32" opacity="0.52" />
+            <ellipse cx="38" cy="36" rx="7.5" ry="3"
+              transform="rotate(18 38 36)"
+              stroke="#e8e6e1" strokeWidth="0.30" opacity="0.48" />
 
-      {/* ─── 灯台構造（幅2倍、中心 x=140）─── */}
-      {/* 頂部飾り */}
-      <line x1="140" y1="72" x2="140" y2="68"
-        stroke="#e8e6e1" strokeWidth="1.4" strokeLinecap="round" />
-      <circle cx="140" cy="67" r="2.5"
-        stroke="#e8e6e1" strokeWidth="1.1" fill="#0a0a0a" />
+            {/* 束ね（ラッピング）*/}
+            <path d="M -12 72 L 0 80 L 12 72 L 9 64 L -9 64 Z"
+              stroke="#e8e6e1" strokeWidth="0.40" strokeLinejoin="round" />
+            <line x1="-7" y1="68" x2="7" y2="68"
+              stroke="#e8e6e1" strokeWidth="0.28" opacity="0.55" />
+          </motion.g>
 
-      {/* 屋根（幅 ±10） */}
-      <path d="M130 82 L140 72 L150 82 Z"
-        stroke="#e8e6e1" strokeWidth="1.2" strokeLinejoin="round" fill="#0a0a0a" />
+          {/* ── 花 ── */}
+          <motion.g style={{ opacity: flowerOp }}>
 
-      {/* ガラス室（幅20） */}
-      <rect x="130" y="82" width="20" height="14" rx="0.5"
-        stroke="#e8e6e1" strokeWidth="1.2" fill="#0a0a0a" />
-      {/* ガラス室 縦桟 */}
-      <line x1="136" y1="82" x2="136" y2="96" stroke="#e8e6e1" strokeWidth="0.7" opacity="0.35" />
-      <line x1="144" y1="82" x2="144" y2="96" stroke="#e8e6e1" strokeWidth="0.7" opacity="0.35" />
+            {/* 中央メイン花（5枚花びら）at (0, -48) */}
+            <g transform="translate(0 -48)">
+              <motion.g style={{ transformOrigin: gTO }}
+                animate={{ rotate: [0, 14, -9, 5, 0] }}
+                transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}>
+                <path d={roseO(42, 5)}
+                  stroke="#e8e6e1" strokeWidth="0.55" strokeLinejoin="round" />
+                <path d={roseO(25, 5)}
+                  stroke="#e8e6e1" strokeWidth="0.32" opacity="0.50" strokeLinejoin="round" />
+                <circle cx="0" cy="0" r="5"
+                  stroke="#e8e6e1" strokeWidth="0.48" />
+                <circle cx="0" cy="0" r="1.8"
+                  fill="#e8e6e1" opacity="0.40" />
+              </motion.g>
+            </g>
 
-      {/* 肩台座（幅32） */}
-      <rect x="124" y="96" width="32" height="3" rx="0.5"
-        stroke="#e8e6e1" strokeWidth="1.2" fill="#0a0a0a" />
-      {/* バルコニー支柱 */}
-      <line x1="124" y1="96" x2="124" y2="102" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.5" />
-      <line x1="156" y1="96" x2="156" y2="102" stroke="#e8e6e1" strokeWidth="0.9" opacity="0.5" />
+            {/* 左の花（4枚花びら）at (-40, -26) */}
+            <g transform="translate(-40 -26)">
+              <motion.g style={{ transformOrigin: gTO }}
+                animate={{ rotate: [0, -11, 7, 0] }}
+                transition={{ duration: 19, repeat: Infinity, ease: "easeInOut" }}>
+                <path d={roseO(28, 4)}
+                  stroke="#e8e6e1" strokeWidth="0.50" strokeLinejoin="round" />
+                <circle cx="0" cy="0" r="3.8"
+                  stroke="#e8e6e1" strokeWidth="0.42" />
+              </motion.g>
+            </g>
 
-      {/* 塔本体（台形：上 ±12、下 ±18） */}
-      <path d="M128 99 L122 265 L158 265 L152 99 Z"
-        stroke="#e8e6e1" strokeWidth="1.2" fill="#0a0a0a" strokeLinejoin="round" />
-      {/* 縞模様 */}
-      <line x1="122.5" y1="155" x2="157.5" y2="155"
-        stroke="#e8e6e1" strokeWidth="0.9" opacity="0.22" />
-      <line x1="122.3" y1="205" x2="157.7" y2="205"
-        stroke="#e8e6e1" strokeWidth="0.9" opacity="0.22" />
+            {/* 右の花（4枚花びら）at (40, -28) */}
+            <g transform="translate(40 -28)">
+              <motion.g style={{ transformOrigin: gTO }}
+                animate={{ rotate: [0, 9, -7, 0] }}
+                transition={{ duration: 21, repeat: Infinity, ease: "easeInOut" }}>
+                <path d={roseO(26, 4)}
+                  stroke="#e8e6e1" strokeWidth="0.48" strokeLinejoin="round" />
+                <circle cx="0" cy="0" r="3.4"
+                  stroke="#e8e6e1" strokeWidth="0.40" />
+              </motion.g>
+            </g>
 
-      {/* 丘シルエット */}
-      <path
-        d="M0 320 C50 295 95 278 140 275 C185 278 230 295 280 320 L280 380 L0 380 Z"
-        fill="#080c1e"
-      />
+            {/* 左外の花（3枚花びら）at (-72, -2) */}
+            <g transform="translate(-72 -2)">
+              <path d={roseO(20, 3)}
+                stroke="#e8e6e1" strokeWidth="0.44" strokeLinejoin="round" />
+              <circle cx="0" cy="0" r="2.8"
+                stroke="#e8e6e1" strokeWidth="0.38" />
+            </g>
 
-      {/* 波（2レイヤー、静的な曲線） */}
-      <motion.path
-        d="M0 335 C70 328 140 342 210 332 C245 327 265 334 280 335"
-        stroke="#1D9E75" strokeWidth="0.9" strokeOpacity="0.18"
-        animate={{ d: [
-          "M0 335 C70 328 140 342 210 332 C245 327 265 334 280 335",
-          "M0 335 C70 342 140 328 210 338 C245 343 265 334 280 335",
-        ]}}
-        transition={{ duration: 8, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-      />
-      <motion.path
-        d="M0 348 C60 341 130 354 200 346 C240 341 265 349 280 348"
-        stroke="#1D9E75" strokeWidth="0.9" strokeOpacity="0.12"
-        animate={{ d: [
-          "M0 348 C60 341 130 354 200 346 C240 341 265 349 280 348",
-          "M0 348 C60 355 130 342 200 350 C240 355 265 347 280 348",
-        ]}}
-        transition={{ duration: 11, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: 1.5 }}
-      />
+            {/* 右外の花（3枚花びら）at (72, 0) */}
+            <g transform="translate(72 0)">
+              <path d={roseO(19, 3)}
+                stroke="#e8e6e1" strokeWidth="0.42" strokeLinejoin="round" />
+              <circle cx="0" cy="0" r="2.6"
+                stroke="#e8e6e1" strokeWidth="0.36" />
+            </g>
 
-      {/* ─── 光源 ─── */}
-      {/* 常時 dim */}
-      <circle cx="140" cy="89" r="5.5" fill="#EF9F27" opacity="0.38" />
-      {/* 呼吸連動コア */}
-      <motion.circle cx="140" cy="89" r="3.5" fill="#EF9F27" style={{ opacity: coreOp }} />
+            {/* 前面の小花 at (-15, -5) */}
+            <g transform="translate(-15 -5)">
+              <path d={roseO(13, 5)}
+                stroke="#e8e6e1" strokeWidth="0.38" strokeLinejoin="round" opacity="0.82" />
+            </g>
+
+            {/* 前面の小花 at (18, -2) */}
+            <g transform="translate(18 -2)">
+              <path d={roseO(12, 4)}
+                stroke="#e8e6e1" strokeWidth="0.36" strokeLinejoin="round" opacity="0.80" />
+            </g>
+
+            {/* つぼみ（左奥）at (-55, -40) */}
+            <g transform="translate(-55 -40)">
+              <circle cx="0" cy="0" r="6"
+                stroke="#e8e6e1" strokeWidth="0.38" opacity="0.52" />
+              <path d="M 0 -6 C -2 -10 2 -14 0 -16"
+                stroke="#e8e6e1" strokeWidth="0.30" strokeLinecap="round" opacity="0.42" />
+            </g>
+
+            {/* つぼみ（右奥）at (58, -38) */}
+            <g transform="translate(58 -38)">
+              <circle cx="0" cy="0" r="5"
+                stroke="#e8e6e1" strokeWidth="0.36" opacity="0.48" />
+              <path d="M 0 -5 C -1.5 -9 1.5 -12 0 -14"
+                stroke="#e8e6e1" strokeWidth="0.28" strokeLinecap="round" opacity="0.38" />
+            </g>
+
+          </motion.g>
+        </g>
+      </motion.g>
     </svg>
   );
 }
@@ -211,9 +275,9 @@ export default function RelaxSession({ config, onDone }: Props) {
           {label}
         </motion.p>
 
-        {/* 灯台（max-w-sm内全幅） */}
+        {/* 植物 / 葉脈（max-w-sm内全幅） */}
         <div className="w-full mt-3 px-4">
-          <BreathLighthouse scale={scale} brightness={brightness} />
+          <RelaxLandscape scale={scale} brightness={brightness} />
         </div>
 
         {/* ボタン行 */}
