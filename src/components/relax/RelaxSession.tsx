@@ -5,7 +5,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useTransform, AnimatePresence } from "framer-motion";
-import { Howl } from "howler";
 import { useTimer } from "@/hooks/useTimer";
 import { useBreath } from "@/hooks/useBreath";
 import StepBar, { RELAX_STEPS } from "@/components/focus/StepBar";
@@ -207,34 +206,82 @@ function RelaxLandscape({
 // ─────────────────────────────────────────────────
 // RelaxSession
 // ─────────────────────────────────────────────────
+// relax_music フォルダ内の全トラック
+const RELAX_TRACKS = [
+  "Ab Major Starlight (1).wav",
+  "Ab Major Starlight.wav",
+  "Breathing Fuzz (1).wav",
+  "Breathing Fuzz.wav",
+  "Breathing Silences (1).wav",
+  "Breathing Silences (2).wav",
+  "Breathing Silences.wav",
+  "Breathing Space (1).wav",
+  "Breathing Space.wav",
+  "Glowing Pad Silence (1).wav",
+  "Glowing Pad Silence (2).wav",
+  "Glowing Pad Silence.wav",
+  "Lighthouse Coffee (1).wav",
+  "Lighthouse Coffee.wav",
+  "Lighthouse-Theremin Hum (1).wav",
+  "Lighthouse-Theremin Hum.wav",
+  "Moon-Tide Pad (1).wav",
+  "Moon-Tide Pad.wav",
+  "Velvet Fume Hush.wav",
+  "relax.wav",
+  "relax2.wav",
+].map(f => `/sounds/relax_music/${encodeURIComponent(f)}`);
+
 export default function RelaxSession({ config, onDone }: Props) {
   const durationSec = config.duration * 60;
   const { formatted, isFinished, start, pause, resume } = useTimer(durationSec);
   const { phase, label, scale, brightness } = useBreath(true);
-  const howlRef = useRef<Howl | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const gainRef     = useRef<GainNode | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const labelColor = "text-[#e8e6e1]";
 
   const handlePauseResume = () => {
-    if (isPaused) { resume(); setIsPaused(false); }
-    else          { pause();  setIsPaused(true);  }
+    if (isPaused) { resume(); audioCtxRef.current?.resume(); setIsPaused(false); }
+    else          { pause();  audioCtxRef.current?.suspend(); setIsPaused(true); }
   };
 
   const handleEnd = () => {
-    howlRef.current?.fade(howlRef.current.volume(), 0, 800);
+    const g = gainRef.current, c = audioCtxRef.current;
+    if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
     setTimeout(onDone, 800);
   };
 
-  // タイマー開始 + BGM
+  // タイマー開始 + ランダムBGM（Web Audio API シームレスループ）
   useEffect(() => {
     start();
-    const howl = new Howl({ src: ["/sounds/pour.wav"], loop: true, volume: 0, html5: true });
-    howl.play();
-    howl.fade(0, 0.18, 2000);
-    howlRef.current = howl;
+    const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];
+    const ctx  = new AudioContext();
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.connect(ctx.destination);
+    audioCtxRef.current = ctx;
+    gainRef.current     = gain;
+
+    fetch(track)
+      .then(r => r.arrayBuffer())
+      .then(buf => ctx.decodeAudioData(buf))
+      .then(audioBuffer => {
+        if (ctx.state === "closed") return;
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.loop   = true;
+        source.connect(gain);
+        source.start(0);
+        gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2);
+      })
+      .catch(console.error);
+
     return () => {
-      howl.fade(howl.volume(), 0, 800);
-      setTimeout(() => { howl.stop(); howl.unload(); }, 800);
+      const g = gainRef.current, c = audioCtxRef.current;
+      if (g && c && c.state !== "closed") {
+        g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
+        setTimeout(() => c.close(), 800);
+      }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -242,7 +289,8 @@ export default function RelaxSession({ config, onDone }: Props) {
   // タイマー完了 → 完了画面へ
   useEffect(() => {
     if (isFinished) {
-      howlRef.current?.fade(howlRef.current.volume(), 0, 1200);
+      const g = gainRef.current, c = audioCtxRef.current;
+      if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 1.2);
       setTimeout(onDone, 1200);
     }
   }, [isFinished, onDone]);
