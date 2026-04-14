@@ -39,3 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+public/sounds/ocean_sound/417797__esh9419__gentle-ocean-waves-mix-2018.wav

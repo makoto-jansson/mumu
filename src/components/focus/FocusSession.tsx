@@ -12,7 +12,7 @@ import { useTimer } from "@/hooks/useTimer";
 import FocusScene from "@/components/animations/FocusScene";
 import type { FocusConfig } from "./FocusSetup";
 
-// Focus_music フォルダ内の全トラック
+// Focus_music フォルダ内の全トラック（音楽モード）
 const FOCUS_TRACKS = [
   "Analog Pad Joy.wav",
   "C major Neonfog.wav",
@@ -25,6 +25,13 @@ const FOCUS_TRACKS = [
   "Vinyl Crackle Loop.wav",
   "Warm Analog Pad.wav",
 ].map(f => `/sounds/Focus_music/${encodeURIComponent(f)}`);
+
+// ocean_sound フォルダ内の全トラック（波モード）
+const OCEAN_TRACKS = [
+  "534915__lucas_schacht__ocean-waves-06.wav",
+  "618238__yaboiboimane__calm-meditative-ocean-waves-sound-effect.mp3",
+  "693389__derjuli__ocean-waves.wav",
+].map(f => `/sounds/ocean_sound/${encodeURIComponent(f)}`);
 
 type Props = {
   config: FocusConfig;
@@ -42,7 +49,8 @@ export default function FocusSession({ config, onBreak }: Props) {
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
     start();
-    const track = FOCUS_TRACKS[Math.floor(Math.random() * FOCUS_TRACKS.length)];
+    const pool  = config.ambient === "波" ? OCEAN_TRACKS : FOCUS_TRACKS;
+    const track = pool[Math.floor(Math.random() * pool.length)];
     const ctx  = new AudioContext();
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
