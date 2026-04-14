@@ -14,7 +14,6 @@ import type { FocusConfig } from "./FocusSetup";
 
 // Focus_music フォルダ内の全トラック
 const FOCUS_TRACKS = [
-  "Analog Pad Joy (1).wav",
   "Analog Pad Joy.wav",
   "C major Neonfog.wav",
   "Cozy Tape Hiss.wav",
