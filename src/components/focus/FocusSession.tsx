@@ -56,6 +56,8 @@ export default function FocusSession({ config, onBreak }: Props) {
   const durationSec = config.duration * 60;
   const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
+  // iOSではAudioContextがsuspendedで始まるため、タップが必要な場合はtrueにする
+  const [needsInteraction, setNeedsInteraction] = useState(false);
   // HTMLAudioElement → createMediaElementSource → GainNode
   // HTMLAudioElement.loop はブラウザのメディアエンジンが処理 → iOS バックグラウンド再生可
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -85,9 +87,14 @@ export default function FocusSession({ config, onBreak }: Props) {
     audioElRef.current = audio;
     const source = ctx.createMediaElementSource(audio);
     source.connect(gain);
-    audio.play()
-      .then(() => gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2))
-      .catch(console.error);
+    // iOSではsuspendedのためユーザー操作が必要。PCはそのまま再生
+    if (ctx.state === "suspended") {
+      setNeedsInteraction(true);
+    } else {
+      audio.play()
+        .then(() => gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2))
+        .catch(() => setNeedsInteraction(true));
+    }
 
     // ロック画面・コントロールセンターにメタデータを表示
     if ("mediaSession" in navigator) {
@@ -110,6 +117,20 @@ export default function FocusSession({ config, onBreak }: Props) {
       setTimeout(() => onBreak(config.duration), 1200);
     }
   }, [isFinished, config.duration, onBreak]);
+
+  // iOSタップでAudioContextを起動し音声を開始する
+  const handleUnlock = async () => {
+    const ctx   = audioCtxRef.current;
+    const audio = audioElRef.current;
+    const gain  = gainRef.current;
+    if (!ctx || !audio || !gain) return;
+    try {
+      await ctx.resume();
+      await audio.play();
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2);
+      setNeedsInteraction(false);
+    } catch (e) { console.error(e); }
+  };
 
   const handlePauseResume = () => {
     if (isPaused) {
@@ -236,6 +257,23 @@ export default function FocusSession({ config, onBreak }: Props) {
       <p className="absolute bottom-8 text-[#e8e6e1]/15 text-xs font-light tracking-wider">
         {`♪ ${config.ambient}`}
       </p>
+
+      {/* iOS用：タップで音声起動オーバーレイ */}
+      <AnimatePresence>
+        {needsInteraction && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
+            onClick={handleUnlock}
+          >
+            <p className="text-[#e8e6e1]/35 text-xs font-light tracking-[0.35em]">
+              タップして開始
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

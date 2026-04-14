@@ -239,7 +239,23 @@ export default function RelaxSession({ config, onDone }: Props) {
   const gainRef     = useRef<GainNode | null>(null);
   const audioElRef  = useRef<HTMLAudioElement | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  // iOSではAudioContextがsuspendedで始まるため、タップが必要な場合はtrueにする
+  const [needsInteraction, setNeedsInteraction] = useState(false);
   const labelColor = "text-[#e8e6e1]";
+
+  // iOSタップでAudioContextを起動し音声を開始する
+  const handleUnlock = async () => {
+    const ctx   = audioCtxRef.current;
+    const audio = audioElRef.current;
+    const gain  = gainRef.current;
+    if (!ctx || !audio || !gain) return;
+    try {
+      await ctx.resume();
+      await audio.play();
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2);
+      setNeedsInteraction(false);
+    } catch (e) { console.error(e); }
+  };
 
   const handlePauseResume = () => {
     if (isPaused) { resume(); audioElRef.current?.play().catch(console.error); setIsPaused(false); }
@@ -270,9 +286,14 @@ export default function RelaxSession({ config, onDone }: Props) {
     audioElRef.current = audio;
     const source = ctx.createMediaElementSource(audio);
     source.connect(gain);
-    audio.play()
-      .then(() => gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2))
-      .catch(console.error);
+    // iOSではsuspendedのためユーザー操作が必要。PCはそのまま再生
+    if (ctx.state === "suspended") {
+      setNeedsInteraction(true);
+    } else {
+      audio.play()
+        .then(() => gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2))
+        .catch(() => setNeedsInteraction(true));
+    }
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
@@ -356,6 +377,23 @@ export default function RelaxSession({ config, onDone }: Props) {
           </button>
         </div>
       </div>
+
+      {/* iOS用：タップで音声起動オーバーレイ */}
+      <AnimatePresence>
+        {needsInteraction && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
+            onClick={handleUnlock}
+          >
+            <p className="text-[#e8e6e1]/35 text-xs font-light tracking-[0.35em]">
+              タップして開始
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
