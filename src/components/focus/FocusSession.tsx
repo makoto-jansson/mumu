@@ -26,6 +26,13 @@ const FOCUS_TRACKS = [
   "Warm Analog Pad.wav",
 ].map(f => `/sounds/Focus_music/${encodeURIComponent(f)}`);
 
+// cafe_sound フォルダ内の全トラック（カフェモード）
+const CAFE_TRACKS = [
+  "482990__priesjensen__people-talking-at-cafe-ambience.wav",
+  "746428__douglasbrucelookca__miss-michelles-cafe-in-discovery-mountain-small-cafe-ambience-room-tone-small-crowd.wav",
+  "811996__ultra-edward__quiet-village-with-a-creaking-cafe-sign.wav",
+].map(f => `/sounds/cafe_sound/${encodeURIComponent(f)}`);
+
 // campfire crackling_sound フォルダ内の全トラック（焚き火モード）
 const CAMPFIRE_TRACKS = [
   "40699__spandau__campfire.wav",
@@ -58,6 +65,7 @@ export default function FocusSession({ config, onBreak }: Props) {
     start();
     const pool  = config.ambient === "波"   ? OCEAN_TRACKS
                 : config.ambient === "焚き火" ? CAMPFIRE_TRACKS
+                : config.ambient === "カフェ" ? CAFE_TRACKS
                 : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
     const ctx  = new AudioContext();
