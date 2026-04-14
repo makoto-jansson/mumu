@@ -256,6 +256,8 @@ export default function RelaxSession({ config, onDone }: Props) {
     start();
     const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];
     const ctx  = new AudioContext();
+    // iOS Safari は AudioContext を suspended 状態で生成するため明示的に resume が必要
+    ctx.resume();
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.connect(ctx.destination);

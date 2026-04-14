@@ -69,6 +69,8 @@ export default function FocusSession({ config, onBreak }: Props) {
                 : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
     const ctx  = new AudioContext();
+    // iOS Safari は AudioContext を suspended 状態で生成するため明示的に resume が必要
+    ctx.resume();
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.connect(ctx.destination);
