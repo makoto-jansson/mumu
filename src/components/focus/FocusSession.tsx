@@ -6,11 +6,31 @@
 // - 霧の海と灯台アニメーション
 // - 一時停止・終了ボタン
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Howl } from "howler";
 import { useTimer } from "@/hooks/useTimer";
 import FocusScene from "@/components/animations/FocusScene";
 import type { FocusConfig } from "./FocusSetup";
+
+// Focus_music フォルダ内の全トラック
+const FOCUS_TRACKS = [
+  "Analog Pad Joy (1).wav",
+  "Analog Pad Joy.wav",
+  "C major Neonfog.wav",
+  "Cozy Tape Hiss.wav",
+  "Glowing Click-Pad Loop.wav",
+  "Golden Glitch Pad.wav",
+  "Lantern-Off Reverb (1).wav",
+  "Lantern-Off Reverb.wav",
+  "Pink Noise Hush.wav",
+  "Tape-Hissed Pad.wav",
+  "Vinyl Crackle Loop (1).wav",
+  "Vinyl Crackle Loop.wav",
+  "Warm Analog Pad.wav",
+  "Warm Sine Pad (1).wav",
+  "Warm Sine Pad.wav",
+].map(f => `/sounds/Focus_music/${encodeURIComponent(f)}`);
 
 type Props = {
   config: FocusConfig;
@@ -21,31 +41,47 @@ export default function FocusSession({ config, onBreak }: Props) {
   const durationSec = config.duration * 60;
   const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
+  const howlRef = useRef<Howl | null>(null);
 
+  // タイマー開始 + ランダムBGM再生
   useEffect(() => {
     start();
-  }, [start]);
+    const track = FOCUS_TRACKS[Math.floor(Math.random() * FOCUS_TRACKS.length)];
+    const howl = new Howl({ src: [track], loop: true, volume: 0, html5: true });
+    howl.play();
+    howl.fade(0, 0.35, 2000);
+    howlRef.current = howl;
+    return () => {
+      howl.fade(howl.volume(), 0, 800);
+      setTimeout(() => { howl.stop(); howl.unload(); }, 800);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isFinished) {
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      onBreak(config.duration);
+      howlRef.current?.fade(howlRef.current.volume(), 0, 1200);
+      setTimeout(() => onBreak(config.duration), 1200);
     }
   }, [isFinished, config.duration, onBreak]);
 
   const handlePauseResume = () => {
     if (isPaused) {
       resume();
+      howlRef.current?.play();
       setIsPaused(false);
     } else {
       pause();
+      howlRef.current?.pause();
       setIsPaused(true);
     }
   };
 
   const handleEnd = () => {
     const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
-    onBreak(elapsedMin);
+    howlRef.current?.fade(howlRef.current.volume(), 0, 800);
+    setTimeout(() => onBreak(elapsedMin), 800);
   };
 
   const progress = timeLeft / durationSec;
