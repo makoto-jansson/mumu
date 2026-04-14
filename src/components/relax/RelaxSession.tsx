@@ -237,12 +237,13 @@ export default function RelaxSession({ config, onDone }: Props) {
   const { phase, label, scale, brightness } = useBreath(true);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainRef     = useRef<GainNode | null>(null);
+  const audioElRef  = useRef<HTMLAudioElement | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const labelColor = "text-[#e8e6e1]";
 
   const handlePauseResume = () => {
-    if (isPaused) { resume(); audioCtxRef.current?.resume(); setIsPaused(false); }
-    else          { pause();  audioCtxRef.current?.suspend(); setIsPaused(true); }
+    if (isPaused) { resume(); audioElRef.current?.play().catch(console.error); setIsPaused(false); }
+    else          { pause();  audioElRef.current?.pause(); setIsPaused(true); }
   };
 
   const handleEnd = () => {
@@ -251,35 +252,34 @@ export default function RelaxSession({ config, onDone }: Props) {
     setTimeout(onDone, 800);
   };
 
-  // タイマー開始 + ランダムBGM（Web Audio API シームレスループ）
+  // タイマー開始 + ランダムBGM（HTMLAudioElement → iOS バックグラウンド再生対応）
   useEffect(() => {
     start();
     const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];
+
     const ctx  = new AudioContext();
-    // iOS Safari は AudioContext を suspended 状態で生成するため明示的に resume が必要
-    ctx.resume();
+    ctx.resume(); // iOS Safari 対応
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.connect(ctx.destination);
     audioCtxRef.current = ctx;
     gainRef.current     = gain;
 
-    fetch(track)
-      .then(r => r.arrayBuffer())
-      .then(buf => ctx.decodeAudioData(buf))
-      .then(audioBuffer => {
-        if (ctx.state === "closed") return;
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.loop   = true;
-        source.connect(gain);
-        source.start(0);
-        gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2);
-      })
+    const audio  = new Audio(track);
+    audio.loop   = true;
+    audioElRef.current = audio;
+    const source = ctx.createMediaElementSource(audio);
+    source.connect(gain);
+    audio.play()
+      .then(() => gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 2))
       .catch(console.error);
 
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
+    }
+
     return () => {
-      const g = gainRef.current, c = audioCtxRef.current;
+      const g = gainRef.current, c = audioCtxRef.current, a = audioElRef.current;
       if (g && c && c.state !== "closed") {
         g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
         setTimeout(() => c.close(), 800);

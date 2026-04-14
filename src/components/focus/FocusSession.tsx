@@ -56,9 +56,11 @@ export default function FocusSession({ config, onBreak }: Props) {
   const durationSec = config.duration * 60;
   const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
-  // Web Audio API を直接使用 → BufferSource.loop はサンプル単位でシームレス
+  // HTMLAudioElement → createMediaElementSource → GainNode
+  // HTMLAudioElement.loop はブラウザのメディアエンジンが処理 → iOS バックグラウンド再生可
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainRef     = useRef<GainNode | null>(null);
+  const audioElRef  = useRef<HTMLAudioElement | null>(null);
 
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
@@ -68,36 +70,34 @@ export default function FocusSession({ config, onBreak }: Props) {
                 : config.ambient === "カフェ" ? CAFE_TRACKS
                 : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
+
     const ctx  = new AudioContext();
-    // iOS Safari は AudioContext を suspended 状態で生成するため明示的に resume が必要
-    ctx.resume();
+    ctx.resume(); // iOS Safari 対応
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.connect(ctx.destination);
     audioCtxRef.current = ctx;
     gainRef.current     = gain;
 
-    fetch(track)
-      .then(r => r.arrayBuffer())
-      .then(buf => ctx.decodeAudioData(buf))
-      .then(audioBuffer => {
-        if (ctx.state === "closed") return;
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.loop   = true; // Web Audio API レベルでのシームレスループ
-        source.connect(gain);
-        source.start(0);
-        gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2);
-      })
+    // HTMLAudioElement でバックグラウンド再生 + Web Audio API で音量制御
+    const audio  = new Audio(track);
+    audio.loop   = true;
+    audioElRef.current = audio;
+    const source = ctx.createMediaElementSource(audio);
+    source.connect(gain);
+    audio.play()
+      .then(() => gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2))
       .catch(console.error);
 
+    // ロック画面・コントロールセンターにメタデータを表示
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
+    }
+
     return () => {
-      const g = gainRef.current;
-      const c = audioCtxRef.current;
-      if (g && c && c.state !== "closed") {
-        g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
-        setTimeout(() => c.close(), 800);
-      }
+      const g = gainRef.current, c = audioCtxRef.current, a = audioElRef.current;
+      if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
+      setTimeout(() => { a?.pause(); c?.close(); }, 800);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,11 +105,8 @@ export default function FocusSession({ config, onBreak }: Props) {
   useEffect(() => {
     if (isFinished) {
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      const g = gainRef.current;
-      const c = audioCtxRef.current;
-      if (g && c && c.state !== "closed") {
-        g.gain.linearRampToValueAtTime(0, c.currentTime + 1.2);
-      }
+      const g = gainRef.current, c = audioCtxRef.current;
+      if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 1.2);
       setTimeout(() => onBreak(config.duration), 1200);
     }
   }, [isFinished, config.duration, onBreak]);
@@ -117,11 +114,11 @@ export default function FocusSession({ config, onBreak }: Props) {
   const handlePauseResume = () => {
     if (isPaused) {
       resume();
-      audioCtxRef.current?.resume();
+      audioElRef.current?.play().catch(console.error);
       setIsPaused(false);
     } else {
       pause();
-      audioCtxRef.current?.suspend();
+      audioElRef.current?.pause();
       setIsPaused(true);
     }
   };
