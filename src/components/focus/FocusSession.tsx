@@ -26,6 +26,13 @@ const FOCUS_TRACKS = [
   "Warm Analog Pad.wav",
 ].map(f => `/sounds/Focus_music/${encodeURIComponent(f)}`);
 
+// campfire crackling_sound フォルダ内の全トラック（焚き火モード）
+const CAMPFIRE_TRACKS = [
+  "40699__spandau__campfire.wav",
+  "588401__funwithsound__campfire-close-crackling-sticks.mp3",
+  "729396__heckfricker__campfire-02.wav",
+].map(f => `/sounds/campfire crackling_sound/${encodeURIComponent(f)}`);
+
 // ocean_sound フォルダ内の全トラック（波モード）
 const OCEAN_TRACKS = [
   "534915__lucas_schacht__ocean-waves-06.wav",
@@ -49,7 +56,9 @@ export default function FocusSession({ config, onBreak }: Props) {
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
     start();
-    const pool  = config.ambient === "波" ? OCEAN_TRACKS : FOCUS_TRACKS;
+    const pool  = config.ambient === "波"   ? OCEAN_TRACKS
+                : config.ambient === "焚き火" ? CAMPFIRE_TRACKS
+                : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
     const ctx  = new AudioContext();
     const gain = ctx.createGain();
