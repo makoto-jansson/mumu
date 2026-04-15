@@ -29,18 +29,25 @@ function fadeVolume(
   }, stepMs);
 }
 
+type NowPlayingMeta = {
+  label: string;  // 表示用テキスト（例: "Focus · 波"）
+  route: string;  // セッションページのパス（例: "/app/focus"）
+};
+
 type AudioStore = {
   audio: HTMLAudioElement | null;
+  meta:  NowPlayingMeta | null;
   // 新しい音声を登録（既存があればフェードアウトして差し替え）
-  setAudio: (audio: HTMLAudioElement) => void;
+  setAudio: (audio: HTMLAudioElement, meta: NowPlayingMeta) => void;
   // 明示的にフェードアウトして停止（セッション終了時）
   stopAndClear: () => void;
 };
 
 export const useAudioStore = create<AudioStore>((set, get) => ({
   audio: null,
+  meta:  null,
 
-  setAudio: (audio) => {
+  setAudio: (audio, meta) => {
     const prev = get().audio;
     if (prev && prev !== audio) {
       // 前の音楽をフェードアウトしてから解放
@@ -49,7 +56,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
         prev.src = "";
       });
     }
-    set({ audio });
+    set({ audio, meta });
   },
 
   stopAndClear: () => {
@@ -58,6 +65,6 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
       audio.pause();
       audio.src = "";
     }
-    set({ audio: null });
+    set({ audio: null, meta: null });
   },
 }));
