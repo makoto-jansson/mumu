@@ -262,6 +262,8 @@ export default function RelaxSession({ config, onDone }: Props) {
   const audioElRef   = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  // 画面タップでナビ表示切り替え（初期は非表示）
+  const [navVisible, setNavVisible] = useState(false);
   const labelColor = "text-[#e8e6e1]";
 
   const handlePauseResume = () => {
@@ -317,7 +319,8 @@ export default function RelaxSession({ config, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed top-0 left-0 right-0 bottom-16 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      className="fixed inset-0 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      onClick={() => setNavVisible(v => !v)}
     >
       {/* 残り時間 */}
       <p className="text-[#e8e6e1]/20 text-xs font-light tracking-widest tabular-nums mb-3">
@@ -340,8 +343,8 @@ export default function RelaxSession({ config, onDone }: Props) {
         <RelaxLandscape scale={scale} brightness={brightness} />
       </div>
 
-      {/* ボタン行（一時停止 + 終了） */}
-      <div className="flex items-start gap-10 mt-10">
+      {/* ボタン行（一時停止 + 終了）— タップがナビトグルに伝播しないよう止める */}
+      <div className="flex items-start gap-10 mt-10" onClick={e => e.stopPropagation()}>
 
         {/* 一時停止 / 再開 */}
         <button
@@ -394,10 +397,23 @@ export default function RelaxSession({ config, onDone }: Props) {
 
       </div>
 
-      {/* BGMメモ */}
-      <p className="absolute bottom-8 text-[#e8e6e1]/15 text-xs font-light tracking-wider">
+      {/* BGMメモ — ナビ表示時はナビの上に出す */}
+      <p className={`absolute text-[#e8e6e1]/15 text-xs font-light tracking-wider transition-all duration-300 ${navVisible ? "bottom-24" : "bottom-8"}`}>
         ♪ relax
       </p>
+
+      {/* ナビ非表示時のカバー（BottomNavをz-[60]で塞ぐ） */}
+      <AnimatePresence>
+        {!navVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed bottom-0 left-0 right-0 h-16 z-[60] bg-[#0a0a0a]"
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
