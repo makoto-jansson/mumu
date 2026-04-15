@@ -95,7 +95,7 @@ export default function FocusSession({ config, onBreak }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    audio.volume = 0;
+    audio.volume = 0.35; // フェードインなしで即時通常音量
     audioElRef.current = audio;
 
     // ロック画面・コントロールセンターにメタデータを表示
@@ -104,11 +104,7 @@ export default function FocusSession({ config, onBreak }: Props) {
     }
 
     // セッション画面はユーザー操作（タップ）直後にマウントされるため再生可能
-    audio.play()
-      .then(() => {
-        fadeTimerRef.current = fadeVolume(audio, 0.35, 2000);
-      })
-      .catch(console.error);
+    audio.play().catch(console.error);
 
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
