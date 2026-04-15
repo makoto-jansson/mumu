@@ -79,18 +79,35 @@ function fadeVolume(
 
 export default function FocusSession({ config, onBreak }: Props) {
   const durationSec = config.duration * 60;
-  const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
+  const { timeLeft, isFinished, formatted, start, startFromRemaining, initPaused, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
   // 画面タップでナビ表示切り替え（初期は非表示）
   const [navVisible, setNavVisible] = useState(false);
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
   const audioElRef   = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { setAudio, stopAndClear } = useAudioStore();
+  const timeLeftRef  = useRef(durationSec); // アンマウント時に最新値を参照するためのref
+  const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
+
+  // timeLeftが変わるたびにrefを同期
+  useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
 
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
-    start();
+    // タイマー復元（他ページ遷移後に戻ってきた場合）
+    if (timerSnap) {
+      if (timerSnap.isPaused) {
+        initPaused(timerSnap.remainingSeconds);
+        setIsPaused(true);
+      } else {
+        const elapsed = (Date.now() - timerSnap.savedAt) / 1000;
+        const adjusted = Math.max(0, timerSnap.remainingSeconds - elapsed);
+        startFromRemaining(adjusted);
+      }
+    } else {
+      start();
+    }
+
     const pool  = config.ambient === "波"   ? OCEAN_TRACKS
                 : config.ambient === "焚き火" ? CAMPFIRE_TRACKS
                 : config.ambient === "カフェ" ? CAFE_TRACKS
@@ -111,9 +128,14 @@ export default function FocusSession({ config, onBreak }: Props) {
 
     audio.play().catch(console.error);
 
-    // アンマウント時は音楽を止めない（他ページ遷移後も継続再生）
+    // アンマウント時はタイマー状態を保存（音楽は止めない）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+      saveTimerSnap({
+        remainingSeconds: timeLeftRef.current,
+        savedAt: Date.now(),
+        isPaused: false, // 一時停止中かどうかはhandlePauseResumeで別途保存
+      });
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -134,10 +156,12 @@ export default function FocusSession({ config, onBreak }: Props) {
       resume();
       audioElRef.current?.play().catch(console.error);
       setIsPaused(false);
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: Date.now(), isPaused: false });
     } else {
       pause();
       audioElRef.current?.pause();
       setIsPaused(true);
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: 0, isPaused: true });
     }
   };
 

@@ -37,11 +37,20 @@ type NowPlayingMeta = {
   config: any;          // FocusConfig | RelaxConfig（ページ側でキャスト）
 };
 
+type TimerSnap = {
+  remainingSeconds: number; // 保存時点の残り秒数
+  savedAt: number;          // Date.now() at save（一時停止中は0）
+  isPaused: boolean;
+};
+
 type AudioStore = {
   audio: HTMLAudioElement | null;
   meta:  NowPlayingMeta | null;
+  timerSnap: TimerSnap | null;
   // 新しい音声を登録（既存があればフェードアウトして差し替え）
   setAudio: (audio: HTMLAudioElement, meta: NowPlayingMeta) => void;
+  // タイマー状態を保存（アンマウント・一時停止時）
+  saveTimerSnap: (snap: TimerSnap) => void;
   // 明示的にフェードアウトして停止（セッション終了時）
   stopAndClear: () => void;
 };
@@ -49,6 +58,9 @@ type AudioStore = {
 export const useAudioStore = create<AudioStore>((set, get) => ({
   audio: null,
   meta:  null,
+  timerSnap: null,
+
+  saveTimerSnap: (snap) => set({ timerSnap: snap }),
 
   setAudio: (audio, meta) => {
     const prev = get().audio;
@@ -68,6 +80,6 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
       audio.pause();
       audio.src = "";
     }
-    set({ audio: null, meta: null });
+    set({ audio: null, meta: null, timerSnap: null });
   },
 }));

@@ -58,6 +58,24 @@ export function useTimer(durationSeconds: number) {
     rafRef.current = requestAnimationFrame(tick);
   }, [durationSeconds, tick]);
 
+  // 残り時間を指定して途中から再開（画面復帰時などに使用）
+  const startFromRemaining = useCallback((remaining: number) => {
+    remainingRef.current = remaining;
+    startTimeRef.current = Date.now();
+    setTimeLeft(remaining);
+    setIsRunning(true);
+    rafRef.current = requestAnimationFrame(tick);
+  }, [tick]);
+
+  // 残り時間を指定して一時停止状態で初期化（一時停止中に離脱した場合）
+  const initPaused = useCallback((remaining: number) => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    remainingRef.current = remaining;
+    startTimeRef.current = null;
+    setTimeLeft(remaining);
+    setIsRunning(false);
+  }, []);
+
   const pause = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     // 残り時間を保存してから停止
@@ -90,5 +108,5 @@ export function useTimer(durationSeconds: number) {
   const formatted = `${String(Math.floor(timeLeft / 60)).padStart(2, "0")}:${String(Math.floor(timeLeft % 60)).padStart(2, "0")}`;
   const isFinished = timeLeft === 0 && !isRunning;
 
-  return { timeLeft, isRunning, isFinished, formatted, start, pause, resume, reset };
+  return { timeLeft, isRunning, isFinished, formatted, start, startFromRemaining, initPaused, pause, resume, reset };
 }
