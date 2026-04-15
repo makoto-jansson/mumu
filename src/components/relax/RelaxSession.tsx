@@ -317,7 +317,7 @@ export default function RelaxSession({ config, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      className="fixed top-0 left-0 right-0 bottom-16 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
     >
       {/* 残り時間 */}
       <p className="text-[#e8e6e1]/20 text-xs font-light tracking-widest tabular-nums mb-3">

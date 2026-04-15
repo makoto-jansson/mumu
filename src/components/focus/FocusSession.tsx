@@ -157,7 +157,7 @@ export default function FocusSession({ config, onBreak }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      className="fixed top-0 left-0 right-0 bottom-16 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
     >
       {/* 残り時間（大きく） */}
       <motion.p
