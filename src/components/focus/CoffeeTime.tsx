@@ -16,9 +16,10 @@ type Props = {
   onSkip: () => void;
   steps?: StepDef[];
   stepKey?: string; // StepBar の current key（デフォルト "coffee"）
+  subtitle?: string; // 説明文（省略時はFocus用デフォルト）
 };
 
-export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, stepKey = "coffee" }: Props) {
+export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, stepKey = "coffee", subtitle }: Props) {
   const { isFinished, start } = useTimer(COFFEE_SEC);
 
   useEffect(() => {
@@ -62,9 +63,13 @@ export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, st
           まずは珈琲を淹れましょう
         </p>
         <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
-          一滴一滴、ていねいに。
-          <br />
-          それが集中の準備になります。
+          {subtitle ?? (
+            <>
+              一滴一滴、ていねいに。
+              <br />
+              それが集中の準備になります。
+            </>
+          )}
         </p>
       </motion.div>
 

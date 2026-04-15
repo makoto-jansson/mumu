@@ -43,7 +43,13 @@ export default function RelaxPage() {
         <RelaxSetup key="setup" onStart={handleStart} onSkip={handleSkip} />
       )}
       {phase === "coffee" && (
-        <CoffeeTime key="coffee" steps={RELAX_STEPS} onComplete={handleCoffeeDone} onSkip={handleCoffeeDone} />
+        <CoffeeTime
+          key="coffee"
+          steps={RELAX_STEPS}
+          onComplete={handleCoffeeDone}
+          onSkip={handleCoffeeDone}
+          subtitle="コーヒーの香り成分には、脳のα波（リラックス時に出る脳波）を増加させる効果があるという研究があります。"
+        />
       )}
       {phase === "session" && config && (
         <RelaxSession key="session" config={config} onDone={handleDone} />
