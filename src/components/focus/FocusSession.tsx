@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTimer } from "@/hooks/useTimer";
 import FocusScene from "@/components/animations/FocusScene";
+import { useAudioStore } from "@/store/audioStore";
 import type { FocusConfig } from "./FocusSetup";
 
 // Focus_music フォルダ内の全トラック（音楽モード）
@@ -85,6 +86,7 @@ export default function FocusSession({ config, onBreak }: Props) {
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
   const audioElRef   = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { setAudio, stopAndClear } = useAudioStore();
 
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
@@ -97,21 +99,21 @@ export default function FocusSession({ config, onBreak }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    audio.volume = 0.35; // フェードインなしで即時通常音量
+    audio.volume = 0.35;
     audioElRef.current = audio;
+    // グローバルストアに登録（既存の音楽は自動停止）
+    setAudio(audio);
 
     // ロック画面・コントロールセンターにメタデータを表示
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
     }
 
-    // セッション画面はユーザー操作（タップ）直後にマウントされるため再生可能
     audio.play().catch(console.error);
 
+    // アンマウント時は音楽を止めない（他ページ遷移後も継続再生）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 800, () => a.pause());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -122,10 +124,10 @@ export default function FocusSession({ config, onBreak }: Props) {
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
       const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 1200, () => a.pause());
+      if (a) fadeVolume(a, 0, 1200, () => stopAndClear());
       setTimeout(() => onBreak(config.duration), 1200);
     }
-  }, [isFinished, config.duration, onBreak]);
+  }, [isFinished, config.duration, onBreak, stopAndClear]);
 
   const handlePauseResume = () => {
     if (isPaused) {
@@ -143,7 +145,7 @@ export default function FocusSession({ config, onBreak }: Props) {
     const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
     const a = audioElRef.current;
-    if (a) fadeVolume(a, 0, 800, () => a.pause());
+    if (a) fadeVolume(a, 0, 800, () => stopAndClear());
     setTimeout(() => onBreak(elapsedMin), 800);
   };
 

@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useTransform, AnimatePresence } from "framer-motion";
+import { useAudioStore } from "@/store/audioStore";
 
 // 音量をなめらかに変化させる（setIntervalベース）
 function fadeVolume(
@@ -261,6 +262,7 @@ export default function RelaxSession({ config, onDone }: Props) {
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
   const audioElRef   = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { setAudio, stopAndClear } = useAudioStore();
   const [isPaused, setIsPaused] = useState(false);
   // 画面タップでナビ表示切り替え（初期は非表示）
   const [navVisible, setNavVisible] = useState(false);
@@ -274,7 +276,7 @@ export default function RelaxSession({ config, onDone }: Props) {
   const handleEnd = () => {
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
     const a = audioElRef.current;
-    if (a) fadeVolume(a, 0, 800, () => a.pause());
+    if (a) fadeVolume(a, 0, 800, () => stopAndClear());
     setTimeout(onDone, 800);
   };
 
@@ -285,20 +287,20 @@ export default function RelaxSession({ config, onDone }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    audio.volume = 0.25; // フェードインなしで即時通常音量
+    audio.volume = 0.25;
     audioElRef.current = audio;
+    // グローバルストアに登録（既存の音楽は自動停止）
+    setAudio(audio);
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
     }
 
-    // セッション画面はユーザー操作（タップ）直後にマウントされるため再生可能
     audio.play().catch(console.error);
 
+    // アンマウント時は音楽を止めない（他ページ遷移後も継続再生）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 800, () => a.pause());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -308,10 +310,10 @@ export default function RelaxSession({ config, onDone }: Props) {
     if (isFinished) {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
       const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 1200, () => a.pause());
+      if (a) fadeVolume(a, 0, 1200, () => stopAndClear());
       setTimeout(onDone, 1200);
     }
-  }, [isFinished, onDone]);
+  }, [isFinished, onDone, stopAndClear]);
 
   return (
     <motion.div
