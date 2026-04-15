@@ -50,7 +50,7 @@ function AddModal({ day, onAdd, onClose }: AddModalProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/60" />
@@ -59,7 +59,7 @@ function AddModal({ day, onAdd, onClose }: AddModalProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 40, opacity: 0 }}
         transition={{ type: "spring", stiffness: 340, damping: 32 }}
-        className="relative w-full max-w-sm bg-[#111214] border-t border-white/10 px-6 pt-6 pb-10 flex flex-col gap-5"
+        className="relative w-full max-w-sm bg-[#111214] border-t border-white/10 px-6 pt-6 pb-28 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-[#e8e6e1]/50 text-xs font-light tracking-[0.3em]">
