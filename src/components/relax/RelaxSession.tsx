@@ -31,7 +31,6 @@ function fadeVolume(
 }
 import { useTimer } from "@/hooks/useTimer";
 import { useBreath } from "@/hooks/useBreath";
-import StepBar, { RELAX_STEPS } from "@/components/focus/StepBar";
 import type { RelaxConfig } from "./RelaxSetup";
 
 type Props = {
@@ -322,60 +321,87 @@ export default function RelaxSession({ config, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
     >
-      <StepBar steps={RELAX_STEPS} current="session" />
+      {/* 残り時間 */}
+      <p className="text-[#e8e6e1]/20 text-xs font-light tracking-widest tabular-nums mb-3">
+        {formatted}
+      </p>
 
-      {/* タイマー・ラベル・灯台・ボタンを密なひとかたまりに */}
-      <div className="max-w-sm mx-auto w-full flex flex-col items-center pt-3 pb-24">
-        {/* 残り時間 */}
-        <p className="text-center text-[#e8e6e1]/20 text-xs font-light tracking-widest tabular-nums">
-          {formatted}
-        </p>
+      {/* フェーズラベル */}
+      <motion.p
+        key={phase}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`text-sm font-light tracking-[0.45em] mb-4 ${labelColor}`}
+      >
+        {label}
+      </motion.p>
 
-        {/* フェーズラベル（タイマーと同程度の余白） */}
-        <motion.p
-          key={phase}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className={`text-center text-sm font-light tracking-[0.45em] mt-3 ${labelColor}`}
-        >
-          {label}
-        </motion.p>
-
-        {/* 植物 / 葉脈（max-w-sm内全幅） */}
-        <div className="w-full mt-3 px-4">
-          <RelaxLandscape scale={scale} brightness={brightness} />
-        </div>
-
-        {/* ボタン行 */}
-        <div className="flex gap-4 w-full mt-8 px-6">
-          <button
-            onClick={handlePauseResume}
-            className="flex-1 py-3 border border-white/20 text-[#e8e6e1] text-sm font-light tracking-[0.15em] hover:border-white/40 hover:bg-white/5 transition-all duration-300"
-          >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={isPaused ? "resume" : "pause"}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isPaused ? "再開" : "一時停止"}
-              </motion.span>
-            </AnimatePresence>
-          </button>
-          <button
-            onClick={handleEnd}
-            className="flex-1 py-3 border border-white/20 text-[#e8e6e1] text-sm font-light tracking-[0.15em] hover:border-white/40 hover:bg-white/5 transition-all duration-300"
-          >
-            終了
-          </button>
-        </div>
+      {/* 花束イラスト */}
+      <div className="w-full max-w-sm px-4">
+        <RelaxLandscape scale={scale} brightness={brightness} />
       </div>
 
+      {/* ボタン行（一時停止 + 終了） */}
+      <div className="flex items-start gap-10 mt-10">
+
+        {/* 一時停止 / 再開 */}
+        <button
+          onClick={handlePauseResume}
+          className="flex flex-col items-center gap-2 group"
+        >
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-colors duration-300">
+            <AnimatePresence mode="wait">
+              {isPaused ? (
+                <motion.svg
+                  key="play"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  width="14" height="16" viewBox="0 0 14 16" fill="none"
+                >
+                  <path d="M1 1L13 8L1 15V1Z" fill="#e8e6e1" opacity="0.6" />
+                </motion.svg>
+              ) : (
+                <motion.svg
+                  key="pause"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  width="14" height="16" viewBox="0 0 14 16" fill="none"
+                >
+                  <rect x="1" y="1" width="4" height="14" fill="#e8e6e1" opacity="0.6" />
+                  <rect x="9" y="1" width="4" height="14" fill="#e8e6e1" opacity="0.6" />
+                </motion.svg>
+              )}
+            </AnimatePresence>
+          </div>
+          <span className="text-[#e8e6e1]/25 text-xs font-light tracking-wider">
+            {isPaused ? "再開" : "一時停止"}
+          </span>
+        </button>
+
+        {/* 終了 */}
+        <button
+          onClick={handleEnd}
+          className="flex flex-col items-center gap-2 group"
+        >
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 transition-colors duration-300">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <rect x="1" y="1" width="10" height="10" rx="1" fill="#e8e6e1" opacity="0.6" />
+            </svg>
+          </div>
+          <span className="text-[#e8e6e1]/25 text-xs font-light tracking-wider">終了</span>
+        </button>
+
+      </div>
+
+      {/* BGMメモ */}
+      <p className="absolute bottom-8 text-[#e8e6e1]/15 text-xs font-light tracking-wider">
+        ♪ relax
+      </p>
     </motion.div>
   );
 }
