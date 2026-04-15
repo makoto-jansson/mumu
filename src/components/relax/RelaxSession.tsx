@@ -283,7 +283,7 @@ export default function RelaxSession({ config, onDone }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    audio.volume = 0;
+    audio.volume = 0.25; // フェードインなしで即時通常音量
     audioElRef.current = audio;
 
     if ("mediaSession" in navigator) {
@@ -291,11 +291,7 @@ export default function RelaxSession({ config, onDone }: Props) {
     }
 
     // セッション画面はユーザー操作（タップ）直後にマウントされるため再生可能
-    audio.play()
-      .then(() => {
-        fadeTimerRef.current = fadeVolume(audio, 0.25, 2000);
-      })
-      .catch(console.error);
+    audio.play().catch(console.error);
 
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
