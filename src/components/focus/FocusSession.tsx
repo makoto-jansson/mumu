@@ -102,7 +102,7 @@ export default function FocusSession({ config, onBreak }: Props) {
     audio.volume = 0.35;
     audioElRef.current = audio;
     // グローバルストアに登録（既存の音楽は自動停止）
-    setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus" });
+    setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
 
     // ロック画面・コントロールセンターにメタデータを表示
     if ("mediaSession" in navigator) {

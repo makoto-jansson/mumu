@@ -11,12 +11,19 @@ import CoffeeTime from "@/components/focus/CoffeeTime";
 import FocusSession from "@/components/focus/FocusSession";
 import FocusBreak from "@/components/focus/FocusBreak";
 import SessionSummary from "@/components/focus/SessionSummary";
+import { useAudioStore } from "@/store/audioStore";
 
 type Phase = "setup" | "coffee" | "session" | "break" | "summary";
 
 export default function FocusPage() {
-  const [phase, setPhase] = useState<Phase>("setup");
-  const [config, setConfig] = useState<FocusConfig | null>(null);
+  const { audio, meta } = useAudioStore();
+
+  // 再生中のFocusセッションがあれば直接sessionフェーズに復元
+  const hasActiveSession = !!(audio && meta?.mode === "focus" && meta.config);
+  const [phase, setPhase] = useState<Phase>(hasActiveSession ? "session" : "setup");
+  const [config, setConfig] = useState<FocusConfig | null>(
+    hasActiveSession ? (meta!.config as FocusConfig) : null
+  );
   const [sets, setSets] = useState(0);
   const [totalMinutes, setTotalMinutes] = useState(0);
 

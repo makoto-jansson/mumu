@@ -10,12 +10,19 @@ import CoffeeTime from "@/components/focus/CoffeeTime";
 import RelaxSession from "@/components/relax/RelaxSession";
 import RelaxDone from "@/components/relax/RelaxDone";
 import { RELAX_STEPS } from "@/components/focus/StepBar";
+import { useAudioStore } from "@/store/audioStore";
 
 type Phase = "setup" | "coffee" | "session" | "done";
 
 export default function RelaxPage() {
-  const [phase,  setPhase]  = useState<Phase>("setup");
-  const [config, setConfig] = useState<RelaxConfig | null>(null);
+  const { audio, meta } = useAudioStore();
+
+  // 再生中のRelaxセッションがあれば直接sessionフェーズに復元
+  const hasActiveSession = !!(audio && meta?.mode === "relax" && meta.config);
+  const [phase,  setPhase]  = useState<Phase>(hasActiveSession ? "session" : "setup");
+  const [config, setConfig] = useState<RelaxConfig | null>(
+    hasActiveSession ? (meta!.config as RelaxConfig) : null
+  );
 
   const handleStart = useCallback((cfg: RelaxConfig) => {
     setConfig(cfg);

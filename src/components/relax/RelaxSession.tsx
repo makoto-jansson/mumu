@@ -290,7 +290,7 @@ export default function RelaxSession({ config, onDone }: Props) {
     audio.volume = 0.25;
     audioElRef.current = audio;
     // グローバルストアに登録（既存の音楽は自動停止）
-    setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax" });
+    setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });

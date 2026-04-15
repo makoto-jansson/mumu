@@ -30,8 +30,11 @@ function fadeVolume(
 }
 
 type NowPlayingMeta = {
-  label: string;  // 表示用テキスト（例: "Focus · 波"）
-  route: string;  // セッションページのパス（例: "/app/focus"）
+  label:  string;       // 表示用テキスト（例: "Focus · 波"）
+  route:  string;       // セッションページのパス（例: "/app/focus"）
+  mode:   "focus" | "relax";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: any;          // FocusConfig | RelaxConfig（ページ側でキャスト）
 };
 
 type AudioStore = {
