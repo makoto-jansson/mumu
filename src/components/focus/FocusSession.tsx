@@ -52,17 +52,37 @@ type Props = {
   onBreak: (actualMinutes: number) => void;
 };
 
+// 音量をなめらかに変化させる（setIntervalベース）
+function fadeVolume(
+  audio: HTMLAudioElement,
+  target: number,
+  durationMs: number,
+  onDone?: () => void
+): ReturnType<typeof setInterval> {
+  const steps    = 30;
+  const stepMs   = durationMs / steps;
+  const startVol = audio.volume;
+  const delta    = (target - startVol) / steps;
+  let   count    = 0;
+  const id = setInterval(() => {
+    count++;
+    audio.volume = Math.max(0, Math.min(1, startVol + delta * count));
+    if (count >= steps) {
+      clearInterval(id);
+      audio.volume = target;
+      onDone?.();
+    }
+  }, stepMs);
+  return id;
+}
+
 export default function FocusSession({ config, onBreak }: Props) {
   const durationSec = config.duration * 60;
   const { timeLeft, isFinished, formatted, start, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
-  // iOSではAudioContextがsuspendedで始まるため、タップが必要な場合はtrueにする
-  const [needsInteraction, setNeedsInteraction] = useState(false);
-  // HTMLAudioElement → createMediaElementSource → GainNode
-  // HTMLAudioElement.loop はブラウザのメディアエンジンが処理 → iOS バックグラウンド再生可
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const gainRef     = useRef<GainNode | null>(null);
-  const audioElRef  = useRef<HTMLAudioElement | null>(null);
+  // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
+  const audioElRef   = useRef<HTMLAudioElement | null>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
@@ -73,64 +93,41 @@ export default function FocusSession({ config, onBreak }: Props) {
                 : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
 
-    const ctx  = new AudioContext();
-    ctx.resume(); // iOS Safari 対応
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.connect(ctx.destination);
-    audioCtxRef.current = ctx;
-    gainRef.current     = gain;
-
-    // HTMLAudioElement でバックグラウンド再生 + Web Audio API で音量制御
-    const audio  = new Audio(track);
+    const audio = new Audio(track);
     audio.loop   = true;
+    audio.volume = 0;
     audioElRef.current = audio;
-    const source = ctx.createMediaElementSource(audio);
-    source.connect(gain);
-    // iOSではsuspendedのためユーザー操作が必要。PCはそのまま再生
-    if (ctx.state === "suspended") {
-      setNeedsInteraction(true);
-    } else {
-      audio.play()
-        .then(() => gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2))
-        .catch(() => setNeedsInteraction(true));
-    }
 
     // ロック画面・コントロールセンターにメタデータを表示
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
     }
 
+    // セッション画面はユーザー操作（タップ）直後にマウントされるため再生可能
+    audio.play()
+      .then(() => {
+        fadeTimerRef.current = fadeVolume(audio, 0.35, 2000);
+      })
+      .catch(console.error);
+
     return () => {
-      const g = gainRef.current, c = audioCtxRef.current, a = audioElRef.current;
-      if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
-      setTimeout(() => { a?.pause(); c?.close(); }, 800);
+      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+      const a = audioElRef.current;
+      if (a) fadeVolume(a, 0, 800, () => a.pause());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // タイマー完了
   useEffect(() => {
     if (isFinished) {
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      const g = gainRef.current, c = audioCtxRef.current;
-      if (g && c && c.state !== "closed") g.gain.linearRampToValueAtTime(0, c.currentTime + 1.2);
+      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+      const a = audioElRef.current;
+      if (a) fadeVolume(a, 0, 1200, () => a.pause());
       setTimeout(() => onBreak(config.duration), 1200);
     }
   }, [isFinished, config.duration, onBreak]);
-
-  // iOSタップでAudioContextを起動し音声を開始する
-  const handleUnlock = async () => {
-    const ctx   = audioCtxRef.current;
-    const audio = audioElRef.current;
-    const gain  = gainRef.current;
-    if (!ctx || !audio || !gain) return;
-    try {
-      await ctx.resume();
-      await audio.play();
-      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2);
-      setNeedsInteraction(false);
-    } catch (e) { console.error(e); }
-  };
 
   const handlePauseResume = () => {
     if (isPaused) {
@@ -146,11 +143,9 @@ export default function FocusSession({ config, onBreak }: Props) {
 
   const handleEnd = () => {
     const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
-    const g = gainRef.current;
-    const c = audioCtxRef.current;
-    if (g && c && c.state !== "closed") {
-      g.gain.linearRampToValueAtTime(0, c.currentTime + 0.8);
-    }
+    if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+    const a = audioElRef.current;
+    if (a) fadeVolume(a, 0, 800, () => a.pause());
     setTimeout(() => onBreak(elapsedMin), 800);
   };
 
@@ -257,23 +252,6 @@ export default function FocusSession({ config, onBreak }: Props) {
       <p className="absolute bottom-8 text-[#e8e6e1]/15 text-xs font-light tracking-wider">
         {`♪ ${config.ambient}`}
       </p>
-
-      {/* iOS用：タップで音声起動オーバーレイ */}
-      <AnimatePresence>
-        {needsInteraction && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
-            onClick={handleUnlock}
-          >
-            <p className="text-[#e8e6e1]/35 text-xs font-light tracking-[0.35em]">
-              タップして開始
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
