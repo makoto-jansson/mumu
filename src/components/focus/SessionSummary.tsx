@@ -39,7 +39,7 @@ export default function SessionSummary({ sets, totalMinutes, task }: Props) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col px-6 pt-16 pb-24 overflow-y-auto"
+      className="fixed inset-0 z-[30] bg-[#0a0a0a] flex flex-col px-6 pt-16 pb-24 overflow-y-auto"
     >
       <div className="max-w-sm mx-auto w-full flex flex-col gap-8">
 

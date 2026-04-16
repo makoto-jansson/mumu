@@ -6,6 +6,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { FeelResult } from "./ReclaimFeel";
+import { playClick } from "@/lib/playSound";
 
 const LAYER_COLORS: Record<string, string> = {
   sensory:  "#F59E0B", // amber-400
@@ -82,7 +83,7 @@ export default function ReclaimSnapshot({ feelResults }: Props) {
           return (
             <motion.button
               key={orb.layer}
-              onClick={() => handleTap(orb.layer)}
+              onClick={() => { playClick(); handleTap(orb.layer); }}
               className="absolute rounded-full"
               style={{
                 left: pos.x,

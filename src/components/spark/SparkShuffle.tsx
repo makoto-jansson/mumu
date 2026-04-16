@@ -7,6 +7,7 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "
 import StepBar, { SPARK_STEPS } from "@/components/focus/StepBar";
 import SparkAmbient from "./SparkAmbient";
 import sparkData from "@/data/sparkCardsV2.json";
+import { playClick } from "@/lib/playSound";
 
 // ---- 型定義 ----
 export type OsborneCategory =
@@ -105,7 +106,7 @@ function FlipCell({
     <div
       className="relative min-h-[82px] cursor-pointer"
       style={{ perspective: 600 }}
-      onClick={onFlip}
+      onClick={() => { playClick(); onFlip(); }}
     >
       <motion.div
         animate={{ rotateY: isFlipped ? 180 : 0 }}
@@ -229,7 +230,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
             {kept.length > 0 ? `${kept.length}テーマをキープしました` : "カードが終わりました"}
           </p>
           <button
-            onClick={() => onDone(kept)}
+            onClick={() => { playClick(); onDone(kept); }}
             className="px-8 py-3 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/10 transition-all duration-300"
           >
             次のステップへ →
@@ -352,13 +353,13 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
         <div className="pb-20 px-6 max-w-sm mx-auto w-full">
           <div className="flex gap-3">
             <button
-              onClick={() => swipe("skip")}
+              onClick={() => { playClick(); swipe("skip"); }}
               className="flex-1 py-3 border border-white/12 text-[#e8e6e1]/35 text-sm font-light tracking-wider hover:border-white/25 hover:text-[#e8e6e1]/60 transition-all duration-200"
             >
               ← パス
             </button>
             <button
-              onClick={() => swipe("keep")}
+              onClick={() => { playClick(); swipe("keep"); }}
               className="flex-1 py-3 border border-[#4ade80]/25 text-[#4ade80]/50 text-sm font-light tracking-wider hover:border-[#4ade80]/45 hover:text-[#4ade80]/80 transition-all duration-200"
             >
               キープ →
@@ -385,7 +386,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
               <motion.button
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                onClick={() => onDone(kept)}
+                onClick={() => { playClick(); onDone(kept); }}
                 className="w-full mt-3 py-2 text-[#EF9F27]/50 text-xs font-light tracking-wider hover:text-[#EF9F27]/80 transition-colors duration-200"
               >
                 {kept.length}テーマキープ — 次のステップへ →

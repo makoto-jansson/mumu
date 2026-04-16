@@ -35,11 +35,8 @@ export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, st
     const audio = new Audio("/sounds/181715__keweldog__drip-coffee.wav");
     audio.loop   = true;
     audio.volume = 0.4;
-    audio.play().catch(console.error);
-    return () => {
-      audio.pause();
-      audio.src = "";
-    };
+    const promise = audio.play().catch(() => {});
+    return () => { promise.then(() => audio.pause()).catch(() => {}); };
   }, []);
 
   return (

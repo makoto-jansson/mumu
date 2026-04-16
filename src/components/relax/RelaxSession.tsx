@@ -260,9 +260,10 @@ export default function RelaxSession({ config, onDone }: Props) {
   const { timeLeft, formatted, isFinished, start, startFromRemaining, initPaused, pause, resume } = useTimer(durationSec);
   const { phase, label, scale, brightness } = useBreath(true);
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
-  const audioElRef   = useRef<HTMLAudioElement | null>(null);
-  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeLeftRef  = useRef(durationSec);
+  const audioElRef      = useRef<HTMLAudioElement | null>(null);
+  const fadeTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeLeftRef     = useRef(durationSec);
+  const sessionEndedRef = useRef(false); // 完了・手動終了時はtimerSnap保存をスキップ
   const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
   const [isPaused, setIsPaused] = useState(false);
   // 画面タップでナビ表示切り替え（初期は非表示）
@@ -286,11 +287,27 @@ export default function RelaxSession({ config, onDone }: Props) {
     }
   };
 
+  // endsound を再生してからコールバックを呼ぶ
+  const playEndSound = (callback: () => void) => {
+    const se = new Audio("/sounds/endsound.wav");
+    se.volume = 0.175;
+    se.play().catch(console.error);
+    se.addEventListener("ended", callback, { once: true });
+    // 読み込み失敗などで ended が来ない場合の保険
+    setTimeout(callback, 4000);
+  };
+
   const handleEnd = () => {
+    sessionEndedRef.current = true;
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+    // BGMを即停止 → endsound再生（鳴らしっぱなしで遷移）
     const a = audioElRef.current;
-    if (a) fadeVolume(a, 0, 800, () => stopAndClear());
-    setTimeout(onDone, 800);
+    if (a) a.pause();
+    stopAndClear();
+    const se = new Audio("/sounds/endsound.wav");
+    se.volume = 0.175;
+    se.play().catch(console.error);
+    onDone();
   };
 
   // タイマー開始 + ランダムBGM（HTMLAudioElement のみ → iOS バックグラウンド再生対応）
@@ -325,14 +342,16 @@ export default function RelaxSession({ config, onDone }: Props) {
 
     audio.play().catch(console.error);
 
-    // アンマウント時はタイマー状態を保存（音楽は止めない）
+    // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      saveTimerSnap({
-        remainingSeconds: timeLeftRef.current,
-        savedAt: Date.now(),
-        isPaused: false,
-      });
+      if (!sessionEndedRef.current) {
+        saveTimerSnap({
+          remainingSeconds: timeLeftRef.current,
+          savedAt: Date.now(),
+          isPaused: false,
+        });
+      }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -340,11 +359,15 @@ export default function RelaxSession({ config, onDone }: Props) {
   // タイマー完了 → 完了画面へ
   useEffect(() => {
     if (isFinished) {
+      sessionEndedRef.current = true;
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
       const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 1200, () => stopAndClear());
-      setTimeout(onDone, 1200);
+      if (a) fadeVolume(a, 0, 1200, () => {
+        stopAndClear();
+        playEndSound(onDone);
+      });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFinished, onDone, stopAndClear]);
 
   return (

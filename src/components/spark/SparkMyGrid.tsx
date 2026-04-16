@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import StepBar, { SPARK_STEPS } from "@/components/focus/StepBar";
 import SparkAmbient from "./SparkAmbient";
 import type { KeptTheme, OsborneCategory } from "./SparkShuffle";
+import { playClick } from "@/lib/playSound";
 
 const CATEGORIES: OsborneCategory[] = [
   "adapt", "apply", "modify",
@@ -102,7 +103,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
                   キープしたアイデア
                 </span>
                 <button
-                  onClick={() => setShowKept(false)}
+                  onClick={() => { playClick(); setShowKept(false); }}
                   className="text-[#e8e6e1]/20 text-[10px] hover:text-[#e8e6e1]/40 transition-colors"
                 >
                   非表示
@@ -179,7 +180,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
                       />
                     ) : (
                       <button
-                        onClick={() => { if (theme) setFocusedCell(cat); }}
+                        onClick={() => { if (theme) { playClick(); setFocusedCell(cat); } }}
                         disabled={!theme}
                         className="flex-1 text-left text-[11px] font-light leading-snug"
                       >
@@ -199,7 +200,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
           {/* スキップ / 完了 */}
           <div className="flex flex-col gap-3 pt-2">
             <button
-              onClick={handleDone}
+              onClick={() => { playClick(); handleDone(); }}
               className="w-full py-3.5 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/10 hover:border-[#EF9F27]/60 transition-all duration-300 flex items-center justify-center gap-2"
             >
               完了
@@ -208,7 +209,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
               </svg>
             </button>
             <button
-              onClick={handleSkip}
+              onClick={() => { playClick(); handleSkip(); }}
               className="w-full py-2 text-[#e8e6e1]/25 text-xs font-light tracking-wider hover:text-[#e8e6e1]/50 transition-colors duration-200"
             >
               スキップ →

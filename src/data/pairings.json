@@ -1,62 +1,80 @@
 {
   "tired": {
-    "morning": {
-      "spring":  { "music": { "title": "Near Light",                   "artist": "Ólafur Arnalds",           "spotifyUrl": "https://open.spotify.com/track/6Xajr512QEGAZ20bqAWkyT" }, "snack": "和三盆" },
-      "summer":  { "music": { "title": "All Melody",                   "artist": "Nils Frahm",               "spotifyUrl": "https://open.spotify.com/track/3OaCGuWEXcT1ygvV1IwQ0H" }, "snack": "抹茶アイスクリーム" },
-      "autumn":  { "music": { "title": "On the Nature of Daylight",    "artist": "Max Richter",              "spotifyUrl": "https://open.spotify.com/track/3gP02RFvQeoGEEhigIcxZd" }, "snack": "きなこ餅" },
-      "winter":  { "music": { "title": "1/1",                          "artist": "Brian Eno",                "spotifyUrl": "https://open.spotify.com/track/3bCmDqflFBHijgJfvtqev5" }, "snack": "黒糖ミルクティー" }
-    },
-    "afternoon": {
-      "spring":  { "music": { "title": "Says",                         "artist": "Nils Frahm",               "spotifyUrl": "https://open.spotify.com/track/5626KdflSKfeDK7RJQfSrE" }, "snack": "フィナンシェ" },
-      "summer":  { "music": { "title": "Kong",                         "artist": "Bonobo",                   "spotifyUrl": "https://open.spotify.com/track/3xzMObwTWiO2Fc0lfo2AnG" }, "snack": "レモンケーキ" },
-      "autumn":  { "music": { "title": "Thousand Knives",              "artist": "Ryuichi Sakamoto",         "spotifyUrl": "https://open.spotify.com/track/1n4dXyQ12ZR8Rn6QuNzAXX" }, "snack": "栗の和菓子" },
-      "winter":  { "music": { "title": "The Plateaux of Mirror",       "artist": "Harold Budd & Brian Eno",  "spotifyUrl": "https://open.spotify.com/track/75Q2oWlmhsTiM9KTbjyduU" }, "snack": "アーモンドクッキー" }
-    },
-    "evening": {
-      "spring":  { "music": { "title": "Breathturn",                   "artist": "Hammock",                  "spotifyUrl": "https://open.spotify.com/track/3cG2iuhY6uzUwrmr7HmwWH" }, "snack": "桜餅" },
-      "summer":  { "music": { "title": "Parallel Jalebi",              "artist": "Four Tet",                 "spotifyUrl": "https://open.spotify.com/track/73cn6vDBBOS74HXf27l9t4" }, "snack": "ゆず羊羹" },
-      "autumn":  { "music": { "title": "The Sun's Gone Dim",           "artist": "Jóhann Jóhannsson",        "spotifyUrl": "https://open.spotify.com/track/2wA8cQwmSw0eVVhOfNRDuZ" }, "snack": "カカオ70%チョコレート" },
-      "winter":  { "music": { "title": "Requiem for Dying Mothers",    "artist": "Stars of the Lid",         "spotifyUrl": "https://open.spotify.com/track/4iCjh6ybA5uiLSIAlcrFuV" }, "snack": "ホットチョコレート" }
-    }
+    "morning": [
+      { "music": { "title": "Near Light",                "artist": "Ólafur Arnalds",          "spotifyUrl": "https://open.spotify.com/track/6Xajr512QEGAZ20bqAWkyT" }, "snack": "和三盆" },
+      { "music": { "title": "All Melody",                "artist": "Nils Frahm",              "spotifyUrl": "https://open.spotify.com/track/3OaCGuWEXcT1ygvV1IwQ0H" }, "snack": "抹茶アイスクリーム" },
+      { "music": { "title": "On the Nature of Daylight", "artist": "Max Richter",             "spotifyUrl": "https://open.spotify.com/track/3gP02RFvQeoGEEhigIcxZd" }, "snack": "きなこ餅" },
+      { "music": { "title": "1/1",                       "artist": "Brian Eno",               "spotifyUrl": "https://open.spotify.com/track/3bCmDqflFBHijgJfvtqev5" }, "snack": "黒糖ミルクティー" },
+      { "music": { "title": "re:member",                 "artist": "Ólafur Arnalds",          "spotifyUrl": "https://open.spotify.com/track/6wUU6ff7O1jlE4NOrv01gI" }, "snack": "緑茶と干菓子" },
+      { "music": { "title": "Gymnopédie No. 2",          "artist": "Erik Satie",              "spotifyUrl": "https://open.spotify.com/track/2bYiCCVu4h9hEjQyN0UwRN" }, "snack": "塩キャラメルクッキー" }
+    ],
+    "afternoon": [
+      { "music": { "title": "Says",                      "artist": "Nils Frahm",              "spotifyUrl": "https://open.spotify.com/track/5626KdflSKfeDK7RJQfSrE" }, "snack": "フィナンシェ" },
+      { "music": { "title": "Kong",                      "artist": "Bonobo",                  "spotifyUrl": "https://open.spotify.com/track/3xzMObwTWiO2Fc0lfo2AnG" }, "snack": "レモンケーキ" },
+      { "music": { "title": "Thousand Knives",           "artist": "Ryuichi Sakamoto",        "spotifyUrl": "https://open.spotify.com/track/1n4dXyQ12ZR8Rn6QuNzAXX" }, "snack": "栗の和菓子" },
+      { "music": { "title": "The Plateaux of Mirror",    "artist": "Harold Budd & Brian Eno", "spotifyUrl": "https://open.spotify.com/track/75Q2oWlmhsTiM9KTbjyduU" }, "snack": "アーモンドクッキー" },
+      { "music": { "title": "Kiara",                     "artist": "Bonobo",                  "spotifyUrl": "https://open.spotify.com/track/5jdEBt26wjmM7EP8V7jwjP" }, "snack": "コーヒーゼリー" },
+      { "music": { "title": "Arabesque No. 1",           "artist": "Claude Debussy",          "spotifyUrl": "https://open.spotify.com/track/6tLObgg6Uzqo0LINIodq0F" }, "snack": "パウンドケーキ" }
+    ],
+    "evening": [
+      { "music": { "title": "Breathturn",                "artist": "Hammock",                 "spotifyUrl": "https://open.spotify.com/track/3cG2iuhY6uzUwrmr7HmwWH" }, "snack": "桜餅" },
+      { "music": { "title": "Parallel Jalebi",           "artist": "Four Tet",                "spotifyUrl": "https://open.spotify.com/track/73cn6vDBBOS74HXf27l9t4" }, "snack": "ゆず羊羹" },
+      { "music": { "title": "The Sun's Gone Dim",        "artist": "Jóhann Jóhannsson",       "spotifyUrl": "https://open.spotify.com/track/2wA8cQwmSw0eVVhOfNRDuZ" }, "snack": "カカオ70%チョコレート" },
+      { "music": { "title": "Requiem for Dying Mothers", "artist": "Stars of the Lid",        "spotifyUrl": "https://open.spotify.com/track/4iCjh6ybA5uiLSIAlcrFuV" }, "snack": "ホットチョコレート" },
+      { "music": { "title": "Holocene",                  "artist": "Bon Iver",                "spotifyUrl": "https://open.spotify.com/track/35KiiILklye1JRRctaLUb4" }, "snack": "マドレーヌ" },
+      { "music": { "title": "The Blower's Daughter",     "artist": "Damien Rice",             "spotifyUrl": "https://open.spotify.com/track/4B2lJinAkeNLSJjcq3dg8Q" }, "snack": "ラムレーズンケーキ" }
+    ]
   },
   "foggy": {
-    "morning": {
-      "spring":  { "music": { "title": "Xtal",                         "artist": "Aphex Twin",               "spotifyUrl": "https://open.spotify.com/track/7o2AeQZzfCERsRmOM86EcB" }, "snack": "いちご大福" },
-      "summer":  { "music": { "title": "Over the Pond",                "artist": "The Album Leaf",           "spotifyUrl": "https://open.spotify.com/track/0DeyIYrCFdd3m7VIQaZIMh" }, "snack": "グレープフルーツゼリー" },
-      "autumn":  { "music": { "title": "Heavy Water / I'd Rather Be Sleeping", "artist": "Grouper",         "spotifyUrl": "https://open.spotify.com/track/6IUwiHsyKAZtfBy37Wu4ij" }, "snack": "黒ごまプリン" },
-      "winter":  { "music": { "title": "d|p 1.1",                      "artist": "William Basinski",         "spotifyUrl": "https://open.spotify.com/track/10SeyQmuBIVJmbZYYJs07W" }, "snack": "生姜湯と落雁" }
-    },
-    "afternoon": {
-      "spring":  { "music": { "title": "Pete Standing Alone",          "artist": "Boards of Canada",         "spotifyUrl": "https://open.spotify.com/track/1U9svUekJ1Hp4sLy9HOqj9" }, "snack": "豆大福" },
-      "summer":  { "music": { "title": "Sea of Pulses",                "artist": "Tim Hecker",               "spotifyUrl": "https://open.spotify.com/track/23mWFtsUgwJGymyGGrSpOo" }, "snack": "黒蜜かき氷" },
-      "autumn":  { "music": { "title": "Ára bátur",                    "artist": "Sigur Rós",                "spotifyUrl": "https://open.spotify.com/track/4O94lc0TZiFr9aU24zQ9LT" }, "snack": "かぼちゃプリン" },
-      "winter":  { "music": { "title": "Friend of the Night",          "artist": "Mogwai",                   "spotifyUrl": "https://open.spotify.com/track/7kdO8e6FpHsBPCSySbSuyl" }, "snack": "蒸し饅頭" }
-    },
-    "evening": {
-      "spring":  { "music": { "title": "Wandering Star",               "artist": "Portishead",               "spotifyUrl": "https://open.spotify.com/track/7h14W1uQK7sjpVI1oVTobt" }, "snack": "桜チーズケーキ" },
-      "summer":  { "music": { "title": "Teardrop",                     "artist": "Massive Attack",           "spotifyUrl": "https://open.spotify.com/track/67Hna13dNDkZvBpTXRIaOJ" }, "snack": "水まんじゅう" },
-      "autumn":  { "music": { "title": "Into My Arms",                 "artist": "Nick Cave & The Bad Seeds","spotifyUrl": "https://open.spotify.com/track/015XUc4jsnVt2BV1GefVHl" }, "snack": "洋梨のタルト" },
-      "winter":  { "music": { "title": "Laura Palmer's Theme",         "artist": "Angelo Badalamenti",       "spotifyUrl": "https://open.spotify.com/track/7Bk3p8UqcP4sItaWNWbvXL" }, "snack": "ラムレーズンチョコレート" }
-    }
+    "morning": [
+      { "music": { "title": "Xtal",                               "artist": "Aphex Twin",        "spotifyUrl": "https://open.spotify.com/track/7o2AeQZzfCERsRmOM86EcB" }, "snack": "いちご大福" },
+      { "music": { "title": "Over the Pond",                      "artist": "The Album Leaf",    "spotifyUrl": "https://open.spotify.com/track/0DeyIYrCFdd3m7VIQaZIMh" }, "snack": "グレープフルーツゼリー" },
+      { "music": { "title": "Heavy Water / I'd Rather Be Sleeping","artist": "Grouper",           "spotifyUrl": "https://open.spotify.com/track/6IUwiHsyKAZtfBy37Wu4ij" }, "snack": "黒ごまプリン" },
+      { "music": { "title": "d|p 1.1",                            "artist": "William Basinski",  "spotifyUrl": "https://open.spotify.com/track/10SeyQmuBIVJmbZYYJs07W" }, "snack": "生姜湯と落雁" },
+      { "music": { "title": "Svefn-g-englar",                     "artist": "Sigur Rós",         "spotifyUrl": "https://open.spotify.com/track/07eGxuz8bL6QMsRqEe1Adu" }, "snack": "黒豆ようかん" },
+      { "music": { "title": "Dream 1",                            "artist": "Max Richter",       "spotifyUrl": "https://open.spotify.com/track/3FVy3aVs0TFzLv6FEiLqC2" }, "snack": "白いムースケーキ" }
+    ],
+    "afternoon": [
+      { "music": { "title": "Pete Standing Alone",  "artist": "Boards of Canada", "spotifyUrl": "https://open.spotify.com/track/1U9svUekJ1Hp4sLy9HOqj9" }, "snack": "豆大福" },
+      { "music": { "title": "Sea of Pulses",         "artist": "Tim Hecker",       "spotifyUrl": "https://open.spotify.com/track/23mWFtsUgwJGymyGGrSpOo" }, "snack": "黒蜜かき氷" },
+      { "music": { "title": "Ára bátur",             "artist": "Sigur Rós",        "spotifyUrl": "https://open.spotify.com/track/4O94lc0TZiFr9aU24zQ9LT" }, "snack": "かぼちゃプリン" },
+      { "music": { "title": "Friend of the Night",   "artist": "Mogwai",           "spotifyUrl": "https://open.spotify.com/track/7kdO8e6FpHsBPCSySbSuyl" }, "snack": "蒸し饅頭" },
+      { "music": { "title": "Halcyon + On + On",     "artist": "Orbital",          "spotifyUrl": "https://open.spotify.com/track/5xcunlfaZvD9BDQsLONI7A" }, "snack": "豆菓子" },
+      { "music": { "title": "Mystery of Love",       "artist": "Sufjan Stevens",   "spotifyUrl": "https://open.spotify.com/track/5GbVzc6Ex5LYlLJqzRQhuy" }, "snack": "ぶどうゼリー" }
+    ],
+    "evening": [
+      { "music": { "title": "Wandering Star",      "artist": "Portishead",               "spotifyUrl": "https://open.spotify.com/track/7h14W1uQK7sjpVI1oVTobt" }, "snack": "桜チーズケーキ" },
+      { "music": { "title": "Teardrop",            "artist": "Massive Attack",           "spotifyUrl": "https://open.spotify.com/track/67Hna13dNDkZvBpTXRIaOJ" }, "snack": "水まんじゅう" },
+      { "music": { "title": "Into My Arms",        "artist": "Nick Cave & The Bad Seeds","spotifyUrl": "https://open.spotify.com/track/015XUc4jsnVt2BV1GefVHl" }, "snack": "洋梨のタルト" },
+      { "music": { "title": "Laura Palmer's Theme","artist": "Angelo Badalamenti",       "spotifyUrl": "https://open.spotify.com/track/7Bk3p8UqcP4sItaWNWbvXL" }, "snack": "ラムレーズンチョコレート" },
+      { "music": { "title": "Lua",                 "artist": "Bright Eyes",              "spotifyUrl": "https://open.spotify.com/track/22XGoIv1cLZty2A5GFu8mo" }, "snack": "クリームブリュレ" },
+      { "music": { "title": "Halcyon + On + On",   "artist": "Orbital",                  "spotifyUrl": "https://open.spotify.com/track/5xcunlfaZvD9BDQsLONI7A" }, "snack": "黒ごまアイス" }
+    ]
   },
   "dreamy": {
-    "morning": {
-      "spring":  { "music": { "title": "Clair de lune",                "artist": "Claude Debussy",           "spotifyUrl": "https://open.spotify.com/track/0qGkaEK2BDIi49Bl69ZKqf" }, "snack": "春の練りきり" },
-      "summer":  { "music": { "title": "Soundscape 1: Surround",       "artist": "Hiroshi Yoshimura",        "spotifyUrl": "https://open.spotify.com/track/0d9l0oF3DbYXnTKOrVp5Cv" }, "snack": "水無月" },
-      "autumn":  { "music": { "title": "Metamorphosis One",            "artist": "Philip Glass",             "spotifyUrl": "https://open.spotify.com/track/2qL1X6erR8veQlPl4Slntn" }, "snack": "さつまいも茶巾" },
-      "winter":  { "music": { "title": "Gymnopédie No. 1",             "artist": "Erik Satie",               "spotifyUrl": "https://open.spotify.com/track/1ECXKOLN68ADM00o4kqjvj" }, "snack": "ミルクキャラメル" }
-    },
-    "afternoon": {
-      "spring":  { "music": { "title": "Peace Piece",                  "artist": "Bill Evans",               "spotifyUrl": "https://open.spotify.com/track/58yFroDNbzHpYzvicaC0de" }, "snack": "桜の練りきり" },
-      "summer":  { "music": { "title": "Nocturne in E-flat major, Op. 9 No. 2", "artist": "Frédéric Chopin","spotifyUrl": "https://open.spotify.com/track/5NdASzUYYx7SiwcpDmLi6n" }, "snack": "白玉ぜんざい" },
-      "autumn":  { "music": { "title": "Gabriel's Oboe",               "artist": "Ennio Morricone",          "spotifyUrl": "https://open.spotify.com/track/6opPrJUpq4Pl5c84eCwLmo" }, "snack": "栗羊羹" },
-      "winter":  { "music": { "title": "Palais de Mari",               "artist": "Morton Feldman",           "spotifyUrl": "https://open.spotify.com/track/5O4kdaLUojf3GLMOQt65oA" }, "snack": "ショコラフォンダン" }
-    },
-    "evening": {
-      "spring":  { "music": { "title": "Pink Moon",                    "artist": "Nick Drake",               "spotifyUrl": "https://open.spotify.com/track/16qzGrIMWoxerw2gnW0zuv" }, "snack": "桜のバウムクーヘン" },
-      "summer":  { "music": { "title": "Fade Into You",                "artist": "Mazzy Star",               "spotifyUrl": "https://open.spotify.com/track/1LzNfuep1bnAUR9skqdHCK" }, "snack": "夏みかんゼリー" },
-      "autumn":  { "music": { "title": "Waltz for Debby",              "artist": "Bill Evans",               "spotifyUrl": "https://open.spotify.com/track/0Op6JCkcFHEswjs6wN1smj" }, "snack": "マロングラッセ" },
-      "winter":  { "music": { "title": "Spiegel im Spiegel",           "artist": "Arvo Pärt",                "spotifyUrl": "https://open.spotify.com/track/3paa6Hhtd1rde7aygyKA3B" }, "snack": "シュトーレン" }
-    }
+    "morning": [
+      { "music": { "title": "Clair de lune",           "artist": "Claude Debussy",  "spotifyUrl": "https://open.spotify.com/track/0qGkaEK2BDIi49Bl69ZKqf" }, "snack": "春の練りきり" },
+      { "music": { "title": "Soundscape 1: Surround",  "artist": "Hiroshi Yoshimura","spotifyUrl": "https://open.spotify.com/track/0d9l0oF3DbYXnTKOrVp5Cv" }, "snack": "水無月" },
+      { "music": { "title": "Metamorphosis One",        "artist": "Philip Glass",    "spotifyUrl": "https://open.spotify.com/track/2qL1X6erR8veQlPl4Slntn" }, "snack": "さつまいも茶巾" },
+      { "music": { "title": "Gymnopédie No. 1",         "artist": "Erik Satie",      "spotifyUrl": "https://open.spotify.com/track/1ECXKOLN68ADM00o4kqjvj" }, "snack": "ミルクキャラメル" },
+      { "music": { "title": "Gymnopédie No. 2",         "artist": "Erik Satie",      "spotifyUrl": "https://open.spotify.com/track/2bYiCCVu4h9hEjQyN0UwRN" }, "snack": "ブランマンジェ" },
+      { "music": { "title": "Comptine d'un autre été",  "artist": "Yann Tiersen",    "spotifyUrl": "https://open.spotify.com/track/2AkcjsKlRbIBYGAgpQVFii" }, "snack": "レモンクリームタルト" }
+    ],
+    "afternoon": [
+      { "music": { "title": "Peace Piece",                             "artist": "Bill Evans",         "spotifyUrl": "https://open.spotify.com/track/58yFroDNbzHpYzvicaC0de" }, "snack": "桜の練りきり" },
+      { "music": { "title": "Nocturne in E-flat major, Op. 9 No. 2",  "artist": "Frédéric Chopin",    "spotifyUrl": "https://open.spotify.com/track/5NdASzUYYx7SiwcpDmLi6n" }, "snack": "白玉ぜんざい" },
+      { "music": { "title": "Gabriel's Oboe",                          "artist": "Ennio Morricone",    "spotifyUrl": "https://open.spotify.com/track/6opPrJUpq4Pl5c84eCwLmo" }, "snack": "栗羊羹" },
+      { "music": { "title": "Palais de Mari",                          "artist": "Morton Feldman",     "spotifyUrl": "https://open.spotify.com/track/5O4kdaLUojf3GLMOQt65oA" }, "snack": "ショコラフォンダン" },
+      { "music": { "title": "Goldberg Variations: Aria",               "artist": "Johann Sebastian Bach","spotifyUrl": "https://open.spotify.com/track/5bu9A6uphPWg39RC3ZKeku" }, "snack": "マドレーヌ" },
+      { "music": { "title": "Arabesque No. 1",                         "artist": "Claude Debussy",     "spotifyUrl": "https://open.spotify.com/track/6tLObgg6Uzqo0LINIodq0F" }, "snack": "クレームカラメル" }
+    ],
+    "evening": [
+      { "music": { "title": "Pink Moon",            "artist": "Nick Drake",   "spotifyUrl": "https://open.spotify.com/track/16qzGrIMWoxerw2gnW0zuv" }, "snack": "桜のバウムクーヘン" },
+      { "music": { "title": "Fade Into You",         "artist": "Mazzy Star",  "spotifyUrl": "https://open.spotify.com/track/1LzNfuep1bnAUR9skqdHCK" }, "snack": "夏みかんゼリー" },
+      { "music": { "title": "Waltz for Debby",       "artist": "Bill Evans",  "spotifyUrl": "https://open.spotify.com/track/0Op6JCkcFHEswjs6wN1smj" }, "snack": "マロングラッセ" },
+      { "music": { "title": "Spiegel im Spiegel",    "artist": "Arvo Pärt",   "spotifyUrl": "https://open.spotify.com/track/3paa6Hhtd1rde7aygyKA3B" }, "snack": "シュトーレン" },
+      { "music": { "title": "The Blower's Daughter", "artist": "Damien Rice", "spotifyUrl": "https://open.spotify.com/track/4B2lJinAkeNLSJjcq3dg8Q" }, "snack": "チョコレートフォンダン" },
+      { "music": { "title": "Lua",                   "artist": "Bright Eyes", "spotifyUrl": "https://open.spotify.com/track/22XGoIv1cLZty2A5GFu8mo" }, "snack": "カヌレ" }
+    ]
   }
 }

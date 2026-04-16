@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTimer } from "@/hooks/useTimer";
 import FocusScene from "@/components/animations/FocusScene";
+import CampfireScene from "@/components/animations/CampfireScene";
+import CafeScene from "@/components/animations/CafeScene";
 import { useAudioStore } from "@/store/audioStore";
 import type { FocusConfig } from "./FocusSetup";
 
@@ -78,15 +80,18 @@ function fadeVolume(
 }
 
 export default function FocusSession({ config, onBreak }: Props) {
+  // 音楽モードではトラック長に合わせて上書きされる
   const durationSec = config.duration * 60;
   const { timeLeft, isFinished, formatted, start, startFromRemaining, initPaused, pause, resume } = useTimer(durationSec);
   const [isPaused, setIsPaused] = useState(false);
   // 画面タップでナビ表示切り替え（初期は非表示）
   const [navVisible, setNavVisible] = useState(false);
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
-  const audioElRef   = useRef<HTMLAudioElement | null>(null);
-  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeLeftRef  = useRef(durationSec); // アンマウント時に最新値を参照するためのref
+  const audioElRef    = useRef<HTMLAudioElement | null>(null);
+  const standbyAudio  = useRef<HTMLAudioElement | null>(null); // ギャップレスループ用スタンバイ
+  const fadeTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeLeftRef   = useRef(durationSec); // アンマウント時に最新値を参照するためのref
+  const sessionEndedRef = useRef(false); // 完了・手動終了時はtimerSnap保存をスキップ
   const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
 
   // timeLeftが変わるたびにrefを同期
@@ -114,10 +119,14 @@ export default function FocusSession({ config, onBreak }: Props) {
                 : FOCUS_TRACKS;
     const track = pool[Math.floor(Math.random() * pool.length)];
 
-    const audio = new Audio(track);
-    audio.loop   = true;
-    audio.volume = 0.35;
-    audioElRef.current = audio;
+    // 2つのAudio要素でギャップレスループ（loop=trueはブラウザ実装でギャップが生じるため）
+    const audio  = new Audio(track);
+    const audio2 = new Audio(track);
+    audio.volume  = 0.35;
+    audio2.volume = 0.35;
+    audioElRef.current   = audio;
+    standbyAudio.current = audio2;
+
     // グローバルストアに登録（既存の音楽は自動停止）
     setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
 
@@ -126,28 +135,65 @@ export default function FocusSession({ config, onBreak }: Props) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
     }
 
+    // トラック終了 0.15秒前にスタンバイを再生開始 → ループ切れ目なし
+    const scheduleGaplessLoop = (active: HTMLAudioElement, sb: HTMLAudioElement) => {
+      const handler = () => {
+        if (!active.duration || active.currentTime < active.duration - 0.15) return;
+        active.removeEventListener('timeupdate', handler);
+        sb.currentTime = 0;
+        sb.volume = active.volume;
+        sb.play().catch(console.error);
+        // アクティブ参照を新しい要素に切り替え
+        audioElRef.current   = sb;
+        standbyAudio.current = active;
+        // ストアの参照もフェードなしで更新
+        useAudioStore.setState({ audio: sb });
+        scheduleGaplessLoop(sb, active);
+      };
+      active.addEventListener('timeupdate', handler);
+    };
+
+    // 全モード共通: ギャップレスループ
+    scheduleGaplessLoop(audio, audio2);
     audio.play().catch(console.error);
 
-    // アンマウント時はタイマー状態を保存（音楽は止めない）
+    // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      saveTimerSnap({
-        remainingSeconds: timeLeftRef.current,
-        savedAt: Date.now(),
-        isPaused: false, // 一時停止中かどうかはhandlePauseResumeで別途保存
-      });
+      if (!sessionEndedRef.current) {
+        saveTimerSnap({
+          remainingSeconds: timeLeftRef.current,
+          savedAt: Date.now(),
+          isPaused: false, // 一時停止中かどうかはhandlePauseResumeで別途保存
+        });
+      }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // endsound を再生してからコールバックを呼ぶ
+  const playEndSound = (onDone: () => void) => {
+    const se = new Audio("/sounds/endsound.wav");
+    se.volume = 0.175;
+    se.play().catch(console.error);
+    se.addEventListener("ended", onDone, { once: true });
+    // 読み込み失敗などで ended が来ない場合の保険
+    setTimeout(onDone, 4000);
+  };
+
   // タイマー完了
   useEffect(() => {
     if (isFinished) {
+      sessionEndedRef.current = true;
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 1200, () => stopAndClear());
-      setTimeout(() => onBreak(config.duration), 1200);
+      const a  = audioElRef.current;
+      const sb = standbyAudio.current;
+      if (a) fadeVolume(a, 0, 1200, () => {
+        stopAndClear();
+        if (sb && sb !== a) sb.pause();
+        playEndSound(() => onBreak(config.duration));
+      });
     }
   }, [isFinished, config.duration, onBreak, stopAndClear]);
 
@@ -166,11 +212,19 @@ export default function FocusSession({ config, onBreak }: Props) {
   };
 
   const handleEnd = () => {
+    sessionEndedRef.current = true;
     const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-    const a = audioElRef.current;
-    if (a) fadeVolume(a, 0, 800, () => stopAndClear());
-    setTimeout(() => onBreak(elapsedMin), 800);
+    // BGMを即停止 → endsound再生（鳴らしっぱなしで遷移）
+    const a  = audioElRef.current;
+    const sb = standbyAudio.current;
+    if (a) a.pause();
+    if (sb && sb !== a) sb.pause();
+    stopAndClear();
+    const se = new Audio("/sounds/endsound.wav");
+    se.volume = 0.175;
+    se.play().catch(console.error);
+    onBreak(elapsedMin);
   };
 
   const progress = timeLeft / durationSec;
@@ -192,9 +246,11 @@ export default function FocusSession({ config, onBreak }: Props) {
         {formatted}
       </motion.p>
 
-      {/* 霧の海と灯台アニメーション */}
+      {/* シーンアニメーション（焚き火モードは森の焚き火、それ以外は灯台） */}
       <div className="w-full max-w-sm">
-        <FocusScene />
+        {config.ambient === "焚き火" ? <CampfireScene />
+          : config.ambient === "カフェ" ? <CafeScene />
+          : <FocusScene />}
       </div>
 
       {/* タスクメモ */}

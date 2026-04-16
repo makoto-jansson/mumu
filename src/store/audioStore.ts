@@ -68,7 +68,6 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
       // 前の音楽をフェードアウトしてから解放
       fadeVolume(prev, 0, 800, () => {
         prev.pause();
-        prev.src = "";
       });
     }
     set({ audio, meta });
@@ -76,10 +75,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 
   stopAndClear: () => {
     const { audio } = get();
-    if (audio) {
-      audio.pause();
-      audio.src = "";
-    }
+    if (audio) audio.pause();
     set({ audio: null, meta: null, timerSnap: null });
   },
 }));

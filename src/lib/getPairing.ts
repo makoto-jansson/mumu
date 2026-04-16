@@ -3,7 +3,6 @@ import type { RelaxConfig } from "@/components/relax/RelaxSetup";
 
 // ─── 型 ───────────────────────────────────────────
 export type TimeOfDay = "morning" | "afternoon" | "evening";
-export type Season    = "spring"  | "summer"    | "autumn" | "winter";
 
 export type Pairing = {
   music: { title: string; artist: string; spotifyUrl: string };
@@ -28,23 +27,12 @@ export function getTimeOfDay(now = new Date()): TimeOfDay {
   return "evening";
 }
 
-// ─── 季節判定（月 1〜12）──────────────────────────
-// spring: 3〜5 / summer: 6〜8 / autumn: 9〜11 / winter: 12・1・2
-export function getSeason(now = new Date()): Season {
-  const m = now.getMonth() + 1; // 1〜12
-  if (m >= 3 && m <= 5)  return "spring";
-  if (m >= 6 && m <= 8)  return "summer";
-  if (m >= 9 && m <= 11) return "autumn";
-  return "winter";
-}
-
-// ─── ペアリング取得 ────────────────────────────────
+// ─── ペアリング取得（気分×時間帯のプールからランダム選択）────
 export function getPairing(
-  mood:    RelaxConfig["mood"],
-  time?:   TimeOfDay,
-  season?: Season,
+  mood: RelaxConfig["mood"],
+  time?: TimeOfDay,
 ): Pairing {
-  const t = time   ?? getTimeOfDay();
-  const s = season ?? getSeason();
-  return (pairings[MOOD_KEY[mood]] as Record<string, Record<string, Pairing>>)[t][s];
+  const t = time ?? getTimeOfDay();
+  const pool = (pairings[MOOD_KEY[mood]] as Record<string, Pairing[]>)[t];
+  return pool[Math.floor(Math.random() * pool.length)];
 }

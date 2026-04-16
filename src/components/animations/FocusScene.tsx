@@ -227,12 +227,12 @@ function SceneLighthouse({ clock }: { clock: MV }) {
       {/* 塔本体（IllustAbout と同じテーパー形）*/}
       <path
         d="M58 138 L60 110 L64 110 L66 138 Z"
-        stroke="#e8e6e1" strokeWidth="0.75" fill="none" strokeLinejoin="round" opacity="0.45"
+        stroke="#e8e6e1" strokeWidth="0.75" fill="#0a0a0a" strokeLinejoin="round" strokeOpacity="0.45"
       />
 
       {/* 灯室（シンプルな rect）*/}
       <rect x="59" y="105" width="6" height="5" rx="0.5"
-        stroke="#e8e6e1" strokeWidth="0.7" fill="none" opacity="0.50"
+        stroke="#e8e6e1" strokeWidth="0.7" fill="#0a0a0a" strokeOpacity="0.50"
       />
 
       {/* 基部（水平線）*/}

@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StepBar, { RECLAIM_STEPS } from "@/components/focus/StepBar";
 import type { FeelResult } from "./ReclaimFeel";
+import { playClick } from "@/lib/playSound";
 
 // ─ タイミング ────────────────────────────────────────
 const INTRO_S   = 4;
@@ -373,7 +374,7 @@ export default function ReclaimSettle({ feelResults, onDone }: Props) {
                 </div>
                 {/* スキップボタン（常時表示） */}
                 <button
-                  onClick={handleSkip}
+                  onClick={(e) => { playClick(); handleSkip(e); }}
                   className="text-[#e8e6e1]/25 text-[11px] font-light tracking-[0.25em] hover:text-[#e8e6e1]/50 transition-colors duration-200"
                 >
                   スキップ →

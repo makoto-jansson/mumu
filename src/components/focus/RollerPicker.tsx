@@ -4,6 +4,7 @@
 // ドラムロール風にスクロールして選択する
 
 import { useRef, useEffect, useCallback } from "react";
+import { playClick, preloadClick } from "@/lib/playSound";
 
 const DEFAULT_OPTIONS = Array.from({ length: 12 }, (_, i) => (i + 1) * 5); // 5,10,...,60
 const ITEM_HEIGHT = 44;
@@ -20,6 +21,7 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
   const OPTIONS = options;
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPlayedIndex = useRef(-1); // クリック音の二重防止用
 
   // 選択値→スクロール位置
   const valueToScroll = (v: number) => {
@@ -34,21 +36,32 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
     return OPTIONS[clamped];
   }, []);
 
-  // 初期位置を設定
+  // 初期位置を設定 + クリック音をプリロード
   useEffect(() => {
+    preloadClick();
     const el = containerRef.current;
     if (!el) return;
     el.scrollTop = valueToScroll(value);
+    lastPlayedIndex.current = OPTIONS.indexOf(value);
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // スクロール停止後にスナップ
+  // スクロール中にアイテムが変わった瞬間に音を鳴らす（ジェスチャー直結）
   const handleScroll = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    // アイテム境界を超えた瞬間に音を鳴らす
+    const currentIndex = Math.round(el.scrollTop / ITEM_HEIGHT);
+    const clamped = Math.max(0, Math.min(OPTIONS.length - 1, currentIndex));
+    if (clamped !== lastPlayedIndex.current) {
+      lastPlayedIndex.current = clamped;
+      playClick();
+    }
+
+    // スクロール停止後にスナップ＆onChange
     if (scrollTimer.current) clearTimeout(scrollTimer.current);
     scrollTimer.current = setTimeout(() => {
       const newVal = scrollToValue(el.scrollTop);
-      // スナップ
       el.scrollTo({ top: valueToScroll(newVal), behavior: "smooth" });
       onChange(newVal);
     }, 80);
@@ -105,6 +118,11 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
                 const el = containerRef.current;
                 if (!el) return;
                 el.scrollTo({ top: valueToScroll(opt), behavior: "smooth" });
+                if (opt !== value) {
+                  const se = new Audio("/sounds/clicksound.wav");
+                  se.volume = 0.2625;
+                  se.play().catch(console.error);
+                }
                 onChange(opt);
               }}
             >

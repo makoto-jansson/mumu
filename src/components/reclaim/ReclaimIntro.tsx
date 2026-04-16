@@ -6,6 +6,7 @@
 
 import { motion } from "framer-motion";
 import StepBar, { RECLAIM_STEPS } from "@/components/focus/StepBar";
+import { playClick } from "@/lib/playSound";
 
 type Props = {
   onCoffee: () => void;   // 珈琲を淹れて始める → CoffeeTime → sense
@@ -59,13 +60,13 @@ export default function ReclaimIntro({ onCoffee, onSkip }: Props) {
             className="flex flex-col gap-3 w-full pb-12"
           >
             <button
-              onClick={onCoffee}
+              onClick={() => { playClick(); onCoffee(); }}
               className="w-full py-4 border border-[#1D9E75]/40 text-[#1D9E75]/80 text-sm font-light tracking-wider hover:bg-[#1D9E75]/8 hover:border-[#1D9E75]/60 transition-all duration-300"
             >
               珈琲を淹れて始める
             </button>
             <button
-              onClick={onSkip}
+              onClick={() => { playClick(); onSkip(); }}
               className="w-full py-2 text-[#e8e6e1]/25 text-xs font-light tracking-wider hover:text-[#e8e6e1]/50 transition-colors duration-200"
             >
               そのまま始める →

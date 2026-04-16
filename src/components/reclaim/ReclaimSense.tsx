@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import StepBar, { RECLAIM_STEPS } from "@/components/focus/StepBar";
 import AmbientOrbs from "@/components/animations/AmbientOrbs";
 import { getDailySensePrompt } from "@/lib/getDailySensePrompt";
+import { playClick } from "@/lib/playSound";
 
 // ミニマルな風景イラスト（海 + 地平線 + 月）
 const LANDSCAPE_ICON = (
@@ -136,13 +137,13 @@ export default function ReclaimSense({ hasCoffee, onDone }: Props) {
             className="flex flex-col gap-3"
           >
             <button
-              onClick={handleDone}
+              onClick={() => { playClick(); handleDone(); }}
               className="w-full py-3.5 border border-[#1D9E75]/40 text-[#1D9E75]/80 text-sm font-light tracking-wider hover:bg-[#1D9E75]/8 hover:border-[#1D9E75]/60 transition-all duration-300"
             >
               感じました
             </button>
             <button
-              onClick={handleSkip}
+              onClick={() => { playClick(); handleSkip(); }}
               className="w-full py-2 text-[#e8e6e1]/25 text-xs font-light tracking-wider hover:text-[#e8e6e1]/50 transition-colors duration-200"
             >
               書かずに進む →

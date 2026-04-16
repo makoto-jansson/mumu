@@ -3,12 +3,13 @@
 // Focusモード開始前画面
 // ロールピッカーで時間を選択、タスク・BGMを設定して開始
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import RollerPicker from "./RollerPicker";
 import StepBar, { FOCUS_STEPS } from "./StepBar";
 import ButtonOrb from "@/components/animations/ButtonOrb";
+import { playClick, preloadClick } from "@/lib/playSound";
 
 export type FocusConfig = {
   duration: number; // 5〜60の任意の分数
@@ -83,6 +84,18 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
   const [task, setTask] = useState("");
   const [ambient, setAmbient] = useState<FocusConfig["ambient"]>("波");
 
+  useEffect(() => {
+    preloadClick();
+    const se = new Audio("/sounds/zyunnbi.wav");
+    se.volume = 0.175;
+    // ユーザー操作後（autoplay制限回避）に再生
+    const handler = () => { se.play().catch(() => {}); };
+    window.addEventListener("pointerdown", handler, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", handler);
+    };
+  }, []);
+
   const config: FocusConfig = { duration, task, ambient };
 
   return (
@@ -143,7 +156,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
             {AMBIENTS.map(({ value, Icon }) => (
               <button
                 key={value}
-                onClick={() => setAmbient(value)}
+                onClick={() => { playClick(); setAmbient(value); }}
                 className={`relative overflow-hidden flex-1 flex flex-col items-center gap-2 py-3 border text-xs font-light transition-all duration-200 ${
                   ambient === value
                     ? "border-[#EF9F27] text-[#EF9F27] bg-[#EF9F27]/10"
@@ -161,14 +174,14 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
         {/* ボタン */}
         <div className="flex flex-col gap-4 mt-auto">
           <button
-            onClick={() => onStart(config)}
+            onClick={() => { playClick(); onStart(config); }}
             className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
           >
             <ButtonOrb />
             <span className="relative z-10">準備できました</span>
           </button>
           <button
-            onClick={() => onSkip(config)}
+            onClick={() => { playClick(); onSkip(config); }}
             className="text-[#e8e6e1]/30 text-sm font-light tracking-wider hover:text-[#e8e6e1]/60 transition-colors duration-300"
           >
             珈琲なしで始める →

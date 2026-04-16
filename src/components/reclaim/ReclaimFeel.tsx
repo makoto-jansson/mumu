@@ -8,6 +8,7 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "
 import StepBar, { RECLAIM_STEPS } from "@/components/focus/StepBar";
 import AmbientOrbs from "@/components/animations/AmbientOrbs";
 import { selectSessionCards, type ReclaimCard } from "@/lib/selectSessionCards";
+import { playClick } from "@/lib/playSound";
 
 export type FeelResult = {
   cardId: string;
@@ -83,7 +84,7 @@ function SwipeCard({ card, index, total, onChoose }: CardProps) {
       >
         {/* A — 左・琥珀 */}
         <motion.button
-          onClick={() => onChoose("a")}
+          onClick={() => { playClick(); onChoose("a"); }}
           style={{
             backgroundColor: useTransform(
               aGlow,
@@ -109,7 +110,7 @@ function SwipeCard({ card, index, total, onChoose }: CardProps) {
 
         {/* B — 右・緑 */}
         <motion.button
-          onClick={() => onChoose("b")}
+          onClick={() => { playClick(); onChoose("b"); }}
           style={{
             backgroundColor: useTransform(
               bGlow,

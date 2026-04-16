@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StepBar, { SPARK_STEPS } from "@/components/focus/StepBar";
+import { playClick } from "@/lib/playSound";
 
 const OSBORNE_CELLS = [
   { label: "転用",   question: "他に使い道は？",         color: "text-amber-400/60"  },
@@ -84,7 +85,7 @@ export default function SparkGuide({ onStart }: Props) {
           {(["concept", "howto"] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setPage(tab)}
+              onClick={() => { playClick(); setPage(tab); }}
               className={`flex-1 pb-2.5 text-xs font-light tracking-wider transition-colors duration-200 ${
                 page === tab
                   ? "text-[#EF9F27]/80 border-b border-[#EF9F27]/50 -mb-px"
@@ -140,7 +141,7 @@ export default function SparkGuide({ onStart }: Props) {
               </div>
 
               <button
-                onClick={() => setPage("howto")}
+                onClick={() => { playClick(); setPage("howto"); }}
                 className="text-right text-[#EF9F27]/40 text-xs font-light tracking-wider hover:text-[#EF9F27]/70 transition-colors"
               >
                 操作ガイドを見る →
@@ -194,7 +195,7 @@ export default function SparkGuide({ onStart }: Props) {
 
         {/* 開始ボタン */}
         <motion.button
-          onClick={onStart}
+          onClick={() => { playClick(); onStart(); }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

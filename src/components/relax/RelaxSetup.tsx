@@ -3,12 +3,13 @@
 // Relaxモード開始前画面
 // 気分・時間を選んでスタート
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import ButtonOrb from "@/components/animations/ButtonOrb";
 import StepBar, { RELAX_STEPS } from "@/components/focus/StepBar";
 import RollerPicker from "@/components/focus/RollerPicker";
+import { playClick, preloadClick } from "@/lib/playSound";
 
 export type RelaxConfig = {
   mood:     "疲れた" | "もやもや" | "ぼんやりしたい";
@@ -27,6 +28,18 @@ type Props = {
 export default function RelaxSetup({ onStart, onSkip }: Props) {
   const [mood,     setMood]     = useState<RelaxConfig["mood"]>("ぼんやりしたい");
   const [duration, setDuration] = useState(5);
+
+  useEffect(() => {
+    preloadClick();
+    const se = new Audio("/sounds/zyunnbi.wav");
+    se.volume = 0.175;
+    // ユーザー操作後（autoplay制限回避）に再生
+    const handler = () => { se.play().catch(() => {}); };
+    window.addEventListener("pointerdown", handler, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", handler);
+    };
+  }, []);
 
   return (
     <motion.div
@@ -69,7 +82,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
             {MOODS.map((m) => (
               <button
                 key={m}
-                onClick={() => setMood(m)}
+                onClick={() => { playClick(); setMood(m); }}
                 className={`w-full py-3 px-4 text-left text-sm font-light tracking-wide border transition-all duration-200 ${
                   mood === m
                     ? "border-[#EF9F27]/50 text-[#EF9F27] bg-[#EF9F27]/8"
@@ -95,14 +108,14 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
         {/* ボタン */}
         <div className="flex flex-col gap-4 mt-auto">
           <button
-            onClick={() => onStart({ mood, duration })}
+            onClick={() => { playClick(); onStart({ mood, duration }); }}
             className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
           >
             <ButtonOrb />
             <span className="relative z-10">準備できました</span>
           </button>
           <button
-            onClick={() => onSkip({ mood, duration })}
+            onClick={() => { playClick(); onSkip({ mood, duration }); }}
             className="text-[#e8e6e1]/30 text-sm font-light tracking-wider hover:text-[#e8e6e1]/60 transition-colors duration-300"
           >
             珈琲なしで始める →

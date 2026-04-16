@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useHistoryStore } from "@/store/historyStore";
 import type { KeptTheme } from "./SparkShuffle";
 import type { MyGridResult } from "./SparkMyGrid";
+import { playClick } from "@/lib/playSound";
 
 type Props = {
   kept: KeptTheme[];
@@ -81,7 +82,7 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
                 className="flex items-start gap-3 border border-white/8 px-4 py-3.5"
               >
                 <button
-                  onClick={() => toggleStar(i)}
+                  onClick={() => { playClick(); toggleStar(i); }}
                   className={`shrink-0 mt-0.5 text-base transition-colors duration-200 ${
                     starred.has(i) ? "text-[#EF9F27]" : "text-white/15 hover:text-white/40"
                   }`}
@@ -160,7 +161,7 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
 
         {/* もう一度 Spark */}
         <button
-          onClick={onRestart}
+          onClick={() => { playClick(); onRestart(); }}
           className="w-full py-3.5 border border-white/12 text-[#e8e6e1]/40 text-sm font-light tracking-wider hover:border-white/25 hover:text-[#e8e6e1]/70 transition-all duration-300"
         >
           もう一度 Spark

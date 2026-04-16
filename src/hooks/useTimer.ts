@@ -3,29 +3,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// 完了時通知音（Web Audio API でベル風トーンを生成）
-function playCompletionSound() {
-  try {
-    const ctx = new AudioContext();
-    const notes = [523.25, 659.25, 783.99]; // C5 E5 G5
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const t = ctx.currentTime + i * 0.22;
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.3, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
-      osc.start(t);
-      osc.stop(t + 0.8);
-    });
-  } catch {
-    // AudioContext 非対応環境は無視
-  }
-}
 
 export function useTimer(durationSeconds: number) {
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
@@ -43,7 +20,6 @@ export function useTimer(durationSeconds: number) {
       rafRef.current = requestAnimationFrame(tick);
     } else {
       setIsRunning(false);
-      playCompletionSound();
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate([400, 100, 400]);
       }

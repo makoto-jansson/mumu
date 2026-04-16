@@ -12,6 +12,7 @@ import { useHistoryStore } from "@/store/historyStore";
 import ReclaimSnapshot from "./ReclaimSnapshot";
 import type { FeelResult } from "./ReclaimFeel";
 import nameData from "@/data/reclaimNamePrompts.json";
+import { playClick } from "@/lib/playSound";
 
 type Props = {
   senseResponse: string;
@@ -117,7 +118,7 @@ export default function ReclaimDone({
           className="flex flex-col gap-3"
         >
           <button
-            onClick={onRestart}
+            onClick={() => { playClick(); onRestart(); }}
             className="w-full py-3.5 border border-white/10 text-[#e8e6e1]/35 text-sm font-light tracking-wider hover:border-white/20 hover:text-[#e8e6e1]/60 transition-all duration-300"
           >
             もう一度 Reclaim
