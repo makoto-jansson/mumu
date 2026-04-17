@@ -31,10 +31,16 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
 
   useEffect(() => {
     preloadClick();
-    // 直前のページ操作（ボタンタップ）のジェスチャーが有効なうちに再生
     const se = new Audio("/sounds/zyunnbi.m4a");
     se.volume = 0.175;
-    se.play().catch(() => {});
+    // 即時再生を試み、ジェスチャー制限で失敗したら最初のタップで再生
+    const tryPlay = () => se.play().catch(() => {});
+    se.play().catch(() => {
+      window.addEventListener("pointerdown", tryPlay, { once: true });
+    });
+    return () => {
+      window.removeEventListener("pointerdown", tryPlay);
+    };
   }, []);
 
   return (
