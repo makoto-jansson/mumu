@@ -122,10 +122,9 @@ export default function FocusSession({ config, onBreak }: Props) {
     // 2つのAudio要素でギャップレスループ（loop=trueはブラウザ実装でギャップが生じるため）
     const audio  = new Audio(track);
     const audio2 = new Audio(track);
-    // 波・焚き火はフェードイン、それ以外は即音量0.35
     const TARGET_VOL = 0.35;
-    const useFade = config.ambient === "波" || config.ambient === "焚き火";
-    audio.volume  = useFade ? 0 : TARGET_VOL;
+    // 全モード共通: 無音から始めてポップノイズを防ぐ
+    audio.volume  = 0;
     audio2.volume = TARGET_VOL;
     audioElRef.current   = audio;
     standbyAudio.current = audio2;
@@ -159,10 +158,9 @@ export default function FocusSession({ config, onBreak }: Props) {
     // 全モード共通: ギャップレスループ
     scheduleGaplessLoop(audio, audio2);
     audio.play().catch(console.error);
-    // 波・焚き火はフェードイン（3秒かけて 0 → 0.35）
-    if (useFade) {
-      fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, 3000);
-    }
+    // 全モード共通: フェードイン（波・焚き火は3秒、それ以外は1秒）
+    const fadeDuration = (config.ambient === "波" || config.ambient === "焚き火") ? 3000 : 1000;
+    fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {

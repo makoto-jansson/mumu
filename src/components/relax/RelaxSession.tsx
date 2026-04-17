@@ -331,7 +331,8 @@ export default function RelaxSession({ config, onDone }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    audio.volume = 0.25;
+    // 無音から始めてポップノイズを防ぐ
+    audio.volume = 0;
     audioElRef.current = audio;
     // グローバルストアに登録（既存の音楽は自動停止）
     setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
@@ -341,6 +342,8 @@ export default function RelaxSession({ config, onDone }: Props) {
     }
 
     audio.play().catch(console.error);
+    // フェードイン（3秒かけて 0 → 0.25）
+    fadeTimerRef.current = fadeVolume(audio, 0.25, 3000);
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {
