@@ -86,14 +86,10 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
 
   useEffect(() => {
     preloadClick();
-    const se = new Audio("/sounds/zyunnbi.wav");
+    // 直前のページ操作（ボタンタップ）のジェスチャーが有効なうちに再生
+    const se = new Audio("/sounds/zyunnbi.m4a");
     se.volume = 0.175;
-    // ユーザー操作後（autoplay制限回避）に再生
-    const handler = () => { se.play().catch(() => {}); };
-    window.addEventListener("pointerdown", handler, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", handler);
-    };
+    se.play().catch(() => {});
   }, []);
 
   const config: FocusConfig = { duration, task, ambient };

@@ -173,7 +173,7 @@ export default function FocusSession({ config, onBreak }: Props) {
 
   // endsound を再生してからコールバックを呼ぶ
   const playEndSound = (onDone: () => void) => {
-    const se = new Audio("/sounds/endsound.wav");
+    const se = new Audio("/sounds/endsound.m4a");
     se.volume = 0.175;
     se.play().catch(console.error);
     se.addEventListener("ended", onDone, { once: true });
@@ -221,7 +221,7 @@ export default function FocusSession({ config, onBreak }: Props) {
     if (a) a.pause();
     if (sb && sb !== a) sb.pause();
     stopAndClear();
-    const se = new Audio("/sounds/endsound.wav");
+    const se = new Audio("/sounds/endsound.m4a");
     se.volume = 0.175;
     se.play().catch(console.error);
     onBreak(elapsedMin);

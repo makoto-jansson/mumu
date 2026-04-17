@@ -289,7 +289,7 @@ export default function RelaxSession({ config, onDone }: Props) {
 
   // endsound を再生してからコールバックを呼ぶ
   const playEndSound = (callback: () => void) => {
-    const se = new Audio("/sounds/endsound.wav");
+    const se = new Audio("/sounds/endsound.m4a");
     se.volume = 0.175;
     se.play().catch(console.error);
     se.addEventListener("ended", callback, { once: true });
@@ -304,7 +304,7 @@ export default function RelaxSession({ config, onDone }: Props) {
     const a = audioElRef.current;
     if (a) a.pause();
     stopAndClear();
-    const se = new Audio("/sounds/endsound.wav");
+    const se = new Audio("/sounds/endsound.m4a");
     se.volume = 0.175;
     se.play().catch(console.error);
     onDone();

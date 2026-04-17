@@ -7,8 +7,8 @@ import { useEffect } from "react";
 
 const EFFECT_SOUNDS = [
   "/sounds/clicksound.wav",
-  "/sounds/endsound.wav",
-  "/sounds/zyunnbi.wav",
+  "/sounds/endsound.m4a",
+  "/sounds/zyunnbi.m4a",
 ];
 
 export default function SoundPreloader() {
