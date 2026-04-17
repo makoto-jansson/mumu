@@ -5,6 +5,7 @@
 
 import BottomNav from "@/components/app/layout/BottomNav";
 import NowPlayingBar from "@/components/app/layout/NowPlayingBar";
+import SoundPreloader from "@/components/app/layout/SoundPreloader";
 
 export default function AppLayout({
   children,
@@ -13,6 +14,8 @@ export default function AppLayout({
 }) {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
+      {/* 効果音のプリロード（キャッシュ用、表示なし） */}
+      <SoundPreloader />
       {/* ページコンテンツ（BottomNavの高さ分だけ下にpaddingを確保） */}
       <div className="pb-16">{children}</div>
       {/* 再生中ミニプレイヤー（セッションページ以外で表示） */}

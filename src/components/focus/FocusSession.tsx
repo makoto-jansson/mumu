@@ -17,37 +17,37 @@ import type { FocusConfig } from "./FocusSetup";
 
 // Focus_music フォルダ内の全トラック（音楽モード）
 const FOCUS_TRACKS = [
-  "Analog Pad Joy.wav",
-  "C major Neonfog.wav",
-  "Cozy Tape Hiss.wav",
-  "Glowing Click-Pad Loop.wav",
-  "Lantern-Off Reverb (1).wav",
-  "Lantern-Off Reverb.wav",
-  "Pink Noise Hush.wav",
-  "Tape-Hissed Pad.wav",
-  "Vinyl Crackle Loop.wav",
-  "Warm Analog Pad.wav",
+  "Analog Pad Joy.m4a",
+  "C major Neonfog.m4a",
+  "Cozy Tape Hiss.m4a",
+  "Glowing Click-Pad Loop.m4a",
+  "Lantern-Off Reverb (1).m4a",
+  "Lantern-Off Reverb.m4a",
+  "Pink Noise Hush.m4a",
+  "Tape-Hissed Pad.m4a",
+  "Vinyl Crackle Loop.m4a",
+  "Warm Analog Pad.m4a",
 ].map(f => `/sounds/Focus_music/${encodeURIComponent(f)}`);
 
 // cafe_sound フォルダ内の全トラック（カフェモード）
 const CAFE_TRACKS = [
-  "482990__priesjensen__people-talking-at-cafe-ambience.wav",
-  "746428__douglasbrucelookca__miss-michelles-cafe-in-discovery-mountain-small-cafe-ambience-room-tone-small-crowd.wav",
-  "811996__ultra-edward__quiet-village-with-a-creaking-cafe-sign.wav",
+  "482990__priesjensen__people-talking-at-cafe-ambience.m4a",
+  "746428__douglasbrucelookca__miss-michelles-cafe-in-discovery-mountain-small-cafe-ambience-room-tone-small-crowd.m4a",
+  "811996__ultra-edward__quiet-village-with-a-creaking-cafe-sign.m4a",
 ].map(f => `/sounds/cafe_sound/${encodeURIComponent(f)}`);
 
 // campfire crackling_sound フォルダ内の全トラック（焚き火モード）
 const CAMPFIRE_TRACKS = [
-  "40699__spandau__campfire.wav",
+  "40699__spandau__campfire.m4a",
   "588401__funwithsound__campfire-close-crackling-sticks.mp3",
-  "729396__heckfricker__campfire-02.wav",
+  "729396__heckfricker__campfire-02.m4a",
 ].map(f => `/sounds/campfire crackling_sound/${encodeURIComponent(f)}`);
 
 // ocean_sound フォルダ内の全トラック（波モード）
 const OCEAN_TRACKS = [
-  "534915__lucas_schacht__ocean-waves-06.wav",
+  "534915__lucas_schacht__ocean-waves-06.m4a",
   "618238__yaboiboimane__calm-meditative-ocean-waves-sound-effect.mp3",
-  "693389__derjuli__ocean-waves.wav",
+  "693389__derjuli__ocean-waves.m4a",
 ].map(f => `/sounds/ocean_sound/${encodeURIComponent(f)}`);
 
 type Props = {
