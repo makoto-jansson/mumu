@@ -331,8 +331,8 @@ export default function RelaxSession({ config, onDone }: Props) {
 
     const audio = new Audio(track);
     audio.loop   = true;
-    // 無音から始めてポップノイズを防ぐ
-    audio.volume = 0;
+    // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
+    audio.volume = 0.001;
     audioElRef.current = audio;
     // グローバルストアに登録（既存の音楽は自動停止）
     setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });

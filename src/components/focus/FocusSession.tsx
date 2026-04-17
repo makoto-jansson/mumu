@@ -123,8 +123,8 @@ export default function FocusSession({ config, onBreak }: Props) {
     const audio  = new Audio(track);
     const audio2 = new Audio(track);
     const TARGET_VOL = 0.35;
-    // 全モード共通: 無音から始めてポップノイズを防ぐ
-    audio.volume  = 0;
+    // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
+    audio.volume  = 0.001;
     audio2.volume = TARGET_VOL;
     audioElRef.current   = audio;
     standbyAudio.current = audio2;

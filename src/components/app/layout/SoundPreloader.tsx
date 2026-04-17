@@ -1,19 +1,23 @@
 "use client";
 
 // アプリ起動時に効果音をプリロードするコンポーネント
-// ブラウザキャッシュに乗せておくことで再生時の遅延を防ぐ
+// - clicksound: Web Audio API用にデコードしてバッファ保持
+// - endsound / zyunnbi: HTMLAudioElement でキャッシュ
 
 import { useEffect } from "react";
+import { preloadClick } from "@/lib/playSound";
 
-const EFFECT_SOUNDS = [
-  "/sounds/clicksound.wav",
+const PRELOAD_SOUNDS = [
   "/sounds/endsound.m4a",
   "/sounds/zyunnbi.m4a",
 ];
 
 export default function SoundPreloader() {
   useEffect(() => {
-    EFFECT_SOUNDS.forEach((src) => {
+    // クリック音を Web Audio API バッファにデコード
+    preloadClick();
+    // その他効果音をHTMLAudioElementでキャッシュ
+    PRELOAD_SOUNDS.forEach((src) => {
       const audio = new Audio(src);
       audio.preload = "auto";
       audio.load();
