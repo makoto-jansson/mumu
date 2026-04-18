@@ -9,6 +9,19 @@ let _ctx: AudioContext | null = null;
 const _buffers: Map<string, AudioBuffer> = new Map();
 const _loading:  Map<string, Promise<void>> = new Map();
 
+// モバイルでどんなタッチ操作でも AudioContext を unlock する
+// BottomNav など playClick() を呼ばないナビゲーションでも確実に解放できる
+if (typeof window !== "undefined") {
+  const _unlock = () => {
+    if (_ctx && _ctx.state === "suspended") {
+      _ctx.resume().catch(() => {});
+    }
+  };
+  // capture フェーズで登録（React のイベントより前に実行される）
+  window.addEventListener("touchstart", _unlock, { capture: true, passive: true });
+  window.addEventListener("mousedown",  _unlock, { capture: true });
+}
+
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   // closed 状態（ページ非表示→復帰等）は再生成
