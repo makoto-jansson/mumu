@@ -107,8 +107,8 @@ export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.262
 
 // useEffect から呼ぶ（準備ページ表示時に鳴らす）
 // モバイル対応:
-//   - AudioContext が suspended の場合は statechange を監視して running になったら再生
-//     （ナビゲーションボタンのタップで resume が進行中のはずなので resume() は呼ばない）
+//   - ctx.resume() を呼ぶ（ナビゲーションのタップ直後なら許可される）
+//   - statechange で running を検知して再生
 //   - バッファがまだロード中の場合もロード完了後に再生を試みる
 //   - 600ms 以内に再生できなければキャンセル（遅れすぎた場合に鳴らさない）
 export function playZyunnbi(): void {
@@ -146,6 +146,10 @@ export function playZyunnbi(): void {
 
   ctx.addEventListener("statechange", onStateChange);
   timeoutId = setTimeout(cleanup, TIMEOUT_MS);
+
+  // resume() を試みる（ナビゲーション直後のジェスチャー内なら成功する）
+  // 失敗しても statechange で button タップ時に再生できる
+  ctx.resume().catch(() => {});
 
   // バッファがまだロード中の場合、ロード完了後も tryFire を試みる
   const loadingP = _loading.get("/sounds/zyunnbi.m4a");
