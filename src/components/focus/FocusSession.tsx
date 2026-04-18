@@ -13,6 +13,7 @@ import FocusScene from "@/components/animations/FocusScene";
 import CampfireScene from "@/components/animations/CampfireScene";
 import CafeScene from "@/components/animations/CafeScene";
 import { useAudioStore } from "@/store/audioStore";
+import { connectGain } from "@/lib/playSound";
 import type { FocusConfig } from "./FocusSetup";
 
 // Focus_music フォルダ内の全トラック（音楽モード）
@@ -90,6 +91,8 @@ export default function FocusSession({ config, onBreak }: Props) {
   const audioElRef    = useRef<HTMLAudioElement | null>(null);
   const standbyAudio  = useRef<HTMLAudioElement | null>(null); // ギャップレスループ用スタンバイ
   const fadeTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  // GainNodeハンドル（iOS対応音量制御 - audio.volumeはiOSで無視されるため）
+  const gainHandleRef = useRef<ReturnType<typeof connectGain>>(null);
   const timeLeftRef   = useRef(durationSec); // アンマウント時に最新値を参照するためのref
   const sessionEndedRef = useRef(false); // 完了・手動終了時はtimerSnap保存をスキップ
   const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
@@ -122,13 +125,26 @@ export default function FocusSession({ config, onBreak }: Props) {
       start();
     }
 
+    const TARGET_VOL = 0.35;
+
     if (isReturning) {
       // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
       audioElRef.current = storeAudio;
       storeAudio.loop = true; // ギャップレスループは再設定不要、loop=trueで継続
       // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
+      // iOS: audio.volumeは無視されるため connectGain を試み、失敗時のみ fadeVolume で補正
       if (storeAudio.volume < 0.3) {
-        fadeTimerRef.current = fadeVolume(storeAudio, 0.35, 1000);
+        const handle = connectGain(storeAudio, storeAudio.volume || 0.001);
+        if (handle) {
+          gainHandleRef.current = handle;
+          handle.fadeTo(TARGET_VOL, 1000);
+        } else {
+          // GainNodeが既に接続済みの場合（前回mountのhandleが継続中）は何もしない
+          // audio.volumeが低い場合のみfadeVolume（非iOS向けフォールバック）
+          if (storeAudio.volume < 0.3) {
+            fadeTimerRef.current = fadeVolume(storeAudio, TARGET_VOL, 1000);
+          }
+        }
       }
     } else {
       // 新規セッション：ランダムトラックを選んで再生
@@ -141,7 +157,6 @@ export default function FocusSession({ config, onBreak }: Props) {
       // 2つのAudio要素でギャップレスループ（loop=trueはブラウザ実装でギャップが生じるため）
       const audio  = new Audio(track);
       const audio2 = new Audio(track);
-      const TARGET_VOL = 0.35;
       // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
       audio.volume  = 0.001;
       audio2.volume = TARGET_VOL;
@@ -162,7 +177,15 @@ export default function FocusSession({ config, onBreak }: Props) {
           if (!active.duration || active.currentTime < active.duration - 0.15) return;
           active.removeEventListener('timeupdate', handler);
           sb.currentTime = 0;
-          sb.volume = active.volume;
+          // GainNodeを新しいaudio要素に接続してiOSでも音量を維持
+          // （初めてconnectGainを呼ぶ要素は成功、2周目以降は失敗しaudio.volumeにフォールバック）
+          const newHandle = connectGain(sb, TARGET_VOL);
+          if (newHandle) {
+            gainHandleRef.current = newHandle;
+          } else {
+            // GainNode接続失敗時はaudio.volumeで設定（iOS以外で機能）
+            sb.volume = TARGET_VOL;
+          }
           sb.play().catch(console.error);
           audioElRef.current   = sb;
           standbyAudio.current = active;
@@ -172,16 +195,27 @@ export default function FocusSession({ config, onBreak }: Props) {
         active.addEventListener('timeupdate', handler);
       };
 
-      scheduleGaplessLoop(audio, audio2);
       audio.play().catch(console.error);
-      // フェードイン（波・焚き火は3秒、それ以外は1秒）
+      // GainNodeによるフェードイン（iOS対応）→ 失敗時はaudio.volumeベースにフォールバック
+      const handle = connectGain(audio, 0.001);
+      gainHandleRef.current = handle;
       const fadeDuration = config.ambient === "波" ? 4000 : config.ambient === "焚き火" ? 3000 : 1000;
-      fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
+      if (handle) {
+        handle.fadeTo(TARGET_VOL, fadeDuration);
+      } else {
+        fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
+      }
+      scheduleGaplessLoop(audio, audio2);
     }
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+      // セッション終了時のみGainNodeを切断（画面遷移中はGainNodeを維持して音楽継続）
+      if (sessionEndedRef.current) {
+        gainHandleRef.current?.disconnect();
+        gainHandleRef.current = null;
+      }
       if (!sessionEndedRef.current) {
         saveTimerSnap({
           remainingSeconds: timeLeftRef.current,
@@ -210,13 +244,24 @@ export default function FocusSession({ config, onBreak }: Props) {
       sessionEndedRef.current = true;
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      const a  = audioElRef.current;
-      const sb = standbyAudio.current;
-      if (a) fadeVolume(a, 0, 1200, () => {
+      const a      = audioElRef.current;
+      const sb     = standbyAudio.current;
+      const handle = gainHandleRef.current;
+      const onFadeDone = () => {
+        handle?.disconnect();
+        gainHandleRef.current = null;
         stopAndClear();
         if (sb && sb !== a) sb.pause();
         playEndSound(() => onBreak(config.duration));
-      });
+      };
+      if (a) {
+        if (handle) {
+          // GainNodeによるフェードアウト（iOS対応）
+          handle.fadeTo(0, 1200, onFadeDone);
+        } else {
+          fadeVolume(a, 0, 1200, onFadeDone);
+        }
+      }
     }
   }, [isFinished, config.duration, onBreak, stopAndClear]);
 
@@ -238,7 +283,9 @@ export default function FocusSession({ config, onBreak }: Props) {
     sessionEndedRef.current = true;
     const elapsedMin = Math.max(1, Math.round((durationSec - timeLeft) / 60));
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-    // BGMを即停止 → endsound再生（鳴らしっぱなしで遷移）
+    // GainNodeを切断してBGMを即停止 → endsound再生
+    gainHandleRef.current?.disconnect();
+    gainHandleRef.current = null;
     const a  = audioElRef.current;
     const sb = standbyAudio.current;
     if (a) a.pause();

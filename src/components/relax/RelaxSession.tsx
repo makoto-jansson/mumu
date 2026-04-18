@@ -32,6 +32,7 @@ function fadeVolume(
 }
 import { useTimer } from "@/hooks/useTimer";
 import { useBreath } from "@/hooks/useBreath";
+import { connectGain } from "@/lib/playSound";
 import type { RelaxConfig } from "./RelaxSetup";
 
 type Props = {
@@ -262,6 +263,8 @@ export default function RelaxSession({ config, onDone }: Props) {
   // HTMLAudioElement のみで管理（Web Audio API不使用 → iOS自動再生＆バックグラウンド対応）
   const audioElRef      = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  // GainNodeハンドル（iOS対応音量制御 - audio.volumeはiOSで無視されるため）
+  const gainHandleRef   = useRef<ReturnType<typeof connectGain>>(null);
   const timeLeftRef     = useRef(durationSec);
   const sessionEndedRef = useRef(false); // 完了・手動終了時はtimerSnap保存をスキップ
   const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
@@ -300,7 +303,9 @@ export default function RelaxSession({ config, onDone }: Props) {
   const handleEnd = () => {
     sessionEndedRef.current = true;
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-    // BGMを即停止 → endsound再生（鳴らしっぱなしで遷移）
+    // GainNodeを切断してBGMを即停止 → endsound再生
+    gainHandleRef.current?.disconnect();
+    gainHandleRef.current = null;
     const a = audioElRef.current;
     if (a) a.pause();
     stopAndClear();
@@ -335,12 +340,24 @@ export default function RelaxSession({ config, onDone }: Props) {
       start();
     }
 
+    const TARGET_VOL = 0.25;
+
     if (isReturning) {
       // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
       audioElRef.current = storeAudio;
       // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
+      // iOS: audio.volumeは無視されるため connectGain を試み、失敗時のみ fadeVolume で補正
       if (storeAudio.volume < 0.2) {
-        fadeTimerRef.current = fadeVolume(storeAudio, 0.25, 1000);
+        const handle = connectGain(storeAudio, storeAudio.volume || 0.001);
+        if (handle) {
+          gainHandleRef.current = handle;
+          handle.fadeTo(TARGET_VOL, 1000);
+        } else {
+          // GainNodeが既に接続済みの場合（前回mountのhandleが継続中）は何もしない
+          if (storeAudio.volume < 0.2) {
+            fadeTimerRef.current = fadeVolume(storeAudio, TARGET_VOL, 1000);
+          }
+        }
       }
     } else {
       // 新規セッション：ランダムトラックを選んで再生
@@ -359,13 +376,24 @@ export default function RelaxSession({ config, onDone }: Props) {
       }
 
       audio.play().catch(console.error);
-      // フェードイン（3秒かけて 0 → 0.25）
-      fadeTimerRef.current = fadeVolume(audio, 0.25, 3000);
+      // GainNodeによるフェードイン（iOS対応）→ 失敗時はaudio.volumeベースにフォールバック
+      const handle = connectGain(audio, 0.001);
+      gainHandleRef.current = handle;
+      if (handle) {
+        handle.fadeTo(TARGET_VOL, 3000);
+      } else {
+        fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, 3000);
+      }
     }
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+      // セッション終了時のみGainNodeを切断（画面遷移中はGainNodeを維持して音楽継続）
+      if (sessionEndedRef.current) {
+        gainHandleRef.current?.disconnect();
+        gainHandleRef.current = null;
+      }
       if (!sessionEndedRef.current) {
         saveTimerSnap({
           remainingSeconds: timeLeftRef.current,
@@ -383,11 +411,22 @@ export default function RelaxSession({ config, onDone }: Props) {
     if (isFinished) {
       sessionEndedRef.current = true;
       if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      const a = audioElRef.current;
-      if (a) fadeVolume(a, 0, 1200, () => {
+      const a      = audioElRef.current;
+      const handle = gainHandleRef.current;
+      const onFadeDone = () => {
+        handle?.disconnect();
+        gainHandleRef.current = null;
         stopAndClear();
         playEndSound(onDone);
-      });
+      };
+      if (a) {
+        if (handle) {
+          // GainNodeによるフェードアウト（iOS対応）
+          handle.fadeTo(0, 1200, onFadeDone);
+        } else {
+          fadeVolume(a, 0, 1200, onFadeDone);
+        }
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFinished, onDone, stopAndClear]);

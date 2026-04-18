@@ -119,16 +119,16 @@ export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
 export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
 
 // useEffect から呼ぶ（準備ページ表示時に鳴らす）
-// モバイル対応:
-//   - ctx.resume() を呼ぶ（ナビゲーションのタップ直後なら許可される）
+// モバイル（iOS含む）対応:
+//   - ctx.resume() を試みる
 //   - statechange で running を検知して再生
-//   - バッファがまだロード中の場合もロード完了後に再生を試みる
-//   - 600ms 以内に再生できなければキャンセル（遅れすぎた場合に鳴らさない）
+//   - バッファ読み込み済みなら最大 800ms、未ロードなら最大 4000ms 待機
+//     （iOS / 低速回線で 216KB の m4a デコードに時間がかかるため）
 export function playZyunnbi(): void {
   const ctx = getCtx();
   if (!ctx) return;
 
-  const TIMEOUT_MS = 600;
+  ctx.resume().catch(() => {}); // 可能なら resume（ジェスチャー直後なら iOS でも成功）
 
   const tryFire = (): boolean => {
     if (ctx.state !== "running") return false;
@@ -138,14 +138,17 @@ export function playZyunnbi(): void {
     return true;
   };
 
-  // バッファ読み込み済み + running → 即再生
+  // 即再生できる場合
   if (tryFire()) return;
 
-  // suspended か未ロード: 最大 600ms 待機
+  // バッファロード済みなら 800ms、未ロードなら 4000ms（ネットワーク取得＋デコード待ち）
+  const bufReady   = _buffers.has("/sounds/zyunnbi.m4a");
+  const timeoutMs  = bufReady ? 800 : 4000;
+
   let done = false;
   let timeoutId: ReturnType<typeof setTimeout>;
 
-  const cleanup = () => {
+  const finish = () => {
     if (done) return;
     done = true;
     clearTimeout(timeoutId);
@@ -154,21 +157,17 @@ export function playZyunnbi(): void {
 
   const onStateChange = () => {
     if (done) return;
-    if (tryFire()) cleanup();
+    if (tryFire()) finish();
   };
 
   ctx.addEventListener("statechange", onStateChange);
-  timeoutId = setTimeout(cleanup, TIMEOUT_MS);
-
-  // resume() を試みる（ナビゲーション直後のジェスチャー内なら成功する）
-  // 失敗しても statechange で button タップ時に再生できる
-  ctx.resume().catch(() => {});
+  timeoutId = setTimeout(finish, timeoutMs);
 
   // バッファがまだロード中の場合、ロード完了後も tryFire を試みる
   const loadingP = _loading.get("/sounds/zyunnbi.m4a");
   if (loadingP) {
     loadingP.then(() => {
-      if (!done && tryFire()) cleanup();
+      if (!done && tryFire()) finish();
     }).catch(() => {});
   }
 }
@@ -179,4 +178,67 @@ export function playSound(path: string, volume = 1.0) {
   const audio = new Audio(path);
   audio.volume = volume;
   audio.play().catch(console.error);
+}
+
+// ── BGM フェード用 GainNode ヘルパー ─────────────────────────────────────
+// iOS は HTMLAudioElement.volume を無視するため、
+// Web Audio API の MediaElementSource + GainNode 経由で音量を制御する。
+// 戻り値: cleanup 関数（アンマウント時に呼ぶ）
+
+type FadeHandle = {
+  setVolume: (v: number) => void;
+  fadeTo:    (target: number, durationMs: number, onDone?: () => void) => void;
+  disconnect: () => void;
+};
+
+export function connectGain(audio: HTMLAudioElement, initialVolume: number): FadeHandle | null {
+  const ctx = getCtx();
+  if (!ctx) return null;
+
+  // iOSなどでAudioContextがsuspendedの場合にresumeを試みる
+  // ジェスチャー直後ならiOSでも成功する場合がある
+  ctx.resume().catch(() => {});
+
+  // createMediaElementSource は同一要素に対して1回しか呼べないためキャッシュ
+  let source: MediaElementAudioSourceNode;
+  try {
+    source = ctx.createMediaElementSource(audio);
+  } catch {
+    // 既に接続済みの場合など（無視して null を返す）
+    return null;
+  }
+
+  const gain = ctx.createGain();
+  gain.gain.value = initialVolume;
+  source.connect(gain);
+  gain.connect(ctx.destination);
+
+  let fadeId: ReturnType<typeof setInterval> | null = null;
+
+  return {
+    setVolume(v: number) {
+      gain.gain.value = Math.max(0, Math.min(1, v));
+    },
+    fadeTo(target: number, durationMs: number, onDone?: () => void) {
+      if (fadeId) clearInterval(fadeId);
+      const steps   = 30;
+      const stepMs  = durationMs / steps;
+      const start   = gain.gain.value;
+      const delta   = (target - start) / steps;
+      let   count   = 0;
+      fadeId = setInterval(() => {
+        count++;
+        gain.gain.value = Math.max(0, Math.min(1, start + delta * count));
+        if (count >= steps) {
+          if (fadeId) clearInterval(fadeId);
+          gain.gain.value = target;
+          onDone?.();
+        }
+      }, stepMs);
+    },
+    disconnect() {
+      if (fadeId) clearInterval(fadeId);
+      try { gain.disconnect(); source.disconnect(); } catch { /* ignore */ }
+    },
+  };
 }
