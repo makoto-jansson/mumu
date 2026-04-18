@@ -3,7 +3,7 @@
 // Relax完了画面
 // 日替わりの一言 + 音楽・お菓子のペアリング提案
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { getDailyPrompt } from "@/lib/getDailyPrompt";
@@ -28,8 +28,9 @@ type Props = { mood: RelaxConfig["mood"]; duration: number };
 export default function RelaxDone({ mood, duration }: Props) {
   const pairing = getPairing(mood);
   const prompt  = getDailyPrompt();
-  const { addSession, markCoffeeRecommendShown, shouldShowCoffeeRecommend } = useHistoryStore();
-  const showCoffee = shouldShowCoffeeRecommend();
+  const { addSession, markCoffeeRecommendShown } = useHistoryStore();
+  // 初回レンダリング時の値を固定（markCoffeeRecommendShownによる再レンダリングで消えないように）
+  const [showCoffee] = useState(() => useHistoryStore.getState().shouldShowCoffeeRecommend());
 
   useEffect(() => {
     addSession({ type: "relax", duration, mood });

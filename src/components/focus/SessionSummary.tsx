@@ -25,8 +25,9 @@ function getEndMessage(minutes: number): string {
 export default function SessionSummary({ sets, totalMinutes, task }: Props) {
   const [reflection, setReflection] = useState("");
   const endMessage = getEndMessage(totalMinutes);
-  const { addSession, markCoffeeRecommendShown, shouldShowCoffeeRecommend } = useHistoryStore();
-  const showCoffee = shouldShowCoffeeRecommend();
+  const { addSession, markCoffeeRecommendShown } = useHistoryStore();
+  // 初回レンダリング時の値を固定（markCoffeeRecommendShownによる再レンダリングで消えないように）
+  const [showCoffee] = useState(() => useHistoryStore.getState().shouldShowCoffeeRecommend());
 
   useEffect(() => {
     addSession({ type: "focus", duration: totalMinutes, task, sets });
