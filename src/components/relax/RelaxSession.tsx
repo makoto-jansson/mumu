@@ -312,8 +312,12 @@ export default function RelaxSession({ config, onDone }: Props) {
 
   // タイマー開始 + ランダムBGM（HTMLAudioElement のみ → iOS バックグラウンド再生対応）
   useEffect(() => {
-    // タイマー復元（他ページ遷移後に戻ってきた場合）
-    if (timerSnap) {
+    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
+    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/relax";
+
+    // タイマー復元（同じセッションに戻ってきた場合のみ）
+    // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始
+    if (timerSnap && isReturning) {
       if (timerSnap.isPaused) {
         initPaused(timerSnap.remainingSeconds);
         setIsPaused(true);
@@ -327,12 +331,13 @@ export default function RelaxSession({ config, onDone }: Props) {
       start();
     }
 
-    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
-    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/relax";
-
     if (isReturning) {
       // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
       audioElRef.current = storeAudio;
+      // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
+      if (storeAudio.volume < 0.2) {
+        fadeTimerRef.current = fadeVolume(storeAudio, 0.25, 1000);
+      }
     } else {
       // 新規セッション：ランダムトラックを選んで再生
       const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];

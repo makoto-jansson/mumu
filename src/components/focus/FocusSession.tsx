@@ -99,8 +99,12 @@ export default function FocusSession({ config, onBreak }: Props) {
 
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
-    // タイマー復元（他ページ遷移後に戻ってきた場合）
-    if (timerSnap) {
+    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
+    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/focus";
+
+    // タイマー復元（同じセッションに戻ってきた場合のみ）
+    // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始
+    if (timerSnap && isReturning) {
       if (timerSnap.isPaused) {
         initPaused(timerSnap.remainingSeconds);
         setIsPaused(true);
@@ -113,13 +117,14 @@ export default function FocusSession({ config, onBreak }: Props) {
       start();
     }
 
-    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
-    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/focus";
-
     if (isReturning) {
       // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
       audioElRef.current = storeAudio;
       storeAudio.loop = true; // ギャップレスループは再設定不要、loop=trueで継続
+      // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
+      if (storeAudio.volume < 0.3) {
+        fadeTimerRef.current = fadeVolume(storeAudio, 0.35, 1000);
+      }
     } else {
       // 新規セッション：ランダムトラックを選んで再生
       const pool  = config.ambient === "波"   ? OCEAN_TRACKS
