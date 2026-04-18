@@ -31,8 +31,10 @@ const serwist = new Serwist({
       handler: new CacheFirst({ cacheName: "images-fonts" }),
     },
     {
+      // NetworkFirst: 常にネットワーク優先（MIME修正・ファイル更新を確実に反映）
+      // キャッシュ名変更で古い "audio" キャッシュエントリを無効化
       matcher: ({ request }) => request.destination === "audio",
-      handler: new CacheFirst({ cacheName: "audio" }),
+      handler: new NetworkFirst({ cacheName: "audio-v2" }),
     },
   ],
 });
