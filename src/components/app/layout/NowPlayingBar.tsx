@@ -41,9 +41,12 @@ export default function NowPlayingBar() {
         // BottomNav(h-16)の真上に配置
         className="fixed bottom-16 left-0 right-0 z-[55] px-4 pb-2"
       >
-        <button
+        <div
           onClick={handleTap}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-[#1a1a1c]/95 backdrop-blur-sm border border-white/10 rounded-xl"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && handleTap()}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-[#1a1a1c]/95 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer"
         >
           {/* 再生中インジケーター（3本のアニメーションバー） */}
           <div className="flex items-end gap-[3px] h-4 shrink-0">
@@ -77,7 +80,7 @@ export default function NowPlayingBar() {
               <rect x="1" y="1" width="8" height="8" rx="1" fill="currentColor" />
             </svg>
           </button>
-        </button>
+        </div>
       </motion.div>
     </AnimatePresence>
   );
