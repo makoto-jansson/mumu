@@ -1,11 +1,13 @@
 "use client";
 
 // 効果音再生ユーティリティ
-// クリック音は Web Audio API（AudioBuffer）を使用 → iOS含む全デバイスで低遅延
+// クリック音・準備音楽は Web Audio API（AudioBuffer）を使用 → iOS含む全デバイスで低遅延
 
 let _ctx: AudioContext | null = null;
-let _clickBuffer: AudioBuffer | null = null;
-let _loadPromise: Promise<void> | null = null;
+
+// サウンドバッファキャッシュ
+const _buffers: Map<string, AudioBuffer> = new Map();
+const _loading:  Map<string, Promise<void>> = new Map();
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -17,37 +19,39 @@ function getCtx(): AudioContext | null {
   return _ctx;
 }
 
-// アプリ起動時にフェッチ＆デコードしてバッファを保持
-export function preloadClick(): void {
+// 指定パスの音声を Web Audio API 用にフェッチ＆デコードして保持
+function preloadBuffer(path: string): void {
   if (typeof window === "undefined") return;
-  if (_clickBuffer || _loadPromise) return;
+  if (_buffers.has(path) || _loading.has(path)) return;
 
   const ctx = getCtx();
   if (!ctx) return;
 
-  _loadPromise = fetch("/sounds/clicksound.wav")
+  const p = fetch(path)
     .then(r => r.arrayBuffer())
     .then(buf => ctx.decodeAudioData(buf))
-    .then(decoded => { _clickBuffer = decoded; })
+    .then(decoded => { _buffers.set(path, decoded); })
     .catch(() => {});
+  _loading.set(path, p);
 }
 
-export function playClick(): void {
+// バッファから再生（AudioContext が suspended なら resume してから）
+function playBuffer(path: string, volume = 1.0): void {
   const ctx = getCtx();
   if (!ctx) return;
 
   const fire = () => {
-    if (!_clickBuffer) return;
+    const buf = _buffers.get(path);
+    if (!buf) return;
     const src  = ctx.createBufferSource();
-    src.buffer = _clickBuffer;
+    src.buffer = buf;
     const gain = ctx.createGain();
-    gain.gain.value = 0.2625;
+    gain.gain.value = volume;
     src.connect(gain);
     gain.connect(ctx.destination);
     src.start(0);
   };
 
-  // iOS は最初 suspended 状態 → ユーザージェスチャー内で resume してから再生
   if (ctx.state === "suspended") {
     ctx.resume().then(fire).catch(console.error);
   } else {
@@ -55,7 +59,15 @@ export function playClick(): void {
   }
 }
 
-// BGM・その他の効果音（HTMLAudioElement）
+// ── 公開 API ──────────────────────────────────────────
+
+export const preloadClick   = () => preloadBuffer("/sounds/clicksound.wav");
+export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
+
+export const playClick   = () => playBuffer("/sounds/clicksound.wav", 0.2625);
+export const playZyunnbi = () => playBuffer("/sounds/zyunnbi.m4a", 0.175);
+
+// BGM・その他効果音（HTMLAudioElement）
 export function playSound(path: string, volume = 1.0) {
   if (typeof window === "undefined") return;
   const audio = new Audio(path);

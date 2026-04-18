@@ -5,18 +5,18 @@
 // - endsound / zyunnbi: HTMLAudioElement でキャッシュ
 
 import { useEffect } from "react";
-import { preloadClick } from "@/lib/playSound";
+import { preloadClick, preloadZyunnbi } from "@/lib/playSound";
 
 const PRELOAD_SOUNDS = [
   "/sounds/endsound.m4a",
-  "/sounds/zyunnbi.m4a",
 ];
 
 export default function SoundPreloader() {
   useEffect(() => {
-    // クリック音を Web Audio API バッファにデコード
+    // Web Audio API バッファにデコード（zyunnbi も含める）
     preloadClick();
-    // その他効果音をHTMLAudioElementでキャッシュ
+    preloadZyunnbi();
+    // endsound は HTMLAudioElement でキャッシュ
     PRELOAD_SOUNDS.forEach((src) => {
       const audio = new Audio(src);
       audio.preload = "auto";

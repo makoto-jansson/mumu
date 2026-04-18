@@ -9,7 +9,7 @@ import Link from "next/link";
 import RollerPicker from "./RollerPicker";
 import StepBar, { FOCUS_STEPS } from "./StepBar";
 import ButtonOrb from "@/components/animations/ButtonOrb";
-import { playClick, preloadClick } from "@/lib/playSound";
+import { playClick, preloadClick, playZyunnbi } from "@/lib/playSound";
 import { useAudioStore } from "@/store/audioStore";
 
 export type FocusConfig = {
@@ -91,16 +91,8 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
     const { audio: storeAudio } = useAudioStore.getState();
     if (storeAudio && !storeAudio.paused) return;
 
-    const se = new Audio("/sounds/zyunnbi.m4a");
-    se.volume = 0.175;
-    // 即時再生を試み、ジェスチャー制限で失敗したら最初のタップで再生
-    const tryPlay = () => se.play().catch(() => {});
-    se.play().catch(() => {
-      window.addEventListener("pointerdown", tryPlay, { once: true });
-    });
-    return () => {
-      window.removeEventListener("pointerdown", tryPlay);
-    };
+    // Web Audio API 経由で即時再生（AudioContext はナビゲーション時のタップで解除済み）
+    playZyunnbi();
   }, []);
 
   const config: FocusConfig = { duration, task, ambient };
