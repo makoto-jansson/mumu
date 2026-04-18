@@ -1,5 +1,5 @@
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist, CacheFirst, NetworkFirst, StaleWhileRevalidate } from "serwist";
+import { Serwist, NetworkFirst, StaleWhileRevalidate } from "serwist";
 
 // This is injected by @serwist/next at build time
 declare global {
@@ -28,14 +28,11 @@ const serwist = new Serwist({
     {
       matcher: ({ request }) =>
         ["image", "font"].includes(request.destination),
-      handler: new CacheFirst({ cacheName: "images-fonts" }),
+      handler: new NetworkFirst({ cacheName: "images-fonts" }),
     },
-    {
-      // NetworkFirst: 常にネットワーク優先（MIME修正・ファイル更新を確実に反映）
-      // キャッシュ名変更で古い "audio" キャッシュエントリを無効化
-      matcher: ({ request }) => request.destination === "audio",
-      handler: new NetworkFirst({ cacheName: "audio-v2" }),
-    },
+    // 音声は SW でインターセプトしない（Range リクエストの互換性のため）
+    // precache も除外済み（next.config.ts の exclude: [/\/sounds\//]）
+    // → ブラウザが直接ネットワークから取得する
   ],
 });
 
