@@ -165,7 +165,7 @@ export default function FocusSession({ config, onBreak }: Props) {
       scheduleGaplessLoop(audio, audio2);
       audio.play().catch(console.error);
       // フェードイン（波・焚き火は3秒、それ以外は1秒）
-      const fadeDuration = (config.ambient === "波" || config.ambient === "焚き火") ? 3000 : 1000;
+      const fadeDuration = config.ambient === "波" ? 4000 : config.ambient === "焚き火" ? 3000 : 1000;
       fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
     }
 
