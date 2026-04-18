@@ -20,6 +20,16 @@ if (typeof window !== "undefined") {
   // capture フェーズで登録（React のイベントより前に実行される）
   window.addEventListener("touchstart", _unlock, { capture: true, passive: true });
   window.addEventListener("mousedown",  _unlock, { capture: true });
+
+  // AudioContext を早期作成：初回のタッチで unlock 可能な状態にする
+  // （useEffect内で作ると、そのページへの遷移タップが unlock に使えない）
+  // 関数宣言はホイストされるため、この位置から呼び出し可能
+  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  if (AC) {
+    try { _ctx = new AC(); } catch { /* ignore */ }
+  }
+  // 主要バッファを事前デコード（AudioContextはsuspendedでもdecodeAudioDataは動作する）
+  // ※ preloadBuffer はこの後に定義されるが、function宣言はホイストされる
 }
 
 function getCtx(): AudioContext | null {
@@ -101,7 +111,9 @@ function playBufferGesture(path: string, volume = 1.0): void {
     return;
   }
 
-  // バッファ未ロード: ロード完了後に再生（ジェスチャー内なので多少遅れても可）
+  // バッファ未ロード: preload を開始してから（or 進行中のものを使って）再生
+  // コンテキスト再生成後など loadingP が null の場合も自動でリカバリする
+  preloadBuffer(path);
   const loadingP = _loading.get(path);
   if (!loadingP) return;
   loadingP.then(() => {
@@ -115,6 +127,14 @@ function playBufferGesture(path: string, volume = 1.0): void {
 export const preloadClick   = () => preloadBuffer("/sounds/clicksound.wav");
 export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
 
+// モジュールロード時にバッファをプリロード開始
+// AudioContextは上部の if(window) ブロックで既に作成済み
+// decodeAudioDataはsuspendedコンテキストでも動作するため、ここで開始しておく
+if (typeof window !== "undefined") {
+  preloadBuffer("/sounds/clicksound.wav");
+  preloadBuffer("/sounds/zyunnbi.m4a");
+}
+
 // ジェスチャーハンドラから呼ぶ（ボタン・タップ等）
 export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
 
@@ -125,6 +145,9 @@ export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.262
 //   - バッファ読み込み済みなら最大 800ms、未ロードなら最大 4000ms 待機
 //     （iOS / 低速回線で 216KB の m4a デコードに時間がかかるため）
 export function playZyunnbi(): void {
+  // バッファが未ロードの場合はロードを開始する（preloadZyunnbi未呼び出しのケースに対応）
+  preloadBuffer("/sounds/zyunnbi.m4a");
+
   const ctx = getCtx();
   if (!ctx) return;
 
