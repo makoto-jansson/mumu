@@ -10,6 +10,7 @@ import ButtonOrb from "@/components/animations/ButtonOrb";
 import StepBar, { RELAX_STEPS } from "@/components/focus/StepBar";
 import RollerPicker from "@/components/focus/RollerPicker";
 import { playClick, preloadClick } from "@/lib/playSound";
+import { useAudioStore } from "@/store/audioStore";
 
 export type RelaxConfig = {
   mood:     "疲れた" | "もやもや" | "ぼんやりしたい";
@@ -31,6 +32,10 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
 
   useEffect(() => {
     preloadClick();
+    // BGM再生中（セッションから戻ってきた場合）は準備音楽をスキップ
+    const { audio: storeAudio } = useAudioStore.getState();
+    if (storeAudio && !storeAudio.paused) return;
+
     const se = new Audio("/sounds/zyunnbi.m4a");
     se.volume = 0.175;
     // 即時再生を試み、ジェスチャー制限で失敗したら最初のタップで再生

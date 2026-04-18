@@ -327,23 +327,32 @@ export default function RelaxSession({ config, onDone }: Props) {
       start();
     }
 
-    const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];
+    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
+    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/relax";
 
-    const audio = new Audio(track);
-    audio.loop   = true;
-    // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
-    audio.volume = 0.001;
-    audioElRef.current = audio;
-    // グローバルストアに登録（既存の音楽は自動停止）
-    setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
+    if (isReturning) {
+      // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
+      audioElRef.current = storeAudio;
+    } else {
+      // 新規セッション：ランダムトラックを選んで再生
+      const track = RELAX_TRACKS[Math.floor(Math.random() * RELAX_TRACKS.length)];
 
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
+      const audio = new Audio(track);
+      audio.loop   = true;
+      // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
+      audio.volume = 0.001;
+      audioElRef.current = audio;
+      // グローバルストアに登録（既存の音楽は自動停止）
+      setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
+
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
+      }
+
+      audio.play().catch(console.error);
+      // フェードイン（3秒かけて 0 → 0.25）
+      fadeTimerRef.current = fadeVolume(audio, 0.25, 3000);
     }
-
-    audio.play().catch(console.error);
-    // フェードイン（3秒かけて 0 → 0.25）
-    fadeTimerRef.current = fadeVolume(audio, 0.25, 3000);
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {

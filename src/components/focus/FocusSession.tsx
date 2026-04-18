@@ -113,54 +113,61 @@ export default function FocusSession({ config, onBreak }: Props) {
       start();
     }
 
-    const pool  = config.ambient === "波"   ? OCEAN_TRACKS
-                : config.ambient === "焚き火" ? CAMPFIRE_TRACKS
-                : config.ambient === "カフェ" ? CAFE_TRACKS
-                : FOCUS_TRACKS;
-    const track = pool[Math.floor(Math.random() * pool.length)];
+    const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
+    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/focus";
 
-    // 2つのAudio要素でギャップレスループ（loop=trueはブラウザ実装でギャップが生じるため）
-    const audio  = new Audio(track);
-    const audio2 = new Audio(track);
-    const TARGET_VOL = 0.35;
-    // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
-    audio.volume  = 0.001;
-    audio2.volume = TARGET_VOL;
-    audioElRef.current   = audio;
-    standbyAudio.current = audio2;
+    if (isReturning) {
+      // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
+      audioElRef.current = storeAudio;
+      storeAudio.loop = true; // ギャップレスループは再設定不要、loop=trueで継続
+    } else {
+      // 新規セッション：ランダムトラックを選んで再生
+      const pool  = config.ambient === "波"   ? OCEAN_TRACKS
+                  : config.ambient === "焚き火" ? CAMPFIRE_TRACKS
+                  : config.ambient === "カフェ" ? CAFE_TRACKS
+                  : FOCUS_TRACKS;
+      const track = pool[Math.floor(Math.random() * pool.length)];
 
-    // グローバルストアに登録（既存の音楽は自動停止）
-    setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
+      // 2つのAudio要素でギャップレスループ（loop=trueはブラウザ実装でギャップが生じるため）
+      const audio  = new Audio(track);
+      const audio2 = new Audio(track);
+      const TARGET_VOL = 0.35;
+      // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
+      audio.volume  = 0.001;
+      audio2.volume = TARGET_VOL;
+      audioElRef.current   = audio;
+      standbyAudio.current = audio2;
 
-    // ロック画面・コントロールセンターにメタデータを表示
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
-    }
+      // グローバルストアに登録（既存の音楽は自動停止）
+      setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
 
-    // トラック終了 0.15秒前にスタンバイを再生開始 → ループ切れ目なし
-    const scheduleGaplessLoop = (active: HTMLAudioElement, sb: HTMLAudioElement) => {
-      const handler = () => {
-        if (!active.duration || active.currentTime < active.duration - 0.15) return;
-        active.removeEventListener('timeupdate', handler);
-        sb.currentTime = 0;
-        sb.volume = active.volume;
-        sb.play().catch(console.error);
-        // アクティブ参照を新しい要素に切り替え
-        audioElRef.current   = sb;
-        standbyAudio.current = active;
-        // ストアの参照もフェードなしで更新
-        useAudioStore.setState({ audio: sb });
-        scheduleGaplessLoop(sb, active);
+      // ロック画面・コントロールセンターにメタデータを表示
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
+      }
+
+      // トラック終了 0.15秒前にスタンバイを再生開始 → ループ切れ目なし
+      const scheduleGaplessLoop = (active: HTMLAudioElement, sb: HTMLAudioElement) => {
+        const handler = () => {
+          if (!active.duration || active.currentTime < active.duration - 0.15) return;
+          active.removeEventListener('timeupdate', handler);
+          sb.currentTime = 0;
+          sb.volume = active.volume;
+          sb.play().catch(console.error);
+          audioElRef.current   = sb;
+          standbyAudio.current = active;
+          useAudioStore.setState({ audio: sb });
+          scheduleGaplessLoop(sb, active);
+        };
+        active.addEventListener('timeupdate', handler);
       };
-      active.addEventListener('timeupdate', handler);
-    };
 
-    // 全モード共通: ギャップレスループ
-    scheduleGaplessLoop(audio, audio2);
-    audio.play().catch(console.error);
-    // 全モード共通: フェードイン（波・焚き火は3秒、それ以外は1秒）
-    const fadeDuration = (config.ambient === "波" || config.ambient === "焚き火") ? 3000 : 1000;
-    fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
+      scheduleGaplessLoop(audio, audio2);
+      audio.play().catch(console.error);
+      // フェードイン（波・焚き火は3秒、それ以外は1秒）
+      const fadeDuration = (config.ambient === "波" || config.ambient === "焚き火") ? 3000 : 1000;
+      fadeTimerRef.current = fadeVolume(audio, TARGET_VOL, fadeDuration);
+    }
 
     // アンマウント時はタイマー状態を保存（完了・手動終了済みの場合は保存しない）
     return () => {

@@ -10,6 +10,7 @@ import RollerPicker from "./RollerPicker";
 import StepBar, { FOCUS_STEPS } from "./StepBar";
 import ButtonOrb from "@/components/animations/ButtonOrb";
 import { playClick, preloadClick } from "@/lib/playSound";
+import { useAudioStore } from "@/store/audioStore";
 
 export type FocusConfig = {
   duration: number; // 5〜60の任意の分数
@@ -86,6 +87,10 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
 
   useEffect(() => {
     preloadClick();
+    // BGM再生中（セッションから戻ってきた場合）は準備音楽をスキップ
+    const { audio: storeAudio } = useAudioStore.getState();
+    if (storeAudio && !storeAudio.paused) return;
+
     const se = new Audio("/sounds/zyunnbi.m4a");
     se.volume = 0.175;
     // 即時再生を試み、ジェスチャー制限で失敗したら最初のタップで再生
