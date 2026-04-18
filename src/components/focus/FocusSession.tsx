@@ -100,7 +100,12 @@ export default function FocusSession({ config, onBreak }: Props) {
   // タイマー開始 + ランダムBGM再生
   useEffect(() => {
     const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
-    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/focus";
+    // 同一セッションへの復帰かどうかを判定
+    // ルート・duration・ambientが全て一致する場合のみ復帰とみなす
+    const isReturning = !!storeAudio && !storeAudio.paused
+      && storeMeta?.route === "/app/focus"
+      && storeMeta?.config?.duration === config.duration
+      && storeMeta?.config?.ambient === config.ambient;
 
     // タイマー復元（同じセッションに戻ってきた場合のみ）
     // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始

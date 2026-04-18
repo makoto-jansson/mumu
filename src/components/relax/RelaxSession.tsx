@@ -313,7 +313,11 @@ export default function RelaxSession({ config, onDone }: Props) {
   // タイマー開始 + ランダムBGM（HTMLAudioElement のみ → iOS バックグラウンド再生対応）
   useEffect(() => {
     const { audio: storeAudio, meta: storeMeta } = useAudioStore.getState();
-    const isReturning = !!storeAudio && !storeAudio.paused && storeMeta?.route === "/app/relax";
+    // 同一セッションへの復帰かどうかを判定
+    // ルート・durationが一致する場合のみ復帰とみなす
+    const isReturning = !!storeAudio && !storeAudio.paused
+      && storeMeta?.route === "/app/relax"
+      && storeMeta?.config?.duration === config.duration;
 
     // タイマー復元（同じセッションに戻ってきた場合のみ）
     // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始
