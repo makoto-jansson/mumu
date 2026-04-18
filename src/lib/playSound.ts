@@ -83,10 +83,38 @@ export const preloadClick   = () => preloadBuffer("/sounds/clicksound.wav");
 export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
 
 // ジェスチャーハンドラから呼ぶ（ボタン・タップ等）
-export const playClick   = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
+export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
 
-// useEffect から呼ぶ（AudioContext が running のときだけ鳴る）
-export const playZyunnbi = () => playBufferIfRunning("/sounds/zyunnbi.m4a", 0.175);
+// useEffect から呼ぶ（直前のジェスチャーで resume が進行中の場合も考慮して少し待つ）
+export function playZyunnbi(): void {
+  const ctx = getCtx();
+  if (!ctx) return;
+
+  let cancelled = false;
+  // 200ms 以内に鳴らなければキャンセル（ローラーピッカーズレ防止）
+  const cancelTimer = setTimeout(() => { cancelled = true; }, 200);
+
+  const fire = () => {
+    if (cancelled) return;
+    clearTimeout(cancelTimer);
+    const buf = _buffers.get("/sounds/zyunnbi.m4a");
+    if (!buf) return;
+    const src  = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.175;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(0);
+  };
+
+  if (ctx.state === "running") {
+    fire();
+  } else {
+    // 直前のボタンタップで resume() が呼ばれていれば 200ms 以内に完了する
+    ctx.resume().then(fire).catch(() => { clearTimeout(cancelTimer); });
+  }
+}
 
 // BGM・その他効果音（HTMLAudioElement）
 export function playSound(path: string, volume = 1.0) {
