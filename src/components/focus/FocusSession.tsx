@@ -108,8 +108,8 @@ export default function FocusSession({ config, onBreak }: Props) {
       && storeMeta?.config?.ambient === config.ambient;
 
     // タイマー復元（同じセッションに戻ってきた場合のみ）
-    // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始
-    if (timerSnap && isReturning) {
+    // timerSnap.routeが"/app/focus"でない場合は別セッションのスナップなので無視
+    if (timerSnap && isReturning && timerSnap.route === "/app/focus") {
       if (timerSnap.isPaused) {
         initPaused(timerSnap.remainingSeconds);
         setIsPaused(true);
@@ -187,6 +187,7 @@ export default function FocusSession({ config, onBreak }: Props) {
           remainingSeconds: timeLeftRef.current,
           savedAt: Date.now(),
           isPaused: false, // 一時停止中かどうかはhandlePauseResumeで別途保存
+          route: "/app/focus",
         });
       }
     };
@@ -224,12 +225,12 @@ export default function FocusSession({ config, onBreak }: Props) {
       resume();
       audioElRef.current?.play().catch(console.error);
       setIsPaused(false);
-      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: Date.now(), isPaused: false });
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: Date.now(), isPaused: false, route: "/app/focus" });
     } else {
       pause();
       audioElRef.current?.pause();
       setIsPaused(true);
-      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: 0, isPaused: true });
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: 0, isPaused: true, route: "/app/focus" });
     }
   };
 

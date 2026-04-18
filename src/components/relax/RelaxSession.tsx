@@ -278,12 +278,12 @@ export default function RelaxSession({ config, onDone }: Props) {
       resume();
       audioElRef.current?.play().catch(console.error);
       setIsPaused(false);
-      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: Date.now(), isPaused: false });
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: Date.now(), isPaused: false, route: "/app/relax" });
     } else {
       pause();
       audioElRef.current?.pause();
       setIsPaused(true);
-      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: 0, isPaused: true });
+      saveTimerSnap({ remainingSeconds: timeLeftRef.current, savedAt: 0, isPaused: true, route: "/app/relax" });
     }
   };
 
@@ -320,8 +320,8 @@ export default function RelaxSession({ config, onDone }: Props) {
       && storeMeta?.config?.duration === config.duration;
 
     // タイマー復元（同じセッションに戻ってきた場合のみ）
-    // 新規セッション（isReturning=false）はtimerSnapを無視して新しい設定で開始
-    if (timerSnap && isReturning) {
+    // timerSnap.routeが"/app/relax"でない場合は別セッションのスナップなので無視
+    if (timerSnap && isReturning && timerSnap.route === "/app/relax") {
       if (timerSnap.isPaused) {
         initPaused(timerSnap.remainingSeconds);
         setIsPaused(true);
@@ -371,6 +371,7 @@ export default function RelaxSession({ config, onDone }: Props) {
           remainingSeconds: timeLeftRef.current,
           savedAt: Date.now(),
           isPaused: false,
+          route: "/app/relax",
         });
       }
     };

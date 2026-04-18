@@ -41,6 +41,7 @@ type TimerSnap = {
   remainingSeconds: number; // 保存時点の残り秒数
   savedAt: number;          // Date.now() at save（一時停止中は0）
   isPaused: boolean;
+  route: string;            // どのセッションのスナップか（"/app/focus" | "/app/relax"）
 };
 
 type AudioStore = {
