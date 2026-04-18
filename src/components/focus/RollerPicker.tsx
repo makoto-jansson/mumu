@@ -119,9 +119,7 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
                 if (!el) return;
                 el.scrollTo({ top: valueToScroll(opt), behavior: "smooth" });
                 if (opt !== value) {
-                  const se = new Audio("/sounds/clicksound.wav");
-                  se.volume = 0.2625;
-                  se.play().catch(console.error);
+                  playClick();
                 }
                 onChange(opt);
               }}

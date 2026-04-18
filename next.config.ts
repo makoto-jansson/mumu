@@ -17,6 +17,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // .m4a ファイルを正しい MIME タイプで配信（ブラウザの audio 再生に必須）
+  headers: async () => [
+    {
+      source: "/sounds/:path*.m4a",
+      headers: [{ key: "Content-Type", value: "audio/mp4" }],
+    },
+  ],
 };
 
 export default withSerwist(nextConfig);
