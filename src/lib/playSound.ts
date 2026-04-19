@@ -175,11 +175,23 @@ type FadeHandle = {
   disconnect: () => void;
 };
 
+// iOS 判定（audio.volume が無視される環境かどうか）
+function _isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+}
+
 export function connectGain(audio: HTMLAudioElement, initialVolume: number): FadeHandle | null {
+  // PC では HTMLAudioElement.volume が正常に動作するため GainNode は不要。
+  // iOS のみ audio.volume が読み取り専用（常に1）なので GainNode で音量制御する。
+  // PC で AudioContext を使うと Chrome の autoplay policy により
+  // resume() がブロックされて BGM が無音になるため、iOS 以外は null を返す。
+  if (!_isIOS()) return null;
+
   const ctx = getCtx();
   if (!ctx) return null;
 
-  // iOS: AudioContext が suspended の場合は resume() してから続行
   ctx.resume().catch(() => {});
 
   let source: MediaElementAudioSourceNode;
