@@ -1,17 +1,23 @@
 "use client";
 
 // 効果音再生ユーティリティ
-// クリック音・準備音楽は Web Audio API（AudioBuffer）を使用 → iOS含む全デバイスで低遅延
+//
+// ⚠️ iOS Safari では AudioContext.statechange イベントが発火しないことがある（WebKit既知の問題）
+//    そのため statechange は一切使わず、ポーリングで ctx.state を監視する方針とする。
 
 let _ctx: AudioContext | null = null;
 
-// サウンドバッファキャッシュ
-const _buffers: Map<string, AudioBuffer> = new Map();
-const _loading:  Map<string, Promise<void>> = new Map();
+// デコード済みバッファキャッシュ
+const _buffers: Map<string, AudioBuffer>     = new Map();
+// ロード中Promise（重複fetch防止）
+const _loading:  Map<string, Promise<void>>  = new Map();
+// fetch済みArrayBufferキャッシュ（decodeAudioData失敗時の再デコードで再fetchしなくて済むよう）
+const _rawBufs:  Map<string, ArrayBuffer>    = new Map();
 
-// モバイルでどんなタッチ操作でも AudioContext を unlock する
-// BottomNav など playClick() を呼ばないナビゲーションでも確実に解放できる
+// ─── AudioContext 初期化 & unlock ────────────────────────────────────────────
+
 if (typeof window !== "undefined") {
+  // どんなタッチ/クリックでも AudioContext を unlock する
   const _unlock = () => {
     if (_ctx && _ctx.state === "suspended") {
       _ctx.resume().catch(() => {});
@@ -21,33 +27,39 @@ if (typeof window !== "undefined") {
   window.addEventListener("touchstart", _unlock, { capture: true, passive: true });
   window.addEventListener("mousedown",  _unlock, { capture: true });
 
-  // AudioContext を早期作成：初回のタッチで unlock 可能な状態にする
-  // （useEffect内で作ると、そのページへの遷移タップが unlock に使えない）
-  // 関数宣言はホイストされるため、この位置から呼び出し可能
-  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  // AudioContext を早期作成しておく
+  // → アプリ起動後の最初のタッチで即 unlock 可能になる
+  // （useEffect 内で作ると、遷移タップが unlock に使えない）
+  const AC = window.AudioContext
+    ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   if (AC) {
     try { _ctx = new AC(); } catch { /* ignore */ }
   }
-  // 主要バッファを事前デコード（AudioContextはsuspendedでもdecodeAudioDataは動作する）
-  // ※ preloadBuffer はこの後に定義されるが、function宣言はホイストされる
 }
+
+// ─── 内部ユーティリティ ───────────────────────────────────────────────────────
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   // closed 状態（ページ非表示→復帰等）は再生成
   if (_ctx && _ctx.state === "closed") {
     _ctx = null;
-    _buffers.clear(); // 旧コンテキストのバッファは使えないため破棄
+    _buffers.clear();
     _loading.clear();
+    // rawBufs は残す（再デコードに使えるため）
   }
   if (!_ctx) {
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AC = window.AudioContext
+      ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     _ctx = new AC();
   }
   return _ctx;
 }
 
-// 指定パスの音声を Web Audio API 用にフェッチ＆デコードして保持
+// 指定パスの音声を fetch → decodeAudioData → _buffers に保持
+// iOS suspended context での decode 失敗に備え：
+//   - _rawBufs に ArrayBuffer をキャッシュ（再 fetch 不要）
+//   - decode 失敗時は _loading を削除して次回呼び出しで再試行可能にする
 function preloadBuffer(path: string): void {
   if (typeof window === "undefined") return;
   if (_buffers.has(path) || _loading.has(path)) return;
@@ -55,15 +67,26 @@ function preloadBuffer(path: string): void {
   const ctx = getCtx();
   if (!ctx) return;
 
-  const p = fetch(path)
-    .then(r => r.arrayBuffer())
-    .then(buf => ctx.decodeAudioData(buf))
+  // ArrayBuffer は fetch が完了していればキャッシュから使う
+  const raw = _rawBufs.get(path);
+  const fetchP: Promise<ArrayBuffer> = raw
+    ? Promise.resolve(raw)
+    : fetch(path)
+        .then(r => r.arrayBuffer())
+        .then(buf => { _rawBufs.set(path, buf); return buf; });
+
+  const p = fetchP
+    .then(arrayBuf => ctx.decodeAudioData(arrayBuf.slice(0)))
+    // slice(0) = コピーを渡す（decodeAudioData はバッファを detach するため）
     .then(decoded => { _buffers.set(path, decoded); })
-    .catch(() => {});
+    .catch(() => {
+      // decode 失敗（suspended context でのデコード失敗等）→ リセットして再試行可能に
+      _loading.delete(path);
+    });
   _loading.set(path, p);
 }
 
-// AudioBuffer を即時再生するコア処理
+// AudioBuffer を即時再生
 function fireBuffer(ctx: AudioContext, buf: AudioBuffer, volume: number): void {
   const src  = ctx.createBufferSource();
   src.buffer = buf;
@@ -74,125 +97,142 @@ function fireBuffer(ctx: AudioContext, buf: AudioBuffer, volume: number): void {
   src.start(0);
 }
 
-// ── ジェスチャーハンドラ専用（ボタン・タップ等）──────────────────────────
-// suspended なら resume() を呼んでよい
-// バッファ未ロードの場合はロード完了まで待って再生
+// AudioContext が running になるまでポーリングで待機する
+// statechange の代替（iOS Safari では statechange が発火しないことがあるため）
+function waitUntilRunning(
+  ctx: AudioContext,
+  maxMs: number,
+  intervalMs: number,
+  onRunning: () => void,
+): () => void {
+  const start = Date.now();
+  const id = setInterval(() => {
+    if (ctx.state === "running") {
+      clearInterval(id);
+      onRunning();
+    } else if (Date.now() - start > maxMs) {
+      clearInterval(id);
+    }
+  }, intervalMs);
+  return () => clearInterval(id);
+}
+
+// ─── ジェスチャーハンドラ専用（ボタン・タップ等）────────────────────────────
+// ジェスチャー内なので resume() は iOS でも許可される
+// Promise チェーン + ポーリングで確実に再生（statechange は使わない）
+
 function playBufferGesture(path: string, volume = 1.0): void {
   const ctx = getCtx();
   if (!ctx) return;
 
-  // ジェスチャー内: suspended なら resume（失敗しても継続）
-  if (ctx.state === "suspended") {
-    ctx.resume().catch(console.error);
-  }
+  // resume を呼ぶ（ジェスチャー内なので iOS でも成功するはず）
+  const resumeP = ctx.resume().catch(() => {});
 
-  const play = (buf: AudioBuffer) => {
+  const fire = () => {
+    const buf = _buffers.get(path);
+    if (!buf) return;
     if (ctx.state === "running") {
       fireBuffer(ctx, buf, volume);
-      return;
+    } else {
+      // resume().then() が呼ばれたがまだ running でない場合はポーリングで待つ
+      waitUntilRunning(ctx, 1000, 50, () => {
+        const b = _buffers.get(path);
+        if (b) fireBuffer(ctx, b, volume);
+      });
     }
-    // resume 完了を statechange で待つ（安全のため 1 秒後にリスナー破棄）
-    const handler = () => {
-      if (ctx.state === "running") {
-        ctx.removeEventListener("statechange", handler);
-        fireBuffer(ctx, buf, volume);
-      }
-    };
-    const tid = setTimeout(() => ctx.removeEventListener("statechange", handler), 1000);
-    ctx.addEventListener("statechange", () => {
-      clearTimeout(tid);
-      handler();
-    });
   };
 
   const buf = _buffers.get(path);
   if (buf) {
-    play(buf);
+    // バッファ準備済み → resume 完了後に即再生
+    resumeP.then(fire);
     return;
   }
 
-  // バッファ未ロード: preload を開始してから（or 進行中のものを使って）再生
-  // コンテキスト再生成後など loadingP が null の場合も自動でリカバリする
+  // バッファ未ロード: preload を開始して resume と両方の完了を待つ
   preloadBuffer(path);
   const loadingP = _loading.get(path);
   if (!loadingP) return;
-  loadingP.then(() => {
-    const b = _buffers.get(path);
-    if (b) play(b);
-  }).catch(() => {});
+
+  Promise.all([resumeP, loadingP]).then(() => fire());
 }
 
-// ── 公開 API ──────────────────────────────────────────
+// ─── 公開 API ─────────────────────────────────────────────────────────────────
 
 export const preloadClick   = () => preloadBuffer("/sounds/clicksound.wav");
 export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
 
+// ジェスチャーハンドラから呼ぶ（ボタン・タップ等）
+export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
+
 // モジュールロード時にバッファをプリロード開始
-// AudioContextは上部の if(window) ブロックで既に作成済み
-// decodeAudioDataはsuspendedコンテキストでも動作するため、ここで開始しておく
+// suspended context でも decodeAudioData は動作する（iOS 15+ で確認済み）
+// →失敗した場合も _loading を削除して再試行可能
 if (typeof window !== "undefined") {
   preloadBuffer("/sounds/clicksound.wav");
   preloadBuffer("/sounds/zyunnbi.m4a");
 }
 
-// ジェスチャーハンドラから呼ぶ（ボタン・タップ等）
-export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
-
-// useEffect から呼ぶ（準備ページ表示時に鳴らす）
-// モバイル（iOS含む）対応:
-//   - ctx.resume() を試みる
-//   - statechange で running を検知して再生
-//   - バッファ読み込み済みなら最大 800ms、未ロードなら最大 4000ms 待機
-//     （iOS / 低速回線で 216KB の m4a デコードに時間がかかるため）
+// useEffect から呼ぶ（準備ページ表示時）
+//
+// iOS での動作フロー:
+//   1. useEffect 内なので ctx.resume() は拒否されることが多い
+//   2. ポーリングで ctx.state === "running" を待つ（最大 5 秒 / 100ms 間隔）
+//   3. ユーザーが画面をタップ → touchstart → _unlock() → ctx.resume() → running に
+//   4. 次の 100ms ポーリングで tryFire() が成功して再生
+//
+// ポーリング間隔 100ms のため、タップから最大 100ms 以内に音が出る
 export function playZyunnbi(): void {
-  // バッファが未ロードの場合はロードを開始する（preloadZyunnbi未呼び出しのケースに対応）
+  // バッファが未ロードなら開始する（suspended 状態でも fetch は可能）
   preloadBuffer("/sounds/zyunnbi.m4a");
 
   const ctx = getCtx();
   if (!ctx) return;
 
-  ctx.resume().catch(() => {}); // 可能なら resume（ジェスチャー直後なら iOS でも成功）
+  // resume を試みる（ジェスチャー直後ならiOSでも成功する場合がある）
+  ctx.resume().catch(() => {});
+
+  let fired = false;
 
   const tryFire = (): boolean => {
+    if (fired) return true;
     if (ctx.state !== "running") return false;
     const buf = _buffers.get("/sounds/zyunnbi.m4a");
     if (!buf) return false;
+    fired = true;
     fireBuffer(ctx, buf, 0.175);
     return true;
   };
 
-  // 即再生できる場合
+  // 即再生できれば即再生
   if (tryFire()) return;
 
-  // バッファロード済みなら 800ms、未ロードなら 4000ms（ネットワーク取得＋デコード待ち）
-  const bufReady   = _buffers.has("/sounds/zyunnbi.m4a");
-  const timeoutMs  = bufReady ? 800 : 4000;
+  // resume().then() で再試行（ナビゲーション直後なら成功することがある）
+  ctx.resume().then(() => { tryFire(); }).catch(() => {});
 
-  let done = false;
-  let timeoutId: ReturnType<typeof setTimeout>;
-
-  const finish = () => {
-    if (done) return;
-    done = true;
-    clearTimeout(timeoutId);
-    ctx.removeEventListener("statechange", onStateChange);
-  };
-
-  const onStateChange = () => {
-    if (done) return;
-    if (tryFire()) finish();
-  };
-
-  ctx.addEventListener("statechange", onStateChange);
-  timeoutId = setTimeout(finish, timeoutMs);
-
-  // バッファがまだロード中の場合、ロード完了後も tryFire を試みる
+  // バッファロード完了時に再試行
   const loadingP = _loading.get("/sounds/zyunnbi.m4a");
   if (loadingP) {
-    loadingP.then(() => {
-      if (!done && tryFire()) finish();
-    }).catch(() => {});
+    loadingP.then(() => { tryFire(); }).catch(() => {});
   }
+
+  // ポーリング: statechange の代替（iOS Safari で statechange は信頼できないため）
+  // 最大 5 秒 / 100ms 間隔 でチェック
+  const startMs = Date.now();
+  const stopPoll = waitUntilRunning(ctx, 5000, 100, () => {
+    // コンテキストが running になったら再度 preload 試行
+    // （suspended 中に decode が失敗していた場合のリカバリ）
+    if (!_buffers.has("/sounds/zyunnbi.m4a")) {
+      preloadBuffer("/sounds/zyunnbi.m4a");
+      // デコードが完了するまで少し待ってから再試行
+      setTimeout(() => { tryFire(); }, 300);
+    } else {
+      tryFire();
+    }
+  });
+
+  // 5 秒経過 or 再生完了で stopPoll は内部で自動停止（waitUntilRunning の maxMs が担う）
+  void startMs; void stopPoll;
 }
 
 // BGM・その他効果音（HTMLAudioElement）
@@ -203,14 +243,13 @@ export function playSound(path: string, volume = 1.0) {
   audio.play().catch(console.error);
 }
 
-// ── BGM フェード用 GainNode ヘルパー ─────────────────────────────────────
+// ─── BGM フェード用 GainNode ヘルパー ────────────────────────────────────────
 // iOS は HTMLAudioElement.volume を無視するため、
 // Web Audio API の MediaElementSource + GainNode 経由で音量を制御する。
-// 戻り値: cleanup 関数（アンマウント時に呼ぶ）
 
 type FadeHandle = {
-  setVolume: (v: number) => void;
-  fadeTo:    (target: number, durationMs: number, onDone?: () => void) => void;
+  setVolume:  (v: number) => void;
+  fadeTo:     (target: number, durationMs: number, onDone?: () => void) => void;
   disconnect: () => void;
 };
 
@@ -218,16 +257,14 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
   const ctx = getCtx();
   if (!ctx) return null;
 
-  // iOSなどでAudioContextがsuspendedの場合にresumeを試みる
-  // ジェスチャー直後ならiOSでも成功する場合がある
+  // resume を試みる（ジェスチャー直後ならiOSでも成功する場合がある）
   ctx.resume().catch(() => {});
 
-  // createMediaElementSource は同一要素に対して1回しか呼べないためキャッシュ
+  // createMediaElementSource は同一要素に対して1回しか呼べない
   let source: MediaElementAudioSourceNode;
   try {
     source = ctx.createMediaElementSource(audio);
   } catch {
-    // 既に接続済みの場合など（無視して null を返す）
     return null;
   }
 
@@ -244,11 +281,11 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
     },
     fadeTo(target: number, durationMs: number, onDone?: () => void) {
       if (fadeId) clearInterval(fadeId);
-      const steps   = 30;
-      const stepMs  = durationMs / steps;
-      const start   = gain.gain.value;
-      const delta   = (target - start) / steps;
-      let   count   = 0;
+      const steps  = 30;
+      const stepMs = durationMs / steps;
+      const start  = gain.gain.value;
+      const delta  = (target - start) / steps;
+      let   count  = 0;
       fadeId = setInterval(() => {
         count++;
         gain.gain.value = Math.max(0, Math.min(1, start + delta * count));
