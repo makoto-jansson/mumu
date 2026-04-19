@@ -89,19 +89,46 @@ export function playZyunnbi(): () => void {
   return cancel;
 }
 
-// ─── クリック音 ─────────────────────────────────────────────────────────────
-// HTMLAudioElement.play() をジェスチャーから直接呼ぶ
-// iOS では click ハンドラからの play() は unlock 不要で確実に動作する
+// ─── クリック音（低遅延 AudioBuffer 方式） ──────────────────────────────────
+// AudioBuffer は事前デコード済みのため再生遅延がほぼゼロ
+// ジェスチャーから直接 BufferSource.start() するので iOS でも確実に動作する
+// AudioContext が未 unlock の場合は HTMLAudioElement にフォールバック
 
 let _clickEl: HTMLAudioElement | null = null;
+let _clickBuf: AudioBuffer | null = null;
+
 if (typeof window !== "undefined") {
+  // HTMLAudioElement（フォールバック用）
   _clickEl = new Audio("/sounds/clicksound.wav");
   _clickEl.preload = "auto";
+
+  // AudioBuffer を非同期でデコード（以降の再生はゼロ遅延になる）
+  fetch("/sounds/clicksound.wav")
+    .then((r) => r.arrayBuffer())
+    .then((buf) => {
+      const ctx = getCtx();
+      return ctx ? ctx.decodeAudioData(buf) : Promise.reject();
+    })
+    .then((decoded) => { _clickBuf = decoded; })
+    .catch(() => { /* フォールバックに任せる */ });
 }
 
 export function playClick(): void {
+  const ctx = getCtx();
+  if (ctx && _clickBuf) {
+    // ジェスチャーから直接呼ばれるので resume → 即再生（低遅延）
+    ctx.resume().catch(() => {});
+    const src  = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer       = _clickBuf;
+    gain.gain.value  = 0.2625;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    return;
+  }
+  // AudioBuffer 未ロード時のフォールバック
   if (!_clickEl) return;
-  // currentTime をリセットして再生（高速連打でも正常動作）
   _clickEl.currentTime = 0;
   _clickEl.volume = 0.2625;
   _clickEl.play().catch(() => {});

@@ -117,6 +117,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
         {/* 戻るリンク */}
         <Link
           href="/app"
+          onClick={() => cancelZyunnbiRef.current?.()}
           className="text-[#e8e6e1]/40 text-sm font-light tracking-wider hover:text-[#e8e6e1] transition-colors duration-300 inline-flex items-center gap-2 mb-8"
         >
           <span>←</span> 戻る
