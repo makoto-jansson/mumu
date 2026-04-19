@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: "/app/", // アプリページはクロール不要
     },
     sitemap: "https://mumucoffee-feel.com/sitemap.xml",
   };

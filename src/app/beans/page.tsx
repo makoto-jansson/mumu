@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     description: "スペシャルティコーヒーをていねいに焙煎しています。",
     url: "https://mumucoffee-feel.com/beans",
   },
+  alternates: {
+    canonical: "https://mumucoffee-feel.com/beans",
+  },
 };
 
 // microCMSのデータは更新したら即反映させたいので revalidate = 0（キャッシュしない）

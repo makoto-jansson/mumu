@@ -30,8 +30,25 @@ export default function Footer() {
           灯台の珈琲焙煎所 mumu
         </Link>
 
+        {/* サイト内リンク（SEO・クローラビリティ向上） */}
+        <nav aria-label="フッターナビゲーション" className="flex items-center gap-8">
+          {[
+            { href: "/about", label: "about" },
+            { href: "/beans", label: "珈琲豆" },
+            { href: "/journal", label: "読み物" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-[#e8e6e1]/50 text-sm font-light tracking-wider hover:text-[#e8e6e1] transition-colors duration-300"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
         {/* 外部リンク */}
-        <nav className="flex items-center gap-8">
+        <nav aria-label="外部リンク" className="flex items-center gap-8">
           {externalLinks.map((link) => (
             <a
               key={link.href}

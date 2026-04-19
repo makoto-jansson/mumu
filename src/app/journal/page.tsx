@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: "珈琲と感性にまつわる読み物。",
     url: "https://mumucoffee-feel.com/journal",
   },
+  alternates: {
+    canonical: "https://mumucoffee-feel.com/journal",
+  },
 };
 
 export default function JournalPage() {

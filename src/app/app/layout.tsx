@@ -2,10 +2,20 @@
 // - HPのHeader/Footerは表示しない（ルートlayout.tsxのmainタグを上書き）
 // - 代わりにBottomNavを表示
 // - 背景は暗色（#0a0a0a）で統一
+// - 検索エンジンにはインデックスさせない（ツールページのため）
 
+import type { Metadata } from "next";
 import BottomNav from "@/components/app/layout/BottomNav";
 import NowPlayingBar from "@/components/app/layout/NowPlayingBar";
 import SoundPreloader from "@/components/app/layout/SoundPreloader";
+
+// アプリページは検索エンジンにインデックスさせない
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AppLayout({
   children,

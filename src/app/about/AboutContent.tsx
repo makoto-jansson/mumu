@@ -5,6 +5,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import RoasterProfile from "@/components/about/RoasterProfile";
 
 function FadeBlock({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
@@ -54,32 +55,76 @@ export default function AboutContent() {
         <div className="flex flex-col gap-10 text-[#e8e6e1]/70 text-base font-light leading-[2] mb-24">
           <FadeBlock>
             <p>
+              灯台の珈琲焙煎所mumu（ムーム）は「感性が、ふと、戻ってくるような瞬間を届ける」をコンセプトに珈琲豆を焙煎しています。
+            </p>
+          </FadeBlock>
+          <FadeBlock>
+            <p>
+              主にスペシャルティコーヒーと呼ばれる、品質にこだわった個性豊かな珈琲豆を取り扱っており、個性のあるフレーバーと優しい甘さのある味づくりを目指しています。
+              <br />
+              浅煎り〜深煎りまでございます。
+            </p>
+          </FadeBlock>
+
+          {/* 区切り */}
+          <FadeBlock>
+            <p className="text-center text-[#e8e6e1]/30 tracking-[0.5em]">・・・・・・</p>
+          </FadeBlock>
+
+          <FadeBlock>
+            <p>
               目まぐるしく変化の激しい世の中で、私たちは、気付けば目の前のことに流され、振り回されてばかりです。
             </p>
           </FadeBlock>
           <FadeBlock>
             <p>
-              仕事、人間関係、情報の波。やるべきことは山積みで、感じたいことを感じる暇もない。そんな日々の中で、ふと「あれ、最近何も感じていないな」と気づく瞬間があります。
+              いつの間にか、好きだった映画や音楽を楽しむ余裕すらなくなり、好きでもないアプリゲームやショート動画を眺めてしまう...。
+              <br />
+              私含めそんな人がとても増えているように感じます。
+            </p>
+          </FadeBlock>
+
+          {/* 区切り */}
+          <FadeBlock>
+            <p className="text-center text-[#e8e6e1]/30 tracking-[0.5em]">・・・・・・</p>
+          </FadeBlock>
+
+          <FadeBlock>
+            <p>
+              そんな毎日に抗って、自分の「好き」を取り戻そうとしてみても、渦に吸い寄せらせるように、またすぐアプリを開いてしまう...。
+              <br />
+              そしてこんなハズではなかったのに...。
+              <br />
+              と少し落ち込む。
             </p>
           </FadeBlock>
           <FadeBlock>
             <p>
-              mumuは、そんな現代の"鈍くなっていく感性"に抗うために生まれました。
+              いっそのことスマホを捨てて山奥で暮らそう...なんて考えもよぎりますが、そんな度胸もありません。
+              <br />
+              忙しない現代を生きていく上で、これはもう仕方のないコトのように感じます。
             </p>
           </FadeBlock>
           <FadeBlock>
             <p>
-              珈琲を淹れる、その一滴一滴の時間。豆を挽く音、湯気の香り、カップを包む温もり。それはほんの数分間のことかもしれないけれど、その小さなひとときが、少しだけ自分に戻るきっかけになる。
+              でも、こうして葛藤しながら、自分と社会を見つめるコト自体が、現代で自分を取り戻す唯一の方法のような気がしています。
             </p>
           </FadeBlock>
           <FadeBlock>
             <p>
-              私たちが目指しているのは、「世界一おいしい珈琲」ではありません。あなたの感性が、ふと戻ってくるような、そんな一杯です。
+              たまには珈琲でも飲みながらぼーっとしてみてください。
+              <br />
+              珈琲って、ゆっくり味わうといろんな味がするんだなあ...と、じわじわ感性が戻ってきます。
             </p>
           </FadeBlock>
           <FadeBlock>
             <p>
-              灯台は、暗い海の中で方向を示す存在です。mumuの珈琲が、忙しい日常の中で感性を取り戻すための、小さな灯台になれたら幸いです。
+              そんな風に、疲れて何もできない毎日が続いていたとしても、ムームの珈琲が「感性を取り戻すきっかけ」を作れたらいいなと思っております。
+            </p>
+          </FadeBlock>
+          <FadeBlock>
+            <p>
+              灯台の珈琲焙煎所mumu（ムーム）は、感性が、ふと、戻ってくる瞬間を、珈琲を中心にお届けいたします。
             </p>
           </FadeBlock>
           <FadeBlock>
@@ -88,6 +133,9 @@ export default function AboutContent() {
             </p>
           </FadeBlock>
         </div>
+
+        {/* 焙煎者プロフィール */}
+        <RoasterProfile />
 
         {/* 下部リンク */}
         <FadeBlock>

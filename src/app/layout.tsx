@@ -50,15 +50,30 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+
+  // canonical URL（重複コンテンツ防止）
+  alternates: {
+    canonical: BASE_URL,
+  },
 };
 
 // 構造化データ（JSON-LD）— 組織情報をGoogleに伝える
+// @id で Person (/about#mako) と相互リンクする
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${BASE_URL}/#organization`,
   name: "灯台の珈琲焙煎所mumu",
+  alternateName: "mumu",
   url: BASE_URL,
   logo: `${BASE_URL}/og-image.jpg`,
+  description:
+    "感性が、ふと、戻ってくる場所。スペシャルティコーヒーの焙煎と、珈琲のある時間をつくるツールをお届けします。",
+  founder: {
+    "@type": "Person",
+    "@id": `${BASE_URL}/about#mako`,
+    name: "マコ",
+  },
   sameAs: [
     "https://www.instagram.com/mumu_coffee_roaster/",
     "https://note.com/mumu_coffee",
