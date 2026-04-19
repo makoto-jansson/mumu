@@ -10,6 +10,12 @@
 //   BGM フェード → Web Audio API GainNode（connectGain）※変更なし
 
 // ─── zyunnbi: HTMLAudioElement + iOS unlock パターン ─────────────────────────
+//
+// unlock に zyunnbi 本体を使うと一瞬鳴ってしまうため、
+// 無音の data URI 音声でセッションを開放し、本体には触れない
+
+// 無音WAV（44100Hz, 1ch, 1サンプル）― iOS audio session unlock 専用
+const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
 
 let _zyunnbiEl: HTMLAudioElement | null = null;
 let _zyunnbiUnlocked = false;
@@ -20,16 +26,12 @@ if (typeof window !== "undefined") {
   _zyunnbiEl.preload = "auto";
   _zyunnbiEl.volume  = 0.175;
 
-  // 最初のジェスチャーで iOS audio session を unlock する
-  // play() → pause() パターン: 以降は useEffect からでも play() 可能になる
+  // 無音WAVで iOS audio session を unlock（zyunnbiが一瞬鳴るのを防ぐ）
+  const _silentEl = new Audio(SILENT_WAV);
   const doUnlock = () => {
-    if (_zyunnbiUnlocked || !_zyunnbiEl) return;
-    _zyunnbiEl.play()
-      .then(() => {
-        _zyunnbiEl!.pause();
-        _zyunnbiEl!.currentTime = 0;
-        _zyunnbiUnlocked = true;
-      })
+    if (_zyunnbiUnlocked) return;
+    _silentEl.play()
+      .then(() => { _zyunnbiUnlocked = true; })
       .catch(() => {
         // 失敗しても次のジェスチャーで再試行される
       });
@@ -87,6 +89,11 @@ export function playZyunnbi(): () => void {
   }, 100);
 
   return cancel;
+}
+
+// zyunnbi を外部から即停止する（BottomNav などのナビゲーション時に使用）
+export function stopZyunnbi(): void {
+  _cancelZyunnbi?.();
 }
 
 // ─── クリック音（低遅延 AudioBuffer 方式） ──────────────────────────────────

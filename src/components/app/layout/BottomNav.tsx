@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { stopZyunnbi } from "@/lib/playSound";
 
 const navItems = [
   {
@@ -97,6 +98,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={stopZyunnbi}
               className="flex flex-col items-center gap-1 py-2 px-4"
             >
               {item.icon(isActive)}
