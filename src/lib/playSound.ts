@@ -174,6 +174,7 @@ if (typeof window !== "undefined") {
 }
 
 // useEffect から呼ぶ（準備ページ表示時）
+// 戻り値: キャンセル関数（useEffect のクリーンアップで呼ぶこと）
 //
 // iOS での動作フロー:
 //   1. useEffect 内なので ctx.resume() は拒否されることが多い
@@ -181,31 +182,32 @@ if (typeof window !== "undefined") {
 //   3. ユーザーが画面をタップ → touchstart → _unlock() → ctx.resume() → running に
 //   4. 次の 100ms ポーリングで tryFire() が成功して再生
 //
-// ポーリング間隔 100ms のため、タップから最大 100ms 以内に音が出る
-export function playZyunnbi(): void {
+// ⚠️ クリーンアップ必須: コンポーネントがアンマウントされたらキャンセル関数を呼ぶこと。
+//    呼ばないと画面遷移後に音が鳴ってしまう。
+export function playZyunnbi(): () => void {
   // バッファが未ロードなら開始する（suspended 状態でも fetch は可能）
   preloadBuffer("/sounds/zyunnbi.m4a");
 
   const ctx = getCtx();
-  if (!ctx) return;
+  if (!ctx) return () => {};
 
   // resume を試みる（ジェスチャー直後ならiOSでも成功する場合がある）
   ctx.resume().catch(() => {});
 
-  let fired = false;
+  let cancelled = false;
 
   const tryFire = (): boolean => {
-    if (fired) return true;
+    if (cancelled) return true; // キャンセル済みなら無音で終了
     if (ctx.state !== "running") return false;
     const buf = _buffers.get("/sounds/zyunnbi.m4a");
     if (!buf) return false;
-    fired = true;
+    cancelled = true; // 再生したら以降はスキップ
     fireBuffer(ctx, buf, 0.175);
     return true;
   };
 
   // 即再生できれば即再生
-  if (tryFire()) return;
+  if (tryFire()) return () => {};
 
   // resume().then() で再試行（ナビゲーション直後なら成功することがある）
   ctx.resume().then(() => { tryFire(); }).catch(() => {});
@@ -218,21 +220,22 @@ export function playZyunnbi(): void {
 
   // ポーリング: statechange の代替（iOS Safari で statechange は信頼できないため）
   // 最大 5 秒 / 100ms 間隔 でチェック
-  const startMs = Date.now();
   const stopPoll = waitUntilRunning(ctx, 5000, 100, () => {
     // コンテキストが running になったら再度 preload 試行
     // （suspended 中に decode が失敗していた場合のリカバリ）
     if (!_buffers.has("/sounds/zyunnbi.m4a")) {
       preloadBuffer("/sounds/zyunnbi.m4a");
-      // デコードが完了するまで少し待ってから再試行
       setTimeout(() => { tryFire(); }, 300);
     } else {
       tryFire();
     }
   });
 
-  // 5 秒経過 or 再生完了で stopPoll は内部で自動停止（waitUntilRunning の maxMs が担う）
-  void startMs; void stopPoll;
+  // キャンセル関数: useEffect のクリーンアップで呼ぶこと
+  return () => {
+    cancelled = true;
+    stopPoll();
+  };
 }
 
 // BGM・その他効果音（HTMLAudioElement）

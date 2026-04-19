@@ -37,7 +37,9 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
     if (storeAudio && !storeAudio.paused) return;
 
     // Web Audio API 経由で即時再生（AudioContext はナビゲーション時のタップで解除済み）
-    playZyunnbi();
+    // 戻り値のキャンセル関数を返す（画面遷移時に停止するため必須）
+    const cancel = playZyunnbi();
+    return cancel;
   }, []);
 
   return (
