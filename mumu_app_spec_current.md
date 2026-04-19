@@ -1,6 +1,6 @@
 # mumu アプリ 実装仕様書（現状版）
 
-> 最終更新: 2026-04-19（セッション2）
+> 最終更新: 2026-04-20（セッション3）
 > 開発フェーズ: Phase 2〜3 移行期（Focus / Relax 完成、Spark / Reclaim スタブ）
 
 ---
@@ -338,29 +338,48 @@ public/sounds/
 
 `/` 以下はブランドサイト。アプリとは別のレイアウト（Header/Footer あり）。
 
-| ページ | 内容 |
-|--------|------|
-| `/` | トップ（灯台・波・モード紹介） |
-| `/about` | ブランドストーリー |
-| `/beans` | 珈琲豆一覧（microCMS API） |
-| `/journal` | 読み物一覧（microCMS API） |
+| ページ | 内容 | 背景 |
+|--------|------|------|
+| `/` | トップ（灯台・波・モード紹介） | ダーク `#0a0a0a` |
+| `/about` | ブランドストーリー | ダーク `#0a0a0a` |
+| `/beans` | 珈琲豆一覧（microCMS API） | ライト `#f7f9f7` |
+| `/journal` | 読み物一覧（microCMS API） | ライト `#f7f9f7` |
+
+### ページ別テーマ
+
+**ダークテーマ（トップ・About）**: 背景 `#0a0a0a`、テキスト `#e8e6e1`、ボーダー `white/8`
+
+**ライトテーマ（beans・journal）**: 背景 `#f7f9f7`、テキスト `#1a1a1a`、ボーダー `black/10`
+- beans: 豆カードも `border-black/10`、テキスト `#1a1a1a`
+- journal: テキスト `#1a1a1a`、noteへの外部リンク
+
+### HP ヘッダー・フッター
+
+- **ヘッダー**: ダーク固定（`bg-[#0a0a0a]`、スクロールで背景表示）。白ロゴ + `#e8e6e1` テキスト
+- **フッター**: ダーク（`bg-[#0a0a0a]`）。ロゴ + Instagram / note / ショップリンク
 
 ### HP ヒーローセクション
 
-- 背景色: `#0d0a08`（純黒 `#0a0a0a` から暖色寄りの黒に変更）
+- 背景色: `#0a0a0a`
+- 波の色: `#1D9E75`（ティール）
+
+### GTM（Google Tag Manager）
+
+ルートレイアウト（`layout.tsx`）に GTM-5SDPJNKR を設置。`<head>` にスクリプト、`<body>` に noscript iframe。
 
 ---
 
-## 13. デザイン — グレイン + ビネット
+## 13. デザイン — グレイン（フィルム質感）
 
 全ページ（HP・app含む）に `GrainOverlay`（`src/components/ui/GrainOverlay.tsx`）を適用。ルートレイアウト（`layout.tsx`）に配置。
 
 | 項目 | 値 |
 |------|----|
 | グレイン | SVG feTurbulence / fractalNoise / baseFrequency 1.2 / 4オクターブ / opacity 0.025 |
-| ビネット | radial-gradient 周辺 rgba(3,1,0,0.28) |
-| z-index | grain: 9999 / vignette: 9998（固定） |
+| z-index | 9999（固定） |
 | pointer-events | none（クリック・タッチを一切ブロックしない） |
+
+※ ビネットは廃止（ライト背景ページとの相性が悪いため削除済み）
 
 **Android 実装上の注意**:  
 SVG + `position:fixed` + CSS filter（feTurbulence）の組み合わせで、Android Chrome は `pointer-events:none` を無視するバグがある。外側を `<div>` でラップして `position:fixed` / `pointer-events:none` を div に持たせ、SVG は内側で `position:absolute` にすることで回避。
@@ -425,7 +444,7 @@ src/
       CafeScene.tsx         カフェシーン
       ButtonOrb.tsx         ボタン背景オーブエフェクト
     ui/
-      GrainOverlay.tsx      フィルムグレイン+ビネット（全ページ適用）
+      GrainOverlay.tsx      フィルムグレイン（全ページ適用、ビネットなし）
     app/layout/
       BottomNav.tsx         アプリBottomNav（stopZyunnbi呼び出し）
       NowPlayingBar.tsx     再生中ミニプレイヤー
@@ -458,7 +477,9 @@ src/
 | BGM 音量フェード | Howler.js の fade | **Web Audio API GainNode（iOS対応）** |
 | Spark・Reclaim | 実装済み | **スタブ（未実装）** |
 | コーヒー補充提案 | 「2セット以上の場合のみ」 | **「前回表示から7日以上経過時のみ」** |
-| 全ページデザイン | フラットな純黒 | **フィルムグレイン + ビネット（GrainOverlay）** |
+| 全ページデザイン | フラットな純黒 | **フィルムグレイン（GrainOverlay、ビネット廃止）** |
+| beans・journal ページ | ダーク背景 | **ライト背景 `#f7f9f7` + ダークテキスト `#1a1a1a`** |
+| GTM | 未設定 | **GTM-5SDPJNKR を全ページに設置** |
 | バックグラウンド再生 | metadata のみ設定 | **MediaSession setActionHandler で pause/stop を無効化** |
 | Android タッチ | 未考慮 | **GrainOverlay を div ラップ、scrollbar-none webkit 対応** |
 | CoffeeTime subtitle | `string` 型 | **`React.ReactNode` 型（JSX改行対応）** |
