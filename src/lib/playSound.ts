@@ -156,24 +156,43 @@ export function playSound(path: string, volume = 1.0) {
 // ─── BGM フェード用 GainNode ヘルパー ────────────────────────────────────────
 // iOS は HTMLAudioElement.volume を無視するため
 // Web Audio API の MediaElementSource + GainNode 経由で音量を制御する
+//
+// iOS unlock 方針:
+//   AudioContext をモジュールロード時に即生成（suspended 状態）しておく。
+//   ナビゲーションのタップ（touchstart）で resume() → useEffect で connectGain()
+//   を呼ぶ頃には running 状態になっているため、フェードが正確に適用される。
+//   遅延生成（getCtx の if(!_ctx) 分岐）では touchstart 時点で _ctx が null のため
+//   unlock が機能しない。
 
 let _ctx: AudioContext | null = null;
 
-function getCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  if (_ctx && _ctx.state === "closed") _ctx = null;
-  if (!_ctx) {
+// モジュールロード時に AudioContext を生成（iOS unlock のため早期に用意する）
+if (typeof window !== "undefined") {
+  try {
     const AC = window.AudioContext
       ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    _ctx = new AC();
+    if (AC) _ctx = new AC(); // iOS では suspended で生成される
+  } catch { /* 非対応環境は null のまま */ }
+}
+
+function getCtx(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (_ctx && _ctx.state === "closed") {
+    // closed になった場合のみ再生成
+    try {
+      const AC = window.AudioContext
+        ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      _ctx = new AC();
+    } catch { _ctx = null; }
   }
   return _ctx;
 }
 
 // BGM 用 AudioContext unlock（ジェスチャーで resume）
+// _ctx がモジュールロード時から存在するため、最初のタップで確実に動作する
 if (typeof window !== "undefined") {
   const _unlockCtx = () => {
-    if (_ctx && _ctx.state === "suspended") _ctx.resume().catch(() => {});
+    if (_ctx?.state === "suspended") _ctx.resume().catch(() => {});
   };
   window.addEventListener("touchstart", _unlockCtx, { capture: true, passive: true });
   window.addEventListener("mousedown",  _unlockCtx, { capture: true });
@@ -189,6 +208,7 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
   const ctx = getCtx();
   if (!ctx) return null;
 
+  // iOS: AudioContext が suspended の場合は resume() してから続行
   ctx.resume().catch(() => {});
 
   let source: MediaElementAudioSourceNode;
@@ -205,26 +225,39 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
 
   let fadeId: ReturnType<typeof setInterval> | null = null;
 
+  // AudioContext が running になるまで最大 500ms ポーリングしてからフェードを開始
+  // iOS では resume() が非同期なため、suspended のままフェードを始めると無音になる
+  function startFade(target: number, durationMs: number, onDone?: () => void) {
+    if (fadeId) clearInterval(fadeId);
+    const startMs = Date.now();
+    const pollId = setInterval(() => {
+      if (ctx!.state === "running" || Date.now() - startMs > 500) {
+        clearInterval(pollId);
+        if (fadeId) clearInterval(fadeId);
+        const steps  = 30;
+        const stepMs = durationMs / steps;
+        const from   = gain.gain.value;
+        const delta  = (target - from) / steps;
+        let   count  = 0;
+        fadeId = setInterval(() => {
+          count++;
+          gain.gain.value = Math.max(0, Math.min(1, from + delta * count));
+          if (count >= steps) {
+            if (fadeId) clearInterval(fadeId);
+            gain.gain.value = target;
+            onDone?.();
+          }
+        }, stepMs);
+      }
+    }, 30);
+  }
+
   return {
     setVolume(v: number) {
       gain.gain.value = Math.max(0, Math.min(1, v));
     },
     fadeTo(target: number, durationMs: number, onDone?: () => void) {
-      if (fadeId) clearInterval(fadeId);
-      const steps  = 30;
-      const stepMs = durationMs / steps;
-      const start  = gain.gain.value;
-      const delta  = (target - start) / steps;
-      let   count  = 0;
-      fadeId = setInterval(() => {
-        count++;
-        gain.gain.value = Math.max(0, Math.min(1, start + delta * count));
-        if (count >= steps) {
-          if (fadeId) clearInterval(fadeId);
-          gain.gain.value = target;
-          onDone?.();
-        }
-      }, stepMs);
+      startFade(target, durationMs, onDone);
     },
     disconnect() {
       if (fadeId) clearInterval(fadeId);
