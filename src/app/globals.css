@@ -34,3 +34,9 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* scrollbar-none クラス: Webkit（Android Chrome / Safari）対応 */
+/* Firefox は inline style の scrollbarWidth: "none" で対応済み   */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
