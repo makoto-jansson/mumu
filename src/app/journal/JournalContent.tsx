@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function JournalContent() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-32 pb-24 px-6">
+    <div className="min-h-screen bg-[#f7f9f7] pt-32 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
 
         <motion.div
@@ -16,7 +16,7 @@ export default function JournalContent() {
         >
           <Link
             href="/"
-            className="text-[#e8e6e1]/40 text-sm font-light tracking-wider hover:text-[#e8e6e1] transition-colors duration-300 inline-flex items-center gap-2"
+            className="text-[#1a1a1a]/40 text-sm font-light tracking-wider hover:text-[#1a1a1a] transition-colors duration-300 inline-flex items-center gap-2"
           >
             <span>←</span> ホームに戻る
           </Link>
@@ -28,10 +28,10 @@ export default function JournalContent() {
           transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
           className="mb-20"
         >
-          <p className="text-[#e8e6e1]/40 text-xs font-light tracking-[0.4em] mb-6">
+          <p className="text-[#1a1a1a]/40 text-xs font-light tracking-[0.4em] mb-6">
             読む
           </p>
-          <h1 className="text-[#e8e6e1] text-2xl md:text-3xl font-light leading-loose tracking-wide">
+          <h1 className="text-[#1a1a1a] text-2xl md:text-3xl font-light leading-loose tracking-wide">
             珈琲と感性にまつわる読み物。
           </h1>
         </motion.div>
@@ -40,19 +40,19 @@ export default function JournalContent() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="border-t border-white/10 pt-16"
+          className="border-t border-black/10 pt-16"
         >
-          <p className="text-[#e8e6e1]/50 text-sm font-light leading-relaxed mb-2">
+          <p className="text-[#1a1a1a]/50 text-sm font-light leading-relaxed mb-2">
             記事はまだありません。
           </p>
-          <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed mb-10">
+          <p className="text-[#1a1a1a]/40 text-sm font-light leading-relaxed mb-10">
             noteでmumuのストーリーを読むことができます。
           </p>
           <a
             href="https://note.com/mumu_coffee"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[#e8e6e1]/60 text-sm font-light tracking-wider group hover:text-[#e8e6e1] transition-colors duration-300 relative"
+            className="inline-flex items-center gap-2 text-[#1a1a1a]/60 text-sm font-light tracking-wider group hover:text-[#1a1a1a] transition-colors duration-300 relative"
           >
             noteで読む
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>

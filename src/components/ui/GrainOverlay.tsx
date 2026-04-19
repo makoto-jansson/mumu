@@ -1,5 +1,6 @@
-// フィルムグレイン + ビネットオーバーレイ
+// フィルムグレインオーバーレイ
 // SVG feTurbulence によるアナログ/紙質感をページ全体に付与する
+// グレイン（中間グレー）のみ — 明暗どちらの背景でも自然に馴染む
 //
 // 【Android対応】
 //   position:fixed な SVG に CSS filter（feTurbulence）を使うと
@@ -46,20 +47,6 @@ export default function GrainOverlay() {
         </filter>
         <rect width="100%" height="100%" filter="url(#pageGrain)" opacity="0.025" />
       </svg>
-
-      {/* ビネット（周辺光量落ち）*/}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse 85% 75% at 50% 50%, transparent 40%, rgba(3,1,0,0.28) 100%)",
-        }}
-      />
     </div>
   );
 }
