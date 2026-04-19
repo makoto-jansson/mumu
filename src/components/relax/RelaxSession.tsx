@@ -371,8 +371,12 @@ export default function RelaxSession({ config, onDone }: Props) {
       // グローバルストアに登録（既存の音楽は自動停止）
       setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
 
+      // setActionHandler を登録しないと iOS がロック時に pause を送って止めてしまう
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Relax" });
+        navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
+        navigator.mediaSession.setActionHandler("pause", () => { /* 一時停止を許可しない（バックグラウンド継続） */ });
+        navigator.mediaSession.setActionHandler("stop",  () => { /* 同上 */ });
       }
 
       audio.play().catch(console.error);

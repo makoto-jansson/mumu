@@ -167,8 +167,12 @@ export default function FocusSession({ config, onBreak }: Props) {
       setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
 
       // ロック画面・コントロールセンターにメタデータを表示
+      // setActionHandler を登録しないと iOS がロック時に pause を送って止めてしまう
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
+        navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
+        navigator.mediaSession.setActionHandler("pause", () => { /* 一時停止を許可しない（バックグラウンド継続） */ });
+        navigator.mediaSession.setActionHandler("stop",  () => { /* 同上 */ });
       }
 
       // トラック終了 0.15秒前にスタンバイを再生開始 → ループ切れ目なし
