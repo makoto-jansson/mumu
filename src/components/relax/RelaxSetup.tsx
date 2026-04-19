@@ -3,7 +3,7 @@
 // Relaxモード開始前画面
 // 気分・時間を選んでスタート
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import ButtonOrb from "@/components/animations/ButtonOrb";
@@ -29,6 +29,8 @@ type Props = {
 export default function RelaxSetup({ onStart, onSkip }: Props) {
   const [mood,     setMood]     = useState<RelaxConfig["mood"]>("ぼんやりしたい");
   const [duration, setDuration] = useState(5);
+  // zyunnbi キャンセル関数（画面遷移時に即停止するために使用）
+  const cancelZyunnbiRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     preloadClick();
@@ -36,10 +38,12 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
     const { audio: storeAudio } = useAudioStore.getState();
     if (storeAudio && !storeAudio.paused) return;
 
-    // Web Audio API 経由で即時再生（AudioContext はナビゲーション時のタップで解除済み）
-    // 戻り値のキャンセル関数を返す（画面遷移時に停止するため必須）
     const cancel = playZyunnbi();
-    return cancel;
+    cancelZyunnbiRef.current = cancel;
+    return () => {
+      cancel();
+      cancelZyunnbiRef.current = null;
+    };
   }, []);
 
   return (
@@ -109,14 +113,14 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
         {/* ボタン */}
         <div className="flex flex-col gap-4 mt-auto">
           <button
-            onClick={() => { playClick(); onStart({ mood, duration }); }}
+            onClick={() => { cancelZyunnbiRef.current?.(); playClick(); onStart({ mood, duration }); }}
             className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
           >
             <ButtonOrb />
             <span className="relative z-10">準備できました</span>
           </button>
           <button
-            onClick={() => { playClick(); onSkip({ mood, duration }); }}
+            onClick={() => { cancelZyunnbiRef.current?.(); playClick(); onSkip({ mood, duration }); }}
             className="text-[#e8e6e1]/30 text-sm font-light tracking-wider hover:text-[#e8e6e1]/60 transition-colors duration-300"
           >
             珈琲なしで始める →

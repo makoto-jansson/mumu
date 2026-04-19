@@ -2,243 +2,116 @@
 
 // 効果音再生ユーティリティ
 //
-// ⚠️ iOS Safari では AudioContext.statechange イベントが発火しないことがある（WebKit既知の問題）
-//    そのため statechange は一切使わず、ポーリングで ctx.state を監視する方針とする。
+// iOS 対応方針:
+//   クリック音   → HTMLAudioElement.play() をジェスチャーから直接呼ぶ（最も確実）
+//   zyunnbi     → HTMLAudioElement + "unlock" パターン
+//                  初回ジェスチャーで play→pause して iOS audio session を有効化
+//                  その後は useEffect からでも再生可能になる
+//   BGM フェード → Web Audio API GainNode（connectGain）※変更なし
 
-let _ctx: AudioContext | null = null;
+// ─── zyunnbi: HTMLAudioElement + iOS unlock パターン ─────────────────────────
 
-// デコード済みバッファキャッシュ
-const _buffers: Map<string, AudioBuffer>     = new Map();
-// ロード中Promise（重複fetch防止）
-const _loading:  Map<string, Promise<void>>  = new Map();
-// fetch済みArrayBufferキャッシュ（decodeAudioData失敗時の再デコードで再fetchしなくて済むよう）
-const _rawBufs:  Map<string, ArrayBuffer>    = new Map();
-
-// ─── AudioContext 初期化 & unlock ────────────────────────────────────────────
+let _zyunnbiEl: HTMLAudioElement | null = null;
+let _zyunnbiUnlocked = false;
+let _cancelZyunnbi: (() => void) | null = null;
 
 if (typeof window !== "undefined") {
-  // どんなタッチ/クリックでも AudioContext を unlock する
-  const _unlock = () => {
-    if (_ctx && _ctx.state === "suspended") {
-      _ctx.resume().catch(() => {});
-    }
-  };
-  // capture フェーズで登録（React のイベントより前に実行される）
-  window.addEventListener("touchstart", _unlock, { capture: true, passive: true });
-  window.addEventListener("mousedown",  _unlock, { capture: true });
+  _zyunnbiEl = new Audio("/sounds/zyunnbi.m4a");
+  _zyunnbiEl.preload = "auto";
+  _zyunnbiEl.volume  = 0.175;
 
-  // AudioContext を早期作成しておく
-  // → アプリ起動後の最初のタッチで即 unlock 可能になる
-  // （useEffect 内で作ると、遷移タップが unlock に使えない）
-  const AC = window.AudioContext
-    ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  if (AC) {
-    try { _ctx = new AC(); } catch { /* ignore */ }
-  }
-}
-
-// ─── 内部ユーティリティ ───────────────────────────────────────────────────────
-
-function getCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  // closed 状態（ページ非表示→復帰等）は再生成
-  if (_ctx && _ctx.state === "closed") {
-    _ctx = null;
-    _buffers.clear();
-    _loading.clear();
-    // rawBufs は残す（再デコードに使えるため）
-  }
-  if (!_ctx) {
-    const AC = window.AudioContext
-      ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    _ctx = new AC();
-  }
-  return _ctx;
-}
-
-// 指定パスの音声を fetch → decodeAudioData → _buffers に保持
-// iOS suspended context での decode 失敗に備え：
-//   - _rawBufs に ArrayBuffer をキャッシュ（再 fetch 不要）
-//   - decode 失敗時は _loading を削除して次回呼び出しで再試行可能にする
-function preloadBuffer(path: string): void {
-  if (typeof window === "undefined") return;
-  if (_buffers.has(path) || _loading.has(path)) return;
-
-  const ctx = getCtx();
-  if (!ctx) return;
-
-  // ArrayBuffer は fetch が完了していればキャッシュから使う
-  const raw = _rawBufs.get(path);
-  const fetchP: Promise<ArrayBuffer> = raw
-    ? Promise.resolve(raw)
-    : fetch(path)
-        .then(r => r.arrayBuffer())
-        .then(buf => { _rawBufs.set(path, buf); return buf; });
-
-  const p = fetchP
-    .then(arrayBuf => ctx.decodeAudioData(arrayBuf.slice(0)))
-    // slice(0) = コピーを渡す（decodeAudioData はバッファを detach するため）
-    .then(decoded => { _buffers.set(path, decoded); })
-    .catch(() => {
-      // decode 失敗（suspended context でのデコード失敗等）→ リセットして再試行可能に
-      _loading.delete(path);
-    });
-  _loading.set(path, p);
-}
-
-// AudioBuffer を即時再生
-function fireBuffer(ctx: AudioContext, buf: AudioBuffer, volume: number): void {
-  const src  = ctx.createBufferSource();
-  src.buffer = buf;
-  const gain = ctx.createGain();
-  gain.gain.value = volume;
-  src.connect(gain);
-  gain.connect(ctx.destination);
-  src.start(0);
-}
-
-// AudioContext が running になるまでポーリングで待機する
-// statechange の代替（iOS Safari では statechange が発火しないことがあるため）
-function waitUntilRunning(
-  ctx: AudioContext,
-  maxMs: number,
-  intervalMs: number,
-  onRunning: () => void,
-): () => void {
-  const start = Date.now();
-  const id = setInterval(() => {
-    if (ctx.state === "running") {
-      clearInterval(id);
-      onRunning();
-    } else if (Date.now() - start > maxMs) {
-      clearInterval(id);
-    }
-  }, intervalMs);
-  return () => clearInterval(id);
-}
-
-// ─── ジェスチャーハンドラ専用（ボタン・タップ等）────────────────────────────
-// ジェスチャー内なので resume() は iOS でも許可される
-// Promise チェーン + ポーリングで確実に再生（statechange は使わない）
-
-function playBufferGesture(path: string, volume = 1.0): void {
-  const ctx = getCtx();
-  if (!ctx) return;
-
-  // resume を呼ぶ（ジェスチャー内なので iOS でも成功するはず）
-  const resumeP = ctx.resume().catch(() => {});
-
-  const fire = () => {
-    const buf = _buffers.get(path);
-    if (!buf) return;
-    if (ctx.state === "running") {
-      fireBuffer(ctx, buf, volume);
-    } else {
-      // resume().then() が呼ばれたがまだ running でない場合はポーリングで待つ
-      waitUntilRunning(ctx, 1000, 50, () => {
-        const b = _buffers.get(path);
-        if (b) fireBuffer(ctx, b, volume);
+  // 最初のジェスチャーで iOS audio session を unlock する
+  // play() → pause() パターン: 以降は useEffect からでも play() 可能になる
+  const doUnlock = () => {
+    if (_zyunnbiUnlocked || !_zyunnbiEl) return;
+    _zyunnbiEl.play()
+      .then(() => {
+        _zyunnbiEl!.pause();
+        _zyunnbiEl!.currentTime = 0;
+        _zyunnbiUnlocked = true;
+      })
+      .catch(() => {
+        // 失敗しても次のジェスチャーで再試行される
       });
-    }
   };
 
-  const buf = _buffers.get(path);
-  if (buf) {
-    // バッファ準備済み → resume 完了後に即再生
-    resumeP.then(fire);
-    return;
-  }
-
-  // バッファ未ロード: preload を開始して resume と両方の完了を待つ
-  preloadBuffer(path);
-  const loadingP = _loading.get(path);
-  if (!loadingP) return;
-
-  Promise.all([resumeP, loadingP]).then(() => fire());
-}
-
-// ─── 公開 API ─────────────────────────────────────────────────────────────────
-
-export const preloadClick   = () => preloadBuffer("/sounds/clicksound.wav");
-export const preloadZyunnbi = () => preloadBuffer("/sounds/zyunnbi.m4a");
-
-// ジェスチャーハンドラから呼ぶ（ボタン・タップ等）
-export const playClick = () => playBufferGesture("/sounds/clicksound.wav", 0.2625);
-
-// モジュールロード時にバッファをプリロード開始
-// suspended context でも decodeAudioData は動作する（iOS 15+ で確認済み）
-// →失敗した場合も _loading を削除して再試行可能
-if (typeof window !== "undefined") {
-  preloadBuffer("/sounds/clicksound.wav");
-  preloadBuffer("/sounds/zyunnbi.m4a");
+  window.addEventListener("touchstart", doUnlock, { capture: true, passive: true });
+  window.addEventListener("mousedown",  doUnlock, { capture: true });
 }
 
 // useEffect から呼ぶ（準備ページ表示時）
-// 戻り値: キャンセル関数（useEffect のクリーンアップで呼ぶこと）
-//
-// iOS での動作フロー:
-//   1. useEffect 内なので ctx.resume() は拒否されることが多い
-//   2. ポーリングで ctx.state === "running" を待つ（最大 5 秒 / 100ms 間隔）
-//   3. ユーザーが画面をタップ → touchstart → _unlock() → ctx.resume() → running に
-//   4. 次の 100ms ポーリングで tryFire() が成功して再生
-//
-// ⚠️ クリーンアップ必須: コンポーネントがアンマウントされたらキャンセル関数を呼ぶこと。
-//    呼ばないと画面遷移後に音が鳴ってしまう。
+// 戻り値: キャンセル関数（必ず useEffect クリーンアップ or 画面遷移ボタンで呼ぶこと）
 export function playZyunnbi(): () => void {
-  // バッファが未ロードなら開始する（suspended 状態でも fetch は可能）
-  preloadBuffer("/sounds/zyunnbi.m4a");
+  if (!_zyunnbiEl) return () => {};
 
-  const ctx = getCtx();
-  if (!ctx) return () => {};
+  // 前の呼び出しをキャンセル（二重起動防止）
+  _cancelZyunnbi?.();
 
-  // resume を試みる（ジェスチャー直後ならiOSでも成功する場合がある）
-  ctx.resume().catch(() => {});
-
+  const el = _zyunnbiEl;
   let cancelled = false;
+  let pollId: ReturnType<typeof setInterval> | null = null;
 
-  const tryFire = (): boolean => {
-    if (cancelled) return true; // キャンセル済みなら無音で終了
-    if (ctx.state !== "running") return false;
-    const buf = _buffers.get("/sounds/zyunnbi.m4a");
-    if (!buf) return false;
-    cancelled = true; // 再生したら以降はスキップ
-    fireBuffer(ctx, buf, 0.175);
-    return true;
+  const doPlay = () => {
+    if (cancelled) return;
+    el.currentTime = 0;
+    el.volume = 0.175;
+    el.play().catch(() => {});
   };
 
-  // 即再生できれば即再生
-  if (tryFire()) return () => {};
+  const cancel = () => {
+    cancelled = true;
+    if (pollId) { clearInterval(pollId); pollId = null; }
+    try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
+    if (_cancelZyunnbi === cancel) _cancelZyunnbi = null;
+  };
+  _cancelZyunnbi = cancel;
 
-  // resume().then() で再試行（ナビゲーション直後なら成功することがある）
-  ctx.resume().then(() => { tryFire(); }).catch(() => {});
-
-  // バッファロード完了時に再試行
-  const loadingP = _loading.get("/sounds/zyunnbi.m4a");
-  if (loadingP) {
-    loadingP.then(() => { tryFire(); }).catch(() => {});
+  if (_zyunnbiUnlocked) {
+    // 既に unlock 済みなら即再生
+    doPlay();
+    return cancel;
   }
 
-  // ポーリング: statechange の代替（iOS Safari で statechange は信頼できないため）
-  // 最大 5 秒 / 100ms 間隔 でチェック
-  const stopPoll = waitUntilRunning(ctx, 5000, 100, () => {
-    // コンテキストが running になったら再度 preload 試行
-    // （suspended 中に decode が失敗していた場合のリカバリ）
-    if (!_buffers.has("/sounds/zyunnbi.m4a")) {
-      preloadBuffer("/sounds/zyunnbi.m4a");
-      setTimeout(() => { tryFire(); }, 300);
-    } else {
-      tryFire();
+  // unlock を最大 5 秒待つ（100ms 間隔）
+  // iOS では最初のジェスチャー（ナビゲーションのタップ等）で unlock が完了する
+  const startMs = Date.now();
+  pollId = setInterval(() => {
+    if (cancelled || Date.now() - startMs > 5000) {
+      if (pollId) { clearInterval(pollId); pollId = null; }
+      return;
     }
-  });
+    if (_zyunnbiUnlocked) {
+      if (pollId) { clearInterval(pollId); pollId = null; }
+      doPlay();
+    }
+  }, 100);
 
-  // キャンセル関数: useEffect のクリーンアップで呼ぶこと
-  return () => {
-    cancelled = true;
-    stopPoll();
-  };
+  return cancel;
 }
 
-// BGM・その他効果音（HTMLAudioElement）
+// ─── クリック音 ─────────────────────────────────────────────────────────────
+// HTMLAudioElement.play() をジェスチャーから直接呼ぶ
+// iOS では click ハンドラからの play() は unlock 不要で確実に動作する
+
+let _clickEl: HTMLAudioElement | null = null;
+if (typeof window !== "undefined") {
+  _clickEl = new Audio("/sounds/clicksound.wav");
+  _clickEl.preload = "auto";
+}
+
+export function playClick(): void {
+  if (!_clickEl) return;
+  // currentTime をリセットして再生（高速連打でも正常動作）
+  _clickEl.currentTime = 0;
+  _clickEl.volume = 0.2625;
+  _clickEl.play().catch(() => {});
+}
+
+// 後方互換（呼ばれても何もしない）
+export const preloadClick   = () => {};
+export const preloadZyunnbi = () => {};
+
+// ─── BGM・その他効果音（HTMLAudioElement） ───────────────────────────────────
 export function playSound(path: string, volume = 1.0) {
   if (typeof window === "undefined") return;
   const audio = new Audio(path);
@@ -247,8 +120,30 @@ export function playSound(path: string, volume = 1.0) {
 }
 
 // ─── BGM フェード用 GainNode ヘルパー ────────────────────────────────────────
-// iOS は HTMLAudioElement.volume を無視するため、
-// Web Audio API の MediaElementSource + GainNode 経由で音量を制御する。
+// iOS は HTMLAudioElement.volume を無視するため
+// Web Audio API の MediaElementSource + GainNode 経由で音量を制御する
+
+let _ctx: AudioContext | null = null;
+
+function getCtx(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (_ctx && _ctx.state === "closed") _ctx = null;
+  if (!_ctx) {
+    const AC = window.AudioContext
+      ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    _ctx = new AC();
+  }
+  return _ctx;
+}
+
+// BGM 用 AudioContext unlock（ジェスチャーで resume）
+if (typeof window !== "undefined") {
+  const _unlockCtx = () => {
+    if (_ctx && _ctx.state === "suspended") _ctx.resume().catch(() => {});
+  };
+  window.addEventListener("touchstart", _unlockCtx, { capture: true, passive: true });
+  window.addEventListener("mousedown",  _unlockCtx, { capture: true });
+}
 
 type FadeHandle = {
   setVolume:  (v: number) => void;
@@ -260,10 +155,8 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
   const ctx = getCtx();
   if (!ctx) return null;
 
-  // resume を試みる（ジェスチャー直後ならiOSでも成功する場合がある）
   ctx.resume().catch(() => {});
 
-  // createMediaElementSource は同一要素に対して1回しか呼べない
   let source: MediaElementAudioSourceNode;
   try {
     source = ctx.createMediaElementSource(audio);
