@@ -63,22 +63,24 @@ export default function RoasterProfile() {
             </div>
 
             <p>
-              焙煎は、
+              焙煎は、Aillioという焙煎機で少量ずつ焙煎しています。
+              取り扱っているのは、いまは
               <a
-                href="https://aillio.com/"
+                href="https://mumucoffee.theshop.jp/items/127027333"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline decoration-[#EF9F27]/40 underline-offset-4 hover:decoration-[#EF9F27] transition"
               >
-                Aillio
+                エチオピア（浅煎り）
               </a>
-              という焙煎機で少量ずつ焙煎しています。
-              取り扱っているのは、いまは
+              と
               <a
-                href="/beans"
+                href="https://mumucoffee.theshop.jp/items/127225149"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="underline decoration-[#EF9F27]/40 underline-offset-4 hover:decoration-[#EF9F27] transition"
               >
-                エチオピア（浅煎り）とインドネシア（深煎り）
+                インドネシア（深煎り）
               </a>
               の2種類。
               初めての方にも気軽に試していただけるように「まず100gから」お届けしています。
