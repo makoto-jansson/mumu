@@ -73,6 +73,18 @@ function IconReclaim() {
 }
 
 // ─── モードカードの定義 ───────────────────────────────
+// 音が出るモードに表示するアイコン
+function IconSound() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+      strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 4.5v3l2.5 1.5V3L1 4.5Z" />
+      <path d="M6 2.5C7.5 3.5 8.5 4.7 8.5 6S7.5 8.5 6 9.5" />
+      <path d="M7.5 1C9.5 2.3 11 4 11 6s-1.5 3.7-3.5 5" opacity="0.5" />
+    </svg>
+  );
+}
+
 const modes = [
   {
     href: "/app/focus",
@@ -81,6 +93,7 @@ const modes = [
     nameJa: "集中する",
     description: "深く集中する時間をつくる",
     available: true,
+    hasSound: true,
   },
   {
     href: "/app/relax",
@@ -89,6 +102,7 @@ const modes = [
     nameJa: "リラックスする",
     description: "呼吸を整え、脳のゴミを排出する時間",
     available: true,
+    hasSound: true,
   },
   {
     href: "/app/spark",
@@ -97,6 +111,7 @@ const modes = [
     nameJa: "アイデアを爆発させる",
     description: "思考をかき混ぜてクリエイティブを生む",
     available: true,
+    hasSound: false,
   },
   {
     href: "/app/reclaim",
@@ -105,6 +120,7 @@ const modes = [
     nameJa: "感性を取り戻す",
     description: "感性のメンテナンスをする",
     available: true,
+    hasSound: false,
   },
 ];
 
@@ -185,9 +201,16 @@ export default function AppHome() {
                       {mode.description}
                     </p>
                   </div>
-                  <span className="text-[#e8e6e1]/30 text-sm transition-transform duration-300 group-hover:translate-x-1">
-                    →
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {mode.hasSound && (
+                      <span className="text-[#e8e6e1]/25 group-hover:text-[#e8e6e1]/50 transition-colors duration-300">
+                        <IconSound />
+                      </span>
+                    )}
+                    <span className="text-[#e8e6e1]/30 text-sm transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
+                  </div>
                 </Link>
               ) : (
                 <div className="flex items-center gap-4 border border-white/[0.06] px-5 py-4 opacity-40">
