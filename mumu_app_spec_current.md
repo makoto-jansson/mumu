@@ -1,6 +1,6 @@
 # mumu アプリ 実装仕様書（現状版）
 
-> 最終更新: 2026-04-19
+> 最終更新: 2026-04-19（セッション2）
 > 開発フェーズ: Phase 2〜3 移行期（Focus / Relax 完成、Spark / Reclaim スタブ）
 
 ---
@@ -57,6 +57,8 @@
 - 中央: 灯台アニメーション + キャッチコピー + 波アニメーション
 - 下部: モードカード一覧、mumuショップへのリンク、HPへ戻るリンク
 
+**モードカードの音アイコン**: Focus・Relax カードの右端に音アイコンを表示（BGMが鳴ることを示す）。Spark・Reclaimは非表示。
+
 **サウンド**: ホーム画面では効果音を一切鳴らさない。
 
 ---
@@ -92,6 +94,8 @@ FocusSetup → CoffeeTime（任意） → FocusSession → FocusBreak → Sessio
 
 - ドリップアニメーション
 - 「ありがとう。行こう →」でセッション開始
+- `subtitle` props の型は `React.ReactNode`（JSX で改行を含めることが可能）
+- Relax モードのデフォルト subtitle: 「コーヒーの香り成分には、脳のα波（リラックス時に出る脳波）を<br/>増加させる効果があるという研究があります。」（2行）
 
 ### FocusSession（集中中）
 
@@ -213,9 +217,23 @@ RelaxSetup → CoffeeTime（任意）→ RelaxSession → RelaxDone
 | 関数 | `connectGain(audio, initialVolume): FadeHandle \| null` |
 | 方式 | Web Audio API `MediaElementSource` → `GainNode` → `destination` |
 | iOS 対応 | `HTMLAudioElement.volume` は iOS で無視されるため GainNode で音量制御 |
+| PC 対応 | `_isIOS()` が false の場合は `null` を返す → 呼び出し側が `fadeVolume()`（audio.volume直接操作）にフォールバック |
 | AudioContext | モジュールロード時に即生成（suspended 状態）。ナビゲーションの touchstart で `resume()` |
 | fadeTo() | `ctx.state === "running"` になるまで最大 500ms ポーリングしてからフェード開始 |
 | 制約 | 同一の `HTMLAudioElement` に `createMediaElementSource` は1回のみ呼べる |
+
+### 7.4 MediaSession（バックグラウンド再生）
+
+FocusSession・RelaxSession で `navigator.mediaSession` を設定。
+
+```typescript
+navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
+navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
+navigator.mediaSession.setActionHandler("pause", () => { /* 空ハンドラ: バックグラウンド継続 */ });
+navigator.mediaSession.setActionHandler("stop",  () => { /* 空ハンドラ */ });
+```
+
+**重要**: `setActionHandler` を登録しないと iOS・Android がスクリーンロック時に pause アクションを送り、BGM が止まる。`pause`・`stop` を空ハンドラで登録することでバックグラウンド継続再生を実現する。
 
 **FadeHandle の API**:
 ```typescript
@@ -224,13 +242,13 @@ handle.fadeTo(target, durationMs, onDone?) // なめらかにフェード
 handle.disconnect()                       // GainNode を切断
 ```
 
-### 7.4 その他効果音
+### 7.5 その他効果音
 
 | ファイル | 用途 | 方式 |
 |---------|------|------|
 | `/sounds/endsound.m4a` | セッション完了音 | `new Audio()` 都度生成 |
 
-### 7.5 BGM ファイル構成
+### 7.6 BGM ファイル構成
 
 ```
 public/sounds/
@@ -327,23 +345,52 @@ public/sounds/
 | `/beans` | 珈琲豆一覧（microCMS API） |
 | `/journal` | 読み物一覧（microCMS API） |
 
+### HP ヒーローセクション
+
+- 背景色: `#0d0a08`（純黒 `#0a0a0a` から暖色寄りの黒に変更）
+
 ---
 
-## 13. iOS 対応まとめ
+## 13. デザイン — グレイン + ビネット
 
-iOS Safari 特有の制約と対策。
+全ページ（HP・app含む）に `GrainOverlay`（`src/components/ui/GrainOverlay.tsx`）を適用。ルートレイアウト（`layout.tsx`）に配置。
+
+| 項目 | 値 |
+|------|----|
+| グレイン | SVG feTurbulence / fractalNoise / baseFrequency 1.2 / 4オクターブ / opacity 0.025 |
+| ビネット | radial-gradient 周辺 rgba(3,1,0,0.28) |
+| z-index | grain: 9999 / vignette: 9998（固定） |
+| pointer-events | none（クリック・タッチを一切ブロックしない） |
+
+**Android 実装上の注意**:  
+SVG + `position:fixed` + CSS filter（feTurbulence）の組み合わせで、Android Chrome は `pointer-events:none` を無視するバグがある。外側を `<div>` でラップして `position:fixed` / `pointer-events:none` を div に持たせ、SVG は内側で `position:absolute` にすることで回避。
+
+---
+
+## 14. iOS・Android 対応まとめ
+
+### iOS
 
 | 問題 | 対策 |
 |------|------|
-| `HTMLAudioElement.volume` が無視される | Web Audio API GainNode で音量制御（`connectGain`） |
+| `HTMLAudioElement.volume` が無視される | Web Audio API GainNode で音量制御（`connectGain`、iOS専用） |
 | `AudioContext` がジェスチャーなしでは起動できない | モジュールロード時に生成（suspended）→ 初回タップで `resume()` |
 | `AudioContext.statechange` イベントが発火しない | `setInterval` でポーリング（statechange 非依存） |
 | useEffect からの `audio.play()` が失敗する | HTMLAudioElement unlock パターン（無音WAVで初回ジェスチャー時にセッション解放） |
 | zyunnbi の play→pause が一瞬聴こえる | unlock 専用の無音 WAV（data URI）を使用し、zyunnbi 本体には触れない |
+| スクリーンロック時に BGM が止まる | MediaSession `setActionHandler("pause", () => {})` で iOS からの停止命令を無効化 |
+
+### Android
+
+| 問題 | 対策 |
+|------|------|
+| SVG overlay がタッチを吸収する | GrainOverlay を `<div>` でラップ（SVG は内側 absolute） |
+| `scrollbar-none` クラスが Chrome で効かない | `globals.css` に `.scrollbar-none::-webkit-scrollbar { display: none }` を追加 |
+| BGM がバックグラウンドで止まる | MediaSession `setActionHandler` 登録（iOS と共通の対策） |
 
 ---
 
-## 14. 主要コンポーネント一覧
+## 15. 主要コンポーネント一覧
 
 ```
 src/
@@ -377,6 +424,8 @@ src/
       CampfireScene.tsx     焚き火シーン
       CafeScene.tsx         カフェシーン
       ButtonOrb.tsx         ボタン背景オーブエフェクト
+    ui/
+      GrainOverlay.tsx      フィルムグレイン+ビネット（全ページ適用）
     app/layout/
       BottomNav.tsx         アプリBottomNav（stopZyunnbi呼び出し）
       NowPlayingBar.tsx     再生中ミニプレイヤー
@@ -398,7 +447,7 @@ src/
 
 ---
 
-## 15. 元仕様書からの主な変更点
+## 16. 元仕様書からの主な変更点
 
 | 項目 | 元の仕様 | 現在の実装 |
 |------|---------|-----------|
@@ -409,3 +458,7 @@ src/
 | BGM 音量フェード | Howler.js の fade | **Web Audio API GainNode（iOS対応）** |
 | Spark・Reclaim | 実装済み | **スタブ（未実装）** |
 | コーヒー補充提案 | 「2セット以上の場合のみ」 | **「前回表示から7日以上経過時のみ」** |
+| 全ページデザイン | フラットな純黒 | **フィルムグレイン + ビネット（GrainOverlay）** |
+| バックグラウンド再生 | metadata のみ設定 | **MediaSession setActionHandler で pause/stop を無効化** |
+| Android タッチ | 未考慮 | **GrainOverlay を div ラップ、scrollbar-none webkit 対応** |
+| CoffeeTime subtitle | `string` 型 | **`React.ReactNode` 型（JSX改行対応）** |
