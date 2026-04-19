@@ -157,42 +157,36 @@ export function playSound(path: string, volume = 1.0) {
 // iOS は HTMLAudioElement.volume を無視するため
 // Web Audio API の MediaElementSource + GainNode 経由で音量を制御する
 //
-// iOS unlock 方針:
-//   AudioContext をモジュールロード時に即生成（suspended 状態）しておく。
-//   ナビゲーションのタップ（touchstart）で resume() → useEffect で connectGain()
-//   を呼ぶ頃には running 状態になっているため、フェードが正確に適用される。
-//   遅延生成（getCtx の if(!_ctx) 分岐）では touchstart 時点で _ctx が null のため
-//   unlock が機能しない。
+// iOS / PC 両対応の unlock 方針:
+//   AudioContext は「モジュールロード時ではなくジェスチャー時に生成 + resume」する。
+//   - モジュールロード時に生成すると PC (Chrome) では「ユーザー操作なしに生成済み」
+//     とみなされより厳しく suspended → 2分以上 BGM が出ない問題が発生する。
+//   - touchstart / mousedown の _unlockCtx で getCtx() を呼んで「生成も一緒に行い」
+//     そのまま resume() する。これにより:
+//       iOS: ナビゲーションのタップ時点で生成 + resume → useEffect 到達時は running
+//       PC : mousedown で生成 + resume → useEffect 到達時は running
 
 let _ctx: AudioContext | null = null;
 
-// モジュールロード時に AudioContext を生成（iOS unlock のため早期に用意する）
-if (typeof window !== "undefined") {
-  try {
-    const AC = window.AudioContext
-      ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (AC) _ctx = new AC(); // iOS では suspended で生成される
-  } catch { /* 非対応環境は null のまま */ }
-}
-
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
-  if (_ctx && _ctx.state === "closed") {
-    // closed になった場合のみ再生成
+  if (_ctx && _ctx.state === "closed") _ctx = null;
+  if (!_ctx) {
     try {
       const AC = window.AudioContext
         ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      _ctx = new AC();
-    } catch { _ctx = null; }
+      if (AC) _ctx = new AC();
+    } catch { /* 非対応環境は null のまま */ }
   }
   return _ctx;
 }
 
-// BGM 用 AudioContext unlock（ジェスチャーで resume）
-// _ctx がモジュールロード時から存在するため、最初のタップで確実に動作する
+// BGM 用 AudioContext unlock（ジェスチャーで生成 + resume）
+// getCtx() で存在しなければ生成もするため iOS / PC どちらでも機能する
 if (typeof window !== "undefined") {
   const _unlockCtx = () => {
-    if (_ctx?.state === "suspended") _ctx.resume().catch(() => {});
+    const ctx = getCtx();
+    if (ctx?.state === "suspended") ctx.resume().catch(() => {});
   };
   window.addEventListener("touchstart", _unlockCtx, { capture: true, passive: true });
   window.addEventListener("mousedown",  _unlockCtx, { capture: true });
