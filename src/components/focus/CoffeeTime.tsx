@@ -4,6 +4,7 @@
 // ドリップアニメーションを見ながら珈琲を淹れる時間
 
 import { useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useTimer } from "@/hooks/useTimer";
 import Drip from "@/components/animations/Drip";
@@ -16,7 +17,7 @@ type Props = {
   onSkip: () => void;
   steps?: StepDef[];
   stepKey?: string; // StepBar の current key（デフォルト "coffee"）
-  subtitle?: string; // 説明文（省略時はFocus用デフォルト）
+  subtitle?: React.ReactNode; // 説明文（省略時はFocus用デフォルト）
 };
 
 export default function CoffeeTime({ onComplete, onSkip, steps = FOCUS_STEPS, stepKey = "coffee", subtitle }: Props) {

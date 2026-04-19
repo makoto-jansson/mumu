@@ -48,7 +48,7 @@ export default function RelaxPage() {
           steps={RELAX_STEPS}
           onComplete={handleCoffeeDone}
           onSkip={handleCoffeeDone}
-          subtitle="コーヒーの香り成分には、脳のα波（リラックス時に出る脳波）を増加させる効果があるという研究があります。"
+          subtitle={<>コーヒーの香り成分には、脳のα波（リラックス時に出る脳波）を<br />増加させる効果があるという研究があります。</>}
         />
       )}
       {phase === "session" && config && (

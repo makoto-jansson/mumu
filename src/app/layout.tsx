@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import InstallBanner from "@/components/layout/InstallBanner";
+import GrainOverlay from "@/components/ui/GrainOverlay";
 
 const BASE_URL = "https://mumucoffee-feel.com";
 
@@ -84,6 +85,8 @@ export default function RootLayout({
         />
       </head>
       <body>
+        {/* 全ページ共通のグレイン + ビネット */}
+        <GrainOverlay />
         <ConditionalLayout>{children}</ConditionalLayout>
         <InstallBanner />
       </body>

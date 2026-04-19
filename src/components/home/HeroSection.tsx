@@ -1,11 +1,12 @@
 "use client";
 
 // トップページ ヒーローセクション
-// - フルスクリーン（100vh）、背景は暗色（#0a0a0a）
+// - フルスクリーン（100vh）、背景は暗色（#0d0a08 ※暖色寄りの黒）
 // - 灯台SVGアニメーション
 // - 波SVGアニメーション（下部）
 // - メインコピーのフェードイン（Framer Motion）
 // - スクロールインジケーター
+// ※ グレイン/ビネットは page.tsx の GrainOverlay（fixed）で全体に適用
 
 import { motion } from "framer-motion";
 import Lighthouse from "@/components/animations/Lighthouse";
