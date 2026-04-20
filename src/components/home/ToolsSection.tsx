@@ -61,8 +61,8 @@ export default function ToolsSection() {
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="relative z-10 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-8 md:gap-10"
       >
-        {/* 左カラム: 番号 + 見出し + イラスト（下に配置） */}
-        <div className="flex flex-col gap-3">
+        {/* 左カラム: 番号 + 見出し + イラスト（SPは中央寄せ、md以上は左寄せ） */}
+        <div className="flex flex-col gap-3 items-center md:items-start text-center md:text-left">
           <p className="text-[10px] text-grad-teal tracking-[0.3em]">01</p>
           <h2
             className="font-mincho text-ink-primary font-medium"
@@ -78,8 +78,8 @@ export default function ToolsSection() {
           </div>
         </div>
 
-        {/* 右カラム: タイトル + 本文 + CTA */}
-        <div className="flex flex-col gap-4">
+        {/* 右カラム: タイトル + 本文 + CTA（SPは中央寄せ、md以上は左寄せ） */}
+        <div className="flex flex-col gap-4 items-center md:items-start text-center md:text-left">
           <h3
             className="font-mincho text-ink-primary font-medium leading-relaxed"
             style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}

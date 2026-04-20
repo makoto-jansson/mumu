@@ -85,8 +85,8 @@ export default async function BeansSection() {
       <div className="relative z-10">
         {/* ヘッダー2カラム */}
         <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-8 md:gap-10 mb-8">
-          {/* 左カラム: 番号 + 見出し + イラスト（下に配置） */}
-          <div className="flex flex-col gap-3">
+          {/* 左カラム: 番号 + 見出し（SPは中央寄せ、md以上は左寄せ） */}
+          <div className="flex flex-col gap-3 items-center md:items-start text-center md:text-left">
             <p className="text-[10px] text-grad-teal tracking-[0.3em]">02</p>
             <h2
               className="font-mincho text-ink-primary font-medium"
@@ -99,8 +99,8 @@ export default async function BeansSection() {
             </p>
           </div>
 
-          {/* 右カラム: タイトル + 本文 */}
-          <div className="flex flex-col gap-4">
+          {/* 右カラム: タイトル + 本文（SPは中央寄せ、md以上は左寄せ） */}
+          <div className="flex flex-col gap-4 items-center md:items-start text-center md:text-left">
             <h3
               className="font-mincho text-ink-primary font-medium leading-relaxed"
               style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}
