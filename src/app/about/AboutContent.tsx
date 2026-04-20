@@ -22,7 +22,7 @@ function FadeBlock({ children, delay = 0 }: { children: React.ReactNode; delay?:
 
 export default function AboutContent() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-32 pb-24 px-6">
+    <div className="min-h-screen bg-base pt-32 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
 
         {/* ホームに戻るリンク */}
@@ -34,15 +34,27 @@ export default function AboutContent() {
         >
           <Link
             href="/"
-            className="text-[#e8e6e1]/40 text-sm font-light tracking-wider hover:text-[#e8e6e1] transition-colors duration-300 inline-flex items-center gap-2"
+            className="text-ink-secondary/70 text-sm font-light tracking-wider hover:text-ink-primary transition-colors duration-300 inline-flex items-center gap-2"
           >
             <span>←</span> ホームに戻る
           </Link>
         </motion.div>
 
+        {/* ページタイトル */}
+        <FadeBlock delay={0.05}>
+          <div className="mb-16">
+            <p className="text-grad-teal text-[10px] font-light tracking-[0.3em] mb-4">
+              04
+            </p>
+            <p className="font-serif italic text-ink-secondary text-[11px] tracking-[0.2em]">
+              — about
+            </p>
+          </div>
+        </FadeBlock>
+
         {/* キャッチコピー */}
         <FadeBlock delay={0.1}>
-          <h1 className="text-[#e8e6e1] text-3xl md:text-4xl font-light leading-loose tracking-wide mb-24">
+          <h1 className="font-mincho text-ink-primary text-3xl md:text-4xl font-medium leading-loose tracking-wide mb-24">
             感性が、ふと、
             <br />
             戻ってくるような珈琲を
@@ -52,7 +64,7 @@ export default function AboutContent() {
         </FadeBlock>
 
         {/* ストーリー本文 */}
-        <div className="flex flex-col gap-10 text-[#e8e6e1]/70 text-base font-light leading-[2] mb-24">
+        <div className="flex flex-col gap-10 text-ink-secondary text-base font-light leading-[2] mb-24">
           <FadeBlock>
             <p>
               灯台の珈琲焙煎所mumu（ムーム）は「感性が、ふと、戻ってくるような瞬間を届ける」をコンセプトに珈琲豆を焙煎しています。
@@ -68,7 +80,7 @@ export default function AboutContent() {
 
           {/* 区切り */}
           <FadeBlock>
-            <p className="text-center text-[#e8e6e1]/30 tracking-[0.5em]">・・・・・・</p>
+            <p className="text-center text-ink-secondary/40 tracking-[0.5em]">・・・・・・</p>
           </FadeBlock>
 
           <FadeBlock>
@@ -86,7 +98,7 @@ export default function AboutContent() {
 
           {/* 区切り */}
           <FadeBlock>
-            <p className="text-center text-[#e8e6e1]/30 tracking-[0.5em]">・・・・・・</p>
+            <p className="text-center text-ink-secondary/40 tracking-[0.5em]">・・・・・・</p>
           </FadeBlock>
 
           <FadeBlock>
@@ -128,7 +140,7 @@ export default function AboutContent() {
             </p>
           </FadeBlock>
           <FadeBlock>
-            <p className="text-[#e8e6e1]/40 text-sm tracking-wider">
+            <p className="font-serif italic text-ink-secondary/80 text-sm tracking-wider">
               灯台の珈琲焙煎所 mumu
             </p>
           </FadeBlock>
@@ -139,22 +151,22 @@ export default function AboutContent() {
 
         {/* 下部リンク */}
         <FadeBlock>
-          <div className="flex flex-col gap-6 pt-10 border-t border-white/10">
+          <div className="flex flex-col gap-6 pt-10 border-t border-ink-primary/15">
             <Link
               href="/beans"
-              className="inline-flex items-center gap-2 text-[#e8e6e1]/60 text-sm font-light tracking-wider group hover:text-[#e8e6e1] transition-colors duration-300 relative w-fit"
+              className="inline-flex items-center gap-2 text-ink-secondary text-sm font-light tracking-wider group hover:text-ink-primary transition-colors duration-300 relative w-fit"
             >
               珈琲豆を見る
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#EF9F27] group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-accent-lime group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/journal"
-              className="inline-flex items-center gap-2 text-[#e8e6e1]/60 text-sm font-light tracking-wider group hover:text-[#e8e6e1] transition-colors duration-300 relative w-fit"
+              className="inline-flex items-center gap-2 text-ink-secondary text-sm font-light tracking-wider group hover:text-ink-primary transition-colors duration-300 relative w-fit"
             >
               読み物を見る
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#EF9F27] group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-accent-lime group-hover:w-full transition-all duration-300" />
             </Link>
           </div>
         </FadeBlock>

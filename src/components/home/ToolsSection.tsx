@@ -1,93 +1,113 @@
 "use client";
 
-// 「整える」セクション — Webアプリの紹介
-// カード型レイアウト + 細線イラスト
+// セクション 01 「整える」（新デザイン 2026リニューアル）
+// 2カラム: 左にアイコン+番号+見出し、右にタイトル+本文+CTA
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import SectionBlock from "@/components/ui/SectionBlock";
+import GradientBackground from "@/components/ui/GradientBackground";
 
-// 細線イラスト: 整いそうな夜明けの風景（山 + 地平線 + 海 + 月 + 星）
-function IllustTools() {
+// 細線イラスト: 夜明けの風景（縮小版、ink-primary 色に変更）
+function IllustTools({ size = 52 }: { size?: number }) {
   return (
-    <svg width="80" height="56" viewBox="0 0 80 56" fill="none">
+    <svg
+      width={size}
+      height={Math.round(size * 0.7)}
+      viewBox="0 0 80 56"
+      fill="none"
+      aria-hidden="true"
+    >
       {/* 月 */}
-      <circle cx="62" cy="11" r="5.5" stroke="#e8e6e1" strokeWidth="0.8" opacity="0.42" />
-      <circle cx="64.5" cy="9.5" r="4.2" fill="#0d0d0d" />
-
-      {/* 星 */}
-      <circle cx="8"  cy="7"  r="0.8" fill="#e8e6e1" opacity="0.28" />
-      <circle cx="20" cy="4"  r="0.6" fill="#e8e6e1" opacity="0.2" />
-      <circle cx="34" cy="9"  r="0.7" fill="#e8e6e1" opacity="0.22" />
-      <circle cx="48" cy="5"  r="0.6" fill="#e8e6e1" opacity="0.18" />
-      <circle cx="74" cy="14" r="0.6" fill="#e8e6e1" opacity="0.2" />
-
+      <circle cx="62" cy="11" r="5.5" stroke="#123656" strokeWidth="0.8" opacity="0.55" />
+      <circle cx="64.5" cy="9.5" r="4.2" fill="#fdf8ef" />
       {/* 遠くの山のシルエット */}
-      <path d="M0 36 L10 22 L18 30 L28 14 L38 26 L50 16 L62 28 L72 18 L80 24 L80 36 Z"
-        stroke="#e8e6e1" strokeWidth="0.7" strokeLinejoin="round" opacity="0.2" />
-
+      <path
+        d="M0 36 L10 22 L18 30 L28 14 L38 26 L50 16 L62 28 L72 18 L80 24 L80 36 Z"
+        stroke="#123656"
+        strokeWidth="0.7"
+        strokeLinejoin="round"
+        opacity="0.3"
+      />
       {/* 地平線 */}
-      <line x1="0" y1="36" x2="80" y2="36" stroke="#e8e6e1" strokeWidth="0.6" opacity="0.35" />
-
-      {/* 海の波（3本） */}
-      <path d="M0 40 C13 38 27 42 40 40 C53 38 67 42 80 40"
-        stroke="#e8e6e1" strokeWidth="0.7" strokeLinecap="round" opacity="0.22" />
-      <path d="M0 44 C10 42 22 46 38 44 C54 42 66 46 80 44"
-        stroke="#e8e6e1" strokeWidth="0.6" strokeLinecap="round" opacity="0.13" />
-      <path d="M0 49 C15 47 32 51 50 49 C64 47 72 50 80 49"
-        stroke="#e8e6e1" strokeWidth="0.5" strokeLinecap="round" opacity="0.08" />
-
-      {/* 月の水面への反射 */}
-      <line x1="60" y1="37" x2="58" y2="50" stroke="#e8e6e1" strokeWidth="0.5" strokeLinecap="round" opacity="0.12" />
-      <line x1="62" y1="37" x2="62" y2="52" stroke="#e8e6e1" strokeWidth="0.7" strokeLinecap="round" opacity="0.18" />
-      <line x1="64" y1="37" x2="66" y2="50" stroke="#e8e6e1" strokeWidth="0.5" strokeLinecap="round" opacity="0.12" />
+      <line x1="0" y1="36" x2="80" y2="36" stroke="#123656" strokeWidth="0.6" opacity="0.45" />
+      {/* 海の波 */}
+      <path
+        d="M0 40 C13 38 27 42 40 40 C53 38 67 42 80 40"
+        stroke="#123656"
+        strokeWidth="0.7"
+        strokeLinecap="round"
+        opacity="0.28"
+      />
+      <path
+        d="M0 44 C10 42 22 46 38 44 C54 42 66 46 80 44"
+        stroke="#123656"
+        strokeWidth="0.6"
+        strokeLinecap="round"
+        opacity="0.18"
+      />
     </svg>
   );
 }
 
 export default function ToolsSection() {
   return (
-    <section className="py-20 px-5 bg-[#0a0a0a]">
-      <div className="max-w-sm mx-auto md:max-w-2xl">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <p className="text-[#e8e6e1]/30 text-[10px] font-light tracking-[0.45em] mb-6">
-            ── 整える ──
+    <SectionBlock>
+      <GradientBackground type="tools" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="relative z-10 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-8 md:gap-10"
+      >
+        {/* 左カラム: 番号 + 見出し + イラスト（下に配置） */}
+        <div className="flex flex-col gap-3">
+          <p className="text-[10px] text-grad-teal tracking-[0.3em]">01</p>
+          <h2
+            className="font-mincho text-ink-primary font-medium"
+            style={{ fontSize: "clamp(22px, 3vw, 26px)", letterSpacing: "0.01em" }}
+          >
+            整える
+          </h2>
+          <p className="font-serif italic text-[11px] text-ink-secondary tracking-[0.2em]">
+            — integrate
           </p>
+          <div className="mt-4">
+            <IllustTools size={52} />
+          </div>
+        </div>
 
+        {/* 右カラム: タイトル + 本文 + CTA */}
+        <div className="flex flex-col gap-4">
+          <h3
+            className="font-mincho text-ink-primary font-medium leading-relaxed"
+            style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}
+          >
+            集中。リラックス。クリエイティブ。
+            <br />
+            感性が回復する、アプリ。
+          </h3>
+          <p
+            className="text-ink-secondary"
+            style={{ fontSize: "13px", lineHeight: "2" }}
+          >
+            自分らしさを取り戻す、4つのモード。
+          </p>
           <Link
             href="/app"
-            className="group block border border-white/8 hover:border-white/18 transition-all duration-400 bg-[#0d0d0d] hover:bg-[#0f0f0f]"
+            className="group inline-flex items-center gap-2 text-ink-primary text-[11px] tracking-[0.25em] w-fit mt-2"
           >
-            <div className="px-6 md:px-12 pt-8 pb-6 flex flex-col md:flex-row md:items-center md:gap-10 gap-5">
-              {/* イラスト（PCでは左固定） */}
-              <div className="shrink-0 md:w-28 flex justify-start">
-                <IllustTools />
-              </div>
-
-              {/* テキスト + CTA */}
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-[#e8e6e1]/85 text-xl font-light leading-relaxed tracking-wide">
-                    集中。リラックス。クリエイティブ。<br />
-                    感性が回復する、アプリ。
-                  </h2>
-                  <p className="text-[#e8e6e1]/40 text-sm font-light leading-relaxed">
-                    自分らしさを取り戻す、4つのモード。
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 text-[#EF9F27]/60 text-xs font-light tracking-wider group-hover:text-[#EF9F27] transition-colors duration-300">
-                  アプリを使ってみる
-                  <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                </div>
-              </div>
-            </div>
+            <span className="relative">
+              アプリを使ってみる
+              <span className="absolute -bottom-1 left-0 w-full h-px bg-ink-primary/40 group-hover:bg-accent-lime transition-colors duration-300" />
+            </span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1">
+              →
+            </span>
           </Link>
-        </motion.div>
-      </div>
-    </section>
+        </div>
+      </motion.div>
+    </SectionBlock>
   );
 }

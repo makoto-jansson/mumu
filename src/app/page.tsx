@@ -9,15 +9,15 @@ import AboutSection from "@/components/home/AboutSection";
 
 export default function Home() {
   return (
-    <>
-      {/* フルスクリーンのヒーロー */}
+    <div className="pt-20 pb-10 px-4 md:px-8">
+      {/* 新デザイン: 角丸ブロック（SectionBlock）を縦に並べる */}
       <HeroSection />
 
-      {/* 3つの柱 + mumuについてセクション */}
+      {/* 3つの柱 + mumuについてセクション（Phase 3以降で新レイアウトに差し替え予定） */}
       <ToolsSection />
       <BeansSection />
       <JournalSection />
       <AboutSection />
-    </>
+    </div>
   );
 }

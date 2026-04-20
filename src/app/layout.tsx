@@ -2,12 +2,32 @@
 // 全ページ共通のHeader・Footerを配置し、SEO / OGP metaを設定する
 
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import InstallBanner from "@/components/layout/InstallBanner";
 import GrainOverlay from "@/components/ui/GrainOverlay";
 
 const BASE_URL = "https://mumucoffee-feel.com";
+
+// Cormorant Garamond（英文セリフ体・装飾用）
+// Variable Font で upright と italic を軽量に提供
+const cormorant = localFont({
+  src: [
+    {
+      path: "../../Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf",
+      weight: "300 700",
+      style: "normal",
+    },
+    {
+      path: "../../Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf",
+      weight: "300 700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-cormorant",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   // デフォルトtitle（各ページで上書き可能）
@@ -87,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={cormorant.variable}>
       <head>
         {/* Google Tag Manager */}
         <script dangerouslySetInnerHTML={{ __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5SDPJNKR');` }} />
