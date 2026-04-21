@@ -222,7 +222,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
-        className="fixed inset-0 bg-[#0a0a0a] flex flex-col"
+        className="fixed inset-0 bg-[#0e0e0e] flex flex-col"
       >
         <StepBar steps={SPARK_STEPS} current="shuffle" />
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8">
@@ -231,7 +231,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
           </p>
           <button
             onClick={() => { playClick(); onDone(kept); }}
-            className="px-8 py-3 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/10 transition-all duration-300"
+            className="px-8 py-3 border border-[#a3a957]/40 text-[#a3a957]/80 text-sm font-light tracking-wider hover:bg-[#a3a957]/10 transition-all duration-300"
           >
             次のステップへ →
           </button>
@@ -246,7 +246,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col"
     >
       <SparkAmbient />
 
@@ -256,7 +256,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
         {/* kept カウンター */}
         <div className="flex justify-end px-6 max-w-sm mx-auto w-full h-5">
           {kept.length > 0 && (
-            <span className="text-[#EF9F27]/50 text-[10px] font-light tracking-wider">
+            <span className="text-[#a3a957]/50 text-[10px] font-light tracking-wider">
               {kept.length} kept
             </span>
           )}
@@ -387,7 +387,7 @@ export default function SparkShuffle({ sceneId, onDone }: Props) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => { playClick(); onDone(kept); }}
-                className="w-full mt-3 py-2 text-[#EF9F27]/50 text-xs font-light tracking-wider hover:text-[#EF9F27]/80 transition-colors duration-200"
+                className="w-full mt-3 py-2 text-[#a3a957]/50 text-xs font-light tracking-wider hover:text-[#a3a957]/80 transition-colors duration-200"
               >
                 {kept.length}テーマキープ — 次のステップへ →
               </motion.button>

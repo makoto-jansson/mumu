@@ -56,7 +56,7 @@ export default function BreathGuide({ onComplete, onSkip }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center px-6"
+      className="fixed inset-0 bg-[#0e0e0e] z-50 flex flex-col items-center justify-center px-6"
     >
       {/* 残り時間 */}
       <p className="text-[#e8e6e1]/30 text-sm font-light tracking-[0.3em] mb-16">
@@ -69,13 +69,13 @@ export default function BreathGuide({ onComplete, onSkip }: Props) {
         <motion.div
           animate={{ scale: circleScale }}
           transition={{ duration: PHASE_DURATION, ease: "easeInOut" }}
-          className="w-40 h-40 rounded-full border border-[#EF9F27]/20"
+          className="w-40 h-40 rounded-full border border-[#a3a957]/20"
         />
         {/* 内側の塗り */}
         <motion.div
           animate={{ scale: circleScale }}
           transition={{ duration: PHASE_DURATION, ease: "easeInOut" }}
-          className="absolute w-32 h-32 rounded-full bg-[#EF9F27]/10"
+          className="absolute w-32 h-32 rounded-full bg-[#a3a957]/10"
         />
         {/* フェーズラベル */}
         <AnimatePresence mode="wait">

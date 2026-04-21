@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRoutineStore } from "@/store/routineStore";
 
 const MODE_COLORS: Record<string, string> = {
-  focus:   "#EF9F27",
+  focus:   "#a3a957",
   relax:   "#38BDF8",
   spark:   "#A78BFA",
   reclaim: "#34D399",

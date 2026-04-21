@@ -25,7 +25,7 @@ export default function FocusBreak({ onNextSet, onFinish }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[30] bg-[#0a0a0a] flex flex-col items-center justify-center px-8 pb-16"
+      className="fixed inset-0 z-[30] bg-[#0e0e0e] flex flex-col items-center justify-center px-8 pb-16"
     >
       <motion.p
         initial={{ opacity: 0, y: 10 }}
@@ -62,7 +62,7 @@ export default function FocusBreak({ onNextSet, onFinish }: Props) {
       >
         <button
           onClick={onNextSet}
-          className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
+          className="relative overflow-hidden w-full py-4 bg-[#a3a957]/10 border border-[#a3a957]/40 text-[#a3a957] text-sm font-light tracking-[0.2em] hover:bg-[#a3a957]/20 transition-all duration-300"
         >
           <ButtonOrb />
           <span className="relative z-10">もう1セット集中する</span>

@@ -79,7 +79,7 @@ function RelaxLandscape({
       xmlns="http://www.w3.org/2000/svg"
       className="w-full"
     >
-      <rect width="360" height="240" fill="#0a0a0a" />
+      <rect width="360" height="240" fill="#0e0e0e" />
 
       {/* 全体がゆっくり浮遊 */}
       <motion.g
@@ -441,7 +441,7 @@ export default function RelaxSession({ config, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      className="fixed inset-0 z-[40] bg-[#0e0e0e] flex flex-col items-center justify-center px-0"
       onClick={() => setNavVisible(v => !v)}
     >
       {/* 残り時間 */}
@@ -532,7 +532,7 @@ export default function RelaxSession({ config, onDone }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-0 left-0 right-0 h-16 z-[60] bg-[#0a0a0a]"
+            className="fixed bottom-0 left-0 right-0 h-16 z-[60] bg-[#0e0e0e]"
           />
         )}
       </AnimatePresence>

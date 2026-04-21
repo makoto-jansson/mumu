@@ -15,7 +15,7 @@ const LANDSCAPE_ICON = (
   <svg width="80" height="48" viewBox="0 0 80 48" fill="none">
     {/* 月 */}
     <circle cx="60" cy="12" r="5" stroke="#e8e6e1" strokeWidth="0.8" opacity="0.45" />
-    <circle cx="62.5" cy="10.5" r="3.8" fill="#0a0a0a" />
+    <circle cx="62.5" cy="10.5" r="3.8" fill="#0e0e0e" />
 
     {/* 星 */}
     <circle cx="20" cy="8"  r="0.8" fill="#e8e6e1" opacity="0.3" />
@@ -66,7 +66,7 @@ export default function ReclaimSense({ hasCoffee, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       {/* アンビエント背景（50%輝度） */}
       <div className="opacity-50">

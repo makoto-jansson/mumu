@@ -67,9 +67,9 @@ export default function StepBar({ steps, current }: Props) {
             <div className="flex flex-col items-center gap-1.5">
               <div className="relative">
                 {isCompleted && (
-                  <div className="w-5 h-5 rounded-full bg-[#EF9F27]/20 border border-[#EF9F27]/40 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-[#a3a957]/20 border border-[#a3a957]/40 flex items-center justify-center">
                     <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                      <path d="M1 3L3 5L7 1" stroke="#EF9F27" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M1 3L3 5L7 1" stroke="#a3a957" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                 )}
@@ -77,12 +77,12 @@ export default function StepBar({ steps, current }: Props) {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-5 h-5 rounded-full border border-[#EF9F27] bg-[#EF9F27]/15 flex items-center justify-center"
+                    className="w-5 h-5 rounded-full border border-[#a3a957] bg-[#a3a957]/15 flex items-center justify-center"
                   >
                     <motion.div
                       animate={{ scale: [1, 1.4, 1] }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      className="w-1.5 h-1.5 rounded-full bg-[#EF9F27]"
+                      className="w-1.5 h-1.5 rounded-full bg-[#a3a957]"
                     />
                   </motion.div>
                 )}
@@ -93,7 +93,7 @@ export default function StepBar({ steps, current }: Props) {
                 )}
               </div>
               <span className={`text-[9px] font-light tracking-wider ${
-                isActive ? "text-[#EF9F27]" : isCompleted ? "text-[#EF9F27]/50" : "text-white/20"
+                isActive ? "text-[#a3a957]" : isCompleted ? "text-[#a3a957]/50" : "text-white/20"
               }`}>
                 {step.label}
               </span>
@@ -108,7 +108,7 @@ export default function StepBar({ steps, current }: Props) {
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 0.4 }}
                     style={{ transformOrigin: "left" }}
-                    className="absolute inset-0 bg-[#EF9F27]/40"
+                    className="absolute inset-0 bg-[#a3a957]/40"
                   />
                 )}
               </div>

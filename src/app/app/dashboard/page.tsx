@@ -11,7 +11,7 @@ import { useRoutineStore } from "@/store/routineStore";
 
 // ─── 定数 ────────────────────────────────────────────
 const MODE_COLORS: Record<string, string> = {
-  focus:   "#EF9F27",
+  focus:   "#a3a957",
   relax:   "#38BDF8",
   spark:   "#A78BFA",
   reclaim: "#34D399",
@@ -89,7 +89,7 @@ function WeekCalendar({ weekDays, sessions }: WeekCalendarProps) {
             {/* 曜日 */}
             <span
               className={`text-[9px] font-light ${
-                isToday ? "text-[#EF9F27]" : "text-[#e8e6e1]/30"
+                isToday ? "text-[#a3a957]" : "text-[#e8e6e1]/30"
               }`}
             >
               {DAY_LABELS[i]}
@@ -115,7 +115,7 @@ function WeekCalendar({ weekDays, sessions }: WeekCalendarProps) {
             {/* 日付 */}
             <span
               className={`text-[9px] font-light ${
-                isToday ? "text-[#EF9F27]" : "text-[#e8e6e1]/20"
+                isToday ? "text-[#a3a957]" : "text-[#e8e6e1]/20"
               }`}
             >
               {day.getDate()}
@@ -243,7 +243,7 @@ export default function DashboardPage() {
   }, [thisWeekSessions]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-5 pt-10 pb-24">
+    <div className="min-h-screen px-5 pt-10 pb-24">
 
       {/* ヘッダー */}
       <motion.div

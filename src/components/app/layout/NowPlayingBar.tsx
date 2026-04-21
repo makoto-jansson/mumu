@@ -53,7 +53,7 @@ export default function NowPlayingBar() {
             {[0, 0.2, 0.1].map((delay, i) => (
               <motion.span
                 key={i}
-                className="w-[3px] bg-[#EF9F27]/80 rounded-full"
+                className="w-[3px] bg-[#a3a957]/80 rounded-full"
                 animate={{ height: ["6px", "14px", "6px"] }}
                 transition={{ duration: 0.8, repeat: Infinity, delay, ease: "easeInOut" }}
               />

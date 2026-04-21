@@ -12,7 +12,7 @@
   --color-grad-teal: #60ae9d;      /* グラデ明るいティール */
   --color-grad-navy: #123656;      /* グラデ深いネイビー */
   --color-grad-deep-teal: #2c6671; /* グラデ中間の青緑 */
-  --color-accent-lime: #cfd57e;    /* 差し色ライム（極小面積のみ） */
+  --color-accent-lime: #a3a957;    /* 差し色ライム（極小面積のみ） */
 
   /* === 旧カラー（既存コンポーネントの互換用・段階的に廃止） === */
   --color-mumu-dark: #0a0a0a;
@@ -20,7 +20,7 @@
   --color-mumu-light: #fafaf8;
   --color-mumu-text-dark: #1a1a1a;
   --color-mumu-text-light: #e8e6e1;
-  --color-mumu-amber: #EF9F27;
+  --color-mumu-amber: #a3a957;
   --color-mumu-teal: #1D9E75;
 
   /* フォント */

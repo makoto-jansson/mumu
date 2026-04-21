@@ -45,7 +45,7 @@ export default function BeanCard({ bean, index }: { bean: Bean; index: number })
           </p>
 
           {/* フレーバー */}
-          <p className="text-[#EF9F27] text-xs font-light tracking-wider mb-3">
+          <p className="text-[#a3a957] text-xs font-light tracking-wider mb-3">
             {bean.flavor}
           </p>
 

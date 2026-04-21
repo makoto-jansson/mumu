@@ -22,7 +22,7 @@ const DAYS = [
 const SLOTS: TimeSlot[] = ["朝", "昼", "夜"];
 
 const MODES: { value: ModeType; label: string; labelEn: string; color: string }[] = [
-  { value: "focus",   label: "集中",     labelEn: "Focus",   color: "#EF9F27" },
+  { value: "focus",   label: "集中",     labelEn: "Focus",   color: "#a3a957" },
   { value: "relax",   label: "リラックス", labelEn: "Relax",   color: "#38BDF8" },
   { value: "spark",   label: "アイデア",  labelEn: "Spark",   color: "#A78BFA" },
   { value: "reclaim", label: "感性",     labelEn: "Reclaim", color: "#34D399" },
@@ -76,7 +76,7 @@ function AddModal({ day, onAdd, onClose }: AddModalProps) {
                 onClick={() => setSlot(s)}
                 className={`flex-1 py-2.5 text-sm font-light tracking-wider border transition-all duration-200 ${
                   slot === s
-                    ? "border-[#EF9F27]/60 text-[#EF9F27] bg-[#EF9F27]/8"
+                    ? "border-[#a3a957]/60 text-[#a3a957] bg-[#a3a957]/8"
                     : "border-white/10 text-[#e8e6e1]/40 hover:border-white/20"
                 }`}
               >
@@ -115,7 +115,7 @@ function AddModal({ day, onAdd, onClose }: AddModalProps) {
         {/* 追加ボタン */}
         <button
           onClick={() => { onAdd(slot, mode); onClose(); }}
-          className="w-full py-3.5 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/8 transition-all duration-200"
+          className="w-full py-3.5 border border-[#a3a957]/40 text-[#a3a957]/80 text-sm font-light tracking-wider hover:bg-[#a3a957]/8 transition-all duration-200"
         >
           追加する
         </button>
@@ -169,7 +169,7 @@ export default function RoutinePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-4 pt-10 pb-24">
+    <div className="min-h-screen px-4 pt-10 pb-24">
       {/* ヘッダー */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -203,12 +203,12 @@ export default function RoutinePage() {
               <button
                 onClick={() => setAddingDay(day.value)}
                 className={`flex flex-col items-center gap-1 py-2 border transition-all duration-200 hover:border-white/20 ${
-                  isToday ? "border-[#EF9F27]/30 bg-[#EF9F27]/5" : "border-white/8"
+                  isToday ? "border-[#a3a957]/30 bg-[#a3a957]/5" : "border-white/8"
                 }`}
               >
                 <span
                   className={`text-[11px] font-light ${
-                    isToday ? "text-[#EF9F27]" : "text-[#e8e6e1]/50"
+                    isToday ? "text-[#a3a957]" : "text-[#e8e6e1]/50"
                   }`}
                 >
                   {day.label}

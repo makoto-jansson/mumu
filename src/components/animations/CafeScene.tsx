@@ -39,7 +39,7 @@ export default function CafeScene() {
       </defs>
 
       {/* 背景（壁） */}
-      <rect width="360" height="240" fill="#0a0a0a" />
+      <rect width="360" height="240" fill="#0e0e0e" />
 
       {/* ── 窓の外（夜景） ── */}
       <rect x="51" y="19" width="258" height="168" fill="#0c0c14" />
@@ -105,11 +105,11 @@ export default function CafeScene() {
 
       {/* ③ 右面（小口・ページの厚み）— 先に描いて表紙で隠す */}
       <path d="M130 214 L123 198 L123 210 L130 226 Z"
-        stroke="#e8e6e1" strokeWidth="0.55" strokeLinejoin="round" strokeOpacity="0.28" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.55" strokeLinejoin="round" strokeOpacity="0.28" fill="#0e0e0e" />
 
       {/* ② 手前面（ページ束） */}
       <path d="M60 214 L130 214 L130 226 L60 226 Z"
-        stroke="#e8e6e1" strokeWidth="0.65" strokeLinejoin="round" strokeOpacity="0.38" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.65" strokeLinejoin="round" strokeOpacity="0.38" fill="#0e0e0e" />
 
       {/* ページ束の横筋 */}
       <line x1="60" y1="216" x2="130" y2="216" stroke="#e8e6e1" strokeWidth="0.35" opacity="0.22" />
@@ -120,7 +120,7 @@ export default function CafeScene() {
 
       {/* ① 上面（表紙） */}
       <path d="M60 214 L130 214 L123 198 L67 198 Z"
-        stroke="#e8e6e1" strokeWidth="0.75" strokeLinejoin="round" strokeOpacity="0.52" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.75" strokeLinejoin="round" strokeOpacity="0.52" fill="#0e0e0e" />
 
       {/* 表紙の飾り枠（インセット） */}
       <path d="M70 199 L120 199 L126 213 L64 213 Z"
@@ -145,13 +145,13 @@ export default function CafeScene() {
       />
       {/* ソーサー上面（カップより先に描いて背面に） */}
       <ellipse cx="209" cy="215" rx="26" ry="5"
-        stroke="#e8e6e1" strokeWidth="0.6" strokeOpacity="0.30" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.6" strokeOpacity="0.30" fill="#0e0e0e" />
       {/* ソーサーのリム（内側の楕円） */}
       <ellipse cx="209" cy="215" rx="20" ry="3.5"
         stroke="#e8e6e1" strokeWidth="0.35" strokeOpacity="0.15" fill="none" />
       {/* カップ本体 */}
       <path d="M188 186 L230 186 L227 214 L191 214 Z"
-        stroke="#e8e6e1" strokeWidth="0.7" strokeLinejoin="round" strokeOpacity="0.46" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.7" strokeLinejoin="round" strokeOpacity="0.46" fill="#0e0e0e" />
       {/* 取っ手（外側） */}
       <path d="M230 193 C242 193 242 208 230 208"
         stroke="#e8e6e1" strokeWidth="0.65" strokeOpacity="0.38" fill="none" />
@@ -160,7 +160,7 @@ export default function CafeScene() {
         stroke="#e8e6e1" strokeWidth="0.35" strokeOpacity="0.20" fill="none" />
       {/* 口の楕円（カップ本体の上に重ねて開口部を表現） */}
       <ellipse cx="209" cy="186" rx="21" ry="4.5"
-        stroke="#e8e6e1" strokeWidth="0.6" strokeOpacity="0.36" fill="#0a0a0a" />
+        stroke="#e8e6e1" strokeWidth="0.6" strokeOpacity="0.36" fill="#0e0e0e" />
       {/* コーヒー液面（内側の楕円） */}
       <ellipse cx="209" cy="186" rx="17" ry="3.2"
         stroke="#e8e6e1" strokeWidth="0.35" strokeOpacity="0.18" fill="none" />

@@ -83,10 +83,10 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
       </p>
 
       {/* ローラー本体 */}
-      <div className="relative bg-[#0a0a0a]/80 backdrop-blur-sm w-full" style={{ height: ITEM_HEIGHT * VISIBLE }}>
+      <div className="relative bg-[#0e0e0e]/80 backdrop-blur-sm w-full" style={{ height: ITEM_HEIGHT * VISIBLE }}>
         {/* 選択中アイテムのハイライト */}
         <div
-          className="absolute left-0 right-0 border-t border-b border-[#EF9F27]/30 bg-[#EF9F27]/5 pointer-events-none z-10"
+          className="absolute left-0 right-0 border-t border-b border-[#a3a957]/30 bg-[#a3a957]/5 pointer-events-none z-10"
           style={{
             top: pad * ITEM_HEIGHT,
             height: ITEM_HEIGHT,
@@ -94,8 +94,8 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
         />
 
         {/* 上下のフェード */}
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none z-20" />
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none z-20" />
+        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#0e0e0e] to-transparent pointer-events-none z-20" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0e0e0e] to-transparent pointer-events-none z-20" />
 
         {/* スクロールコンテナ */}
         <div
@@ -125,7 +125,7 @@ export default function RollerPicker({ value, onChange, options = DEFAULT_OPTION
               }}
             >
               <span className={`text-sm font-light tabular-nums tracking-wider transition-all duration-200 ${
-                opt === value ? "text-[#EF9F27] text-base" : "text-[#e8e6e1]/30"
+                opt === value ? "text-[#a3a957] text-base" : "text-[#e8e6e1]/30"
               }`}>
                 {opt}<span className="text-xs ml-0.5">分</span>
               </span>

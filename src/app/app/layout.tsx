@@ -1,7 +1,7 @@
 // アプリゾーン専用レイアウト
 // - HPのHeader/Footerは表示しない（ルートlayout.tsxのmainタグを上書き）
 // - 代わりにBottomNavを表示
-// - 背景は暗色（#0a0a0a）で統一
+// - 背景: ダークグレー（#0e0e0e）
 // - 検索エンジンにはインデックスさせない（ツールページのため）
 
 import type { Metadata } from "next";
@@ -23,7 +23,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="relative min-h-screen bg-[#0e0e0e]">
       {/* 効果音のプリロード（キャッシュ用、表示なし） */}
       <SoundPreloader />
       {/* ページコンテンツ（BottomNavの高さ分だけ下にpaddingを確保） */}

@@ -20,7 +20,7 @@ export default function ReclaimIntro({ onCoffee, onSkip }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       <StepBar steps={RECLAIM_STEPS} current="intro" />
 

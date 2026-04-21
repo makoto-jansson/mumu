@@ -23,13 +23,13 @@ const HOW_TO = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <rect x="8" y="8" width="12" height="12" rx="1" stroke="#EF9F27" strokeWidth="1.4" />
-        <path d="M14 10v8M10 14h8" stroke="#EF9F27" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 1.5" />
+        <rect x="8" y="8" width="12" height="12" rx="1" stroke="#a3a957" strokeWidth="1.4" />
+        <path d="M14 10v8M10 14h8" stroke="#a3a957" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 1.5" />
       </svg>
     ),
     title: "マスをタップ — 裏返す",
     desc: "表はカテゴリ名のみ。タップするとキーワードが現れる。気になるマスだけ開いてみよう。",
-    accent: "text-[#EF9F27]/80",
+    accent: "text-[#a3a957]/80",
   },
   {
     icon: (
@@ -66,7 +66,7 @@ export default function SparkGuide({ onStart }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       <StepBar steps={SPARK_STEPS} current="setup" />
 
@@ -74,10 +74,10 @@ export default function SparkGuide({ onStart }: Props) {
 
         {/* タイトル */}
         <div className="flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="text-[#EF9F27]/60">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="text-[#a3a957]/60">
             <path d="M9 2L4 9h5l-2 5 7-8H9l2-4z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p className="text-[#EF9F27]/60 text-xs font-light tracking-[0.4em]">Spark</p>
+          <p className="text-[#a3a957]/60 text-xs font-light tracking-[0.4em]">Spark</p>
         </div>
 
         {/* タブ */}
@@ -88,7 +88,7 @@ export default function SparkGuide({ onStart }: Props) {
               onClick={() => { playClick(); setPage(tab); }}
               className={`flex-1 pb-2.5 text-xs font-light tracking-wider transition-colors duration-200 ${
                 page === tab
-                  ? "text-[#EF9F27]/80 border-b border-[#EF9F27]/50 -mb-px"
+                  ? "text-[#a3a957]/80 border-b border-[#a3a957]/50 -mb-px"
                   : "text-[#e8e6e1]/25 hover:text-[#e8e6e1]/50"
               }`}
             >
@@ -142,7 +142,7 @@ export default function SparkGuide({ onStart }: Props) {
 
               <button
                 onClick={() => { playClick(); setPage("howto"); }}
-                className="text-right text-[#EF9F27]/40 text-xs font-light tracking-wider hover:text-[#EF9F27]/70 transition-colors"
+                className="text-right text-[#a3a957]/40 text-xs font-light tracking-wider hover:text-[#a3a957]/70 transition-colors"
               >
                 操作ガイドを見る →
               </button>
@@ -183,8 +183,8 @@ export default function SparkGuide({ onStart }: Props) {
                 ))}
               </div>
 
-              <div className="border border-[#EF9F27]/12 bg-[#EF9F27]/3 px-4 py-4">
-                <p className="text-[#EF9F27]/55 text-[11px] font-light leading-[1.9]">
+              <div className="border border-[#a3a957]/12 bg-[#a3a957]/3 px-4 py-4">
+                <p className="text-[#a3a957]/55 text-[11px] font-light leading-[1.9]">
                   全部開かなくていい。気になるマスだけ覗いて、ピンときたらキープ。<br />
                   テンポよく流していくのがコツです。
                 </p>
@@ -199,7 +199,7 @@ export default function SparkGuide({ onStart }: Props) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="w-full py-4 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/10 hover:border-[#EF9F27]/60 transition-all duration-300 flex items-center justify-center gap-2"
+          className="w-full py-4 border border-[#a3a957]/40 text-[#a3a957]/80 text-sm font-light tracking-wider hover:bg-[#a3a957]/10 hover:border-[#a3a957]/60 transition-all duration-300 flex items-center justify-center gap-2"
         >
           カードをはじめる
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-70">

@@ -126,7 +126,7 @@ const modes = [
 
 export default function AppHome() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center px-5 pt-4">
+    <div className="min-h-screen flex flex-col items-center px-5 pt-4">
 
       {/* 今日のルーティン */}
       <div className="w-full max-w-sm">

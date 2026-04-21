@@ -74,7 +74,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       {/* アンビエント背景（半分の明るさ）*/}
       <SparkAmbient dimmed />
@@ -153,14 +153,14 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
                     key={cat}
                     className={`flex flex-col p-2.5 min-h-[88px] transition-all duration-150 ${
                       hasValue
-                        ? "bg-[#141414] border border-[#EF9F27]/20"
+                        ? "bg-[#141414] border border-[#a3a957]/20"
                         : isFocused
                         ? "bg-white/4 border border-white/15"
                         : "bg-[#141414]"
                     }`}
                   >
                     <span className={`text-[9px] font-light tracking-wider mb-1 ${
-                      hasValue ? "text-[#EF9F27]/60" : "text-white/25"
+                      hasValue ? "text-[#a3a957]/60" : "text-white/25"
                     }`}>
                       {CATEGORY_LABEL[cat]}
                     </span>
@@ -201,7 +201,7 @@ export default function SparkMyGrid({ kept, onDone }: Props) {
           <div className="flex flex-col gap-3 pt-2">
             <button
               onClick={() => { playClick(); handleDone(); }}
-              className="w-full py-3.5 border border-[#EF9F27]/40 text-[#EF9F27]/80 text-sm font-light tracking-wider hover:bg-[#EF9F27]/10 hover:border-[#EF9F27]/60 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3.5 border border-[#a3a957]/40 text-[#a3a957]/80 text-sm font-light tracking-wider hover:bg-[#a3a957]/10 hover:border-[#a3a957]/60 transition-all duration-300 flex items-center justify-center gap-2"
             >
               完了
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-70">

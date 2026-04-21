@@ -61,23 +61,23 @@ export default function Lighthouse({ slow = false, strokeColor = "#e8e6e1" }: Pr
 
         {/* 右向きビーム */}
         <motion.g style={{ opacity: rightOpacity }}>
-          <path d="M0 0 L220 -70 L220 70 Z" fill="#EF9F27" opacity="0.2" />
-          <path d="M0 0 L220 -35 L220 35 Z" fill="#EF9F27" opacity="0.3" />
-          <path d="M0 0 L220 -14 L220 14 Z" fill="#EF9F27" opacity="0.4" />
+          <path d="M0 0 L220 -70 L220 70 Z" fill="#a3a957" opacity="0.2" />
+          <path d="M0 0 L220 -35 L220 35 Z" fill="#a3a957" opacity="0.3" />
+          <path d="M0 0 L220 -14 L220 14 Z" fill="#a3a957" opacity="0.4" />
         </motion.g>
 
         {/* 左向きビーム */}
         <motion.g style={{ opacity: leftOpacity }}>
-          <path d="M0 0 L-220 -70 L-220 70 Z" fill="#EF9F27" opacity="0.2" />
-          <path d="M0 0 L-220 -35 L-220 35 Z" fill="#EF9F27" opacity="0.3" />
-          <path d="M0 0 L-220 -14 L-220 14 Z" fill="#EF9F27" opacity="0.4" />
+          <path d="M0 0 L-220 -70 L-220 70 Z" fill="#a3a957" opacity="0.2" />
+          <path d="M0 0 L-220 -35 L-220 35 Z" fill="#a3a957" opacity="0.3" />
+          <path d="M0 0 L-220 -14 L-220 14 Z" fill="#a3a957" opacity="0.4" />
         </motion.g>
 
         {/* 正面グロー（こちらを向いている時の楕円形の光） */}
         <motion.g style={{ scale: glowScale }}>
-          <ellipse cx="0" cy="0" rx="52" ry="34" fill="#EF9F27" opacity="0.12" />
-          <ellipse cx="0" cy="0" rx="30" ry="20" fill="#EF9F27" opacity="0.22" />
-          <ellipse cx="0" cy="0" rx="13" ry="9"  fill="#EF9F27" opacity="0.40" />
+          <ellipse cx="0" cy="0" rx="52" ry="34" fill="#a3a957" opacity="0.12" />
+          <ellipse cx="0" cy="0" rx="30" ry="20" fill="#a3a957" opacity="0.22" />
+          <ellipse cx="0" cy="0" rx="13" ry="9"  fill="#a3a957" opacity="0.40" />
         </motion.g>
 
       </g>
@@ -108,8 +108,8 @@ export default function Lighthouse({ slow = false, strokeColor = "#e8e6e1" }: Pr
       <rect x="82" y="100" width="36" height="38" rx="2" stroke={strokeColor} strokeWidth="0.9" opacity="0.50" />
 
       {/* 光源の輝き（常時点灯） */}
-      <circle cx="100" cy="119" r="6" fill="#EF9F27" opacity="0.4" />
-      <circle cx="100" cy="119" r="3" fill="#EF9F27" opacity="1" />
+      <circle cx="100" cy="119" r="6" fill="#a3a957" opacity="0.4" />
+      <circle cx="100" cy="119" r="3" fill="#a3a957" opacity="1" />
 
       {/* 屋根 */}
       <path

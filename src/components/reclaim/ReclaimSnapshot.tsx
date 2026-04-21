@@ -115,7 +115,7 @@ export default function ReclaimSnapshot({ feelResults }: Props) {
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
             <span
-              className="text-xs font-light tracking-[0.3em] px-3 py-1 border border-white/15 bg-[#0a0a0a]/80"
+              className="text-xs font-light tracking-[0.3em] px-3 py-1 border border-white/15 bg-[#0e0e0e]/80"
               style={{ color: LAYER_COLORS[tappedLayer] }}
             >
               {LAYER_LABEL[tappedLayer]}

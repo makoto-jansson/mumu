@@ -46,17 +46,17 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       <div className="max-w-sm mx-auto w-full px-6 pt-16 pb-24 flex flex-col gap-8">
 
         {/* タイトル */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#EF9F27]/70">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#a3a957]/70">
               <path d="M9 2L4 9h5l-2 5 7-8H9l2-4z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <p className="text-[#EF9F27]/60 text-xs font-light tracking-[0.4em]">Spark</p>
+            <p className="text-[#a3a957]/60 text-xs font-light tracking-[0.4em]">Spark</p>
           </div>
           <h1 className="text-[#e8e6e1] text-2xl font-light tracking-wide mb-3">
             お疲れさまでした。
@@ -84,7 +84,7 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
                 <button
                   onClick={() => { playClick(); toggleStar(i); }}
                   className={`shrink-0 mt-0.5 text-base transition-colors duration-200 ${
-                    starred.has(i) ? "text-[#EF9F27]" : "text-white/15 hover:text-white/40"
+                    starred.has(i) ? "text-[#a3a957]" : "text-white/15 hover:text-white/40"
                   }`}
                 >
                   {starred.has(i) ? "★" : "☆"}
@@ -118,7 +118,7 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
             <div className="border border-white/8 divide-y divide-white/6">
               {myGridEntries.map(([cat, value]) => (
                 <div key={cat} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-[#EF9F27]/40 text-[10px] font-light tracking-wider shrink-0 w-12">
+                  <span className="text-[#a3a957]/40 text-[10px] font-light tracking-wider shrink-0 w-12">
                     {cat === "adapt" ? "転用" :
                      cat === "apply" ? "応用" :
                      cat === "modify" ? "変更" :
@@ -189,26 +189,26 @@ export default function SparkDone({ kept, myGrid, sceneLabel, onRestart }: Props
             rel="noopener noreferrer"
             whileHover={{ x: 2 }}
             transition={{ duration: 0.15 }}
-            className="flex items-center justify-between border border-[#EF9F27]/20 bg-[#EF9F27]/4 px-5 py-4 hover:bg-[#EF9F27]/10 hover:border-[#EF9F27]/40 transition-all duration-300 group"
+            className="flex items-center justify-between border border-[#a3a957]/20 bg-[#a3a957]/4 px-5 py-4 hover:bg-[#a3a957]/10 hover:border-[#a3a957]/40 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                className="shrink-0 text-[#EF9F27]/50 group-hover:text-[#EF9F27]/80 transition-colors duration-300"
+                className="shrink-0 text-[#a3a957]/50 group-hover:text-[#a3a957]/80 transition-colors duration-300"
                 stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
                 <ellipse cx="10" cy="10" rx="6" ry="4" transform="rotate(-30 10 10)" />
                 <path d="M5 12.5 C7 10.5 13 9.5 15 7.5" />
               </svg>
               <div>
-                <p className="text-[#EF9F27]/70 text-sm font-light group-hover:text-[#EF9F27]/90 transition-colors duration-300">
+                <p className="text-[#a3a957]/70 text-sm font-light group-hover:text-[#a3a957]/90 transition-colors duration-300">
                   mumuの珈琲豆を見る
                 </p>
-                <p className="text-[#EF9F27]/35 text-[10px] font-light tracking-wider mt-0.5">
+                <p className="text-[#a3a957]/35 text-[10px] font-light tracking-wider mt-0.5">
                   BASE SHOP
                 </p>
               </div>
             </div>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-              className="text-[#EF9F27]/30 group-hover:text-[#EF9F27]/60 transition-colors duration-300">
+              className="text-[#a3a957]/30 group-hover:text-[#a3a957]/60 transition-colors duration-300">
               <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.a>

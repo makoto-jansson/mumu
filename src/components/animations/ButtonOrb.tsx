@@ -103,7 +103,7 @@ function OrbGroup({ cfg }: { cfg: OrbCfg }) {
             marginLeft:  -coreSize / 2,
             marginTop:   -coreSize / 2,
             borderRadius:"50%",
-            background:  "#EF9F27",
+            background:  "#a3a957",
             filter:      "blur(5px)",
             mixBlendMode:"screen",
           }}

@@ -43,13 +43,13 @@ export default function RelaxDone({ mood, duration }: Props) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col px-6 pt-16 pb-24 overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col px-6 pt-16 pb-24 overflow-y-auto"
     >
       <div className="max-w-sm mx-auto w-full flex flex-col gap-8">
 
         {/* タイトル */}
         <div>
-          <p className="text-[#EF9F27]/60 text-xs font-light tracking-[0.4em] mb-3">
+          <p className="text-[#a3a957]/60 text-xs font-light tracking-[0.4em] mb-3">
             ☽ Relax
           </p>
           <h1 className="text-[#e8e6e1] text-2xl font-light tracking-wide mb-4">
@@ -96,19 +96,19 @@ export default function RelaxDone({ mood, duration }: Props) {
             href="https://mumucoffee.theshop.jp/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-start gap-4 border border-[#EF9F27]/20 bg-[#EF9F27]/5 px-5 py-4 hover:bg-[#EF9F27]/10 hover:border-[#EF9F27]/35 transition-all duration-300 group"
+            className="flex items-start gap-4 border border-[#a3a957]/20 bg-[#a3a957]/5 px-5 py-4 hover:bg-[#a3a957]/10 hover:border-[#a3a957]/35 transition-all duration-300 group"
           >
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
-              className="shrink-0 mt-0.5 text-[#EF9F27]/60 group-hover:text-[#EF9F27] transition-colors duration-300"
+              className="shrink-0 mt-0.5 text-[#a3a957]/60 group-hover:text-[#a3a957] transition-colors duration-300"
               stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
               <ellipse cx="11" cy="11" rx="7" ry="4.5" transform="rotate(-30 11 11)" />
               <path d="M5.5 14 C8 11.5 14 10.5 16.5 8" />
             </svg>
             <div>
-              <p className="text-[#EF9F27]/80 text-sm font-light leading-relaxed mb-1">
+              <p className="text-[#a3a957]/80 text-sm font-light leading-relaxed mb-1">
                 珈琲豆は足りていますか？
               </p>
-              <span className="text-[#EF9F27]/50 text-xs font-light tracking-wider group-hover:text-[#EF9F27]/80 transition-colors duration-300">
+              <span className="text-[#a3a957]/50 text-xs font-light tracking-wider group-hover:text-[#a3a957]/80 transition-colors duration-300">
                 mumuの珈琲豆を見る →
               </span>
             </div>

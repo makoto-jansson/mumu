@@ -91,11 +91,11 @@ function SwipeCard({ card, index, total, onChoose }: CardProps) {
               (v) => `rgba(239,159,39,${v})`
             ),
           }}
-          className="relative flex flex-col justify-between px-4 py-6 border border-[#EF9F27]/20 hover:border-[#EF9F27]/50 transition-colors duration-200 min-h-[200px] text-center items-center group"
+          className="relative flex flex-col justify-between px-4 py-6 border border-[#a3a957]/20 hover:border-[#a3a957]/50 transition-colors duration-200 min-h-[200px] text-center items-center group"
           whileTap={{ scale: 0.97 }}
         >
           {/* ラベル */}
-          <span className="text-[#EF9F27]/60 text-[10px] font-light tracking-[0.4em] group-hover:text-[#EF9F27]/90 transition-colors">
+          <span className="text-[#a3a957]/60 text-[10px] font-light tracking-[0.4em] group-hover:text-[#a3a957]/90 transition-colors">
             A
           </span>
           {/* テキスト */}
@@ -103,7 +103,7 @@ function SwipeCard({ card, index, total, onChoose }: CardProps) {
             {card.a}
           </p>
           {/* 方向ヒント */}
-          <span className="text-[#EF9F27]/30 text-[10px] font-light mt-4 group-hover:text-[#EF9F27]/60 transition-colors">
+          <span className="text-[#a3a957]/30 text-[10px] font-light mt-4 group-hover:text-[#a3a957]/60 transition-colors">
             ← こちら
           </span>
         </motion.button>
@@ -183,7 +183,7 @@ export default function ReclaimFeel({ onDone }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       <div className="opacity-50">
         <AmbientOrbs />

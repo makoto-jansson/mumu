@@ -16,7 +16,7 @@ function Drop({ delay }: { delay: number }) {
   return (
     <motion.ellipse
       cx="100" cy="0" rx="2.5" ry="3.5"
-      fill="#EF9F27"
+      fill="#a3a957"
       initial={{ cy: 145, opacity: 0 }}
       animate={{
         cy:      [145, 145, 195, 195],
@@ -42,7 +42,7 @@ function Ripple({ delay }: { delay: number }) {
       cx="100" cy="218"
       rx="0" ry="0"
       fill="none"
-      stroke="#EF9F27"
+      stroke="#a3a957"
       strokeWidth="0.8"
       initial={{ rx: 0, ry: 0, opacity: 0.5 }}
       animate={{ rx: [0, 16], ry: [0, 4], opacity: [0.5, 0] }}
@@ -129,7 +129,7 @@ export default function Drip() {
       {/* 珈琲液面（ゆっくり上昇） */}
       <motion.path
         d="M75 227 C88 224 112 224 125 227 L125 230 L75 230 Z"
-        fill="#EF9F27" opacity="0.15"
+        fill="#a3a957" opacity="0.15"
         animate={{ d: [
           "M75 227 C88 224 112 224 125 227 L125 230 L75 230 Z",
           "M75 208 C88 205 112 205 125 208 L125 230 L75 230 Z",

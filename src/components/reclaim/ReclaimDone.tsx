@@ -44,7 +44,7 @@ export default function ReclaimDone({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9 }}
-      className="fixed inset-0 bg-[#0a0a0a] flex flex-col overflow-y-auto"
+      className="fixed inset-0 bg-[#0e0e0e] flex flex-col overflow-y-auto"
     >
       <div className="max-w-sm mx-auto w-full px-6 pt-28 pb-24 flex flex-col gap-8">
 

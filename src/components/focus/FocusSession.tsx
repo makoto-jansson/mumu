@@ -309,7 +309,7 @@ export default function FocusSession({ config, onBreak }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed inset-0 z-[40] bg-[#0a0a0a] flex flex-col items-center justify-center px-0"
+      className="fixed inset-0 z-[40] bg-[#0e0e0e] flex flex-col items-center justify-center px-0"
       onClick={() => setNavVisible(v => !v)}
     >
       {/* 残り時間（大きく） */}
@@ -344,7 +344,7 @@ export default function FocusSession({ config, onBreak }: Props) {
       {/* 進捗バー */}
       <div className="w-32 h-px bg-white/10 mb-10">
         <motion.div
-          className="h-full bg-[#EF9F27]/50"
+          className="h-full bg-[#a3a957]/50"
           style={{ width: `${(1 - progress) * 100}%` }}
         />
       </div>
@@ -416,7 +416,7 @@ export default function FocusSession({ config, onBreak }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-0 left-0 right-0 h-16 z-[60] bg-[#0a0a0a]"
+            className="fixed bottom-0 left-0 right-0 h-16 z-[60] bg-[#0e0e0e]"
           />
         )}
       </AnimatePresence>

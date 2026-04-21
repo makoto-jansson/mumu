@@ -83,7 +83,7 @@ function Sky() {
 
   return (
     <>
-      <rect width="360" height="240" fill="#0a0a0a" />
+      <rect width="360" height="240" fill="#0e0e0e" />
 
       {/* 流れ星 */}
       <ShootingStar sx={280} sy={15}  delay={5}  repeatDelay={44} />
@@ -94,7 +94,7 @@ function Sky() {
       {/* 月（三日月） */}
       <circle cx="295" cy="40" r="18" stroke="#e8e6e1" strokeWidth="0.8" opacity="0.45" fill="none" />
       {/* 少しずらした塗りで三日月を表現 */}
-      <circle cx="299" cy="37" r="14" fill="#0a0a0a" />
+      <circle cx="299" cy="37" r="14" fill="#0e0e0e" />
 
       {/* 月の右下あたりに小さな星 */}
       <circle cx="324" cy="58" r="0.6" fill="#e8e6e1" opacity="0.20" />
@@ -227,12 +227,12 @@ function SceneLighthouse({ clock }: { clock: MV }) {
       {/* 塔本体（IllustAbout と同じテーパー形）*/}
       <path
         d="M58 138 L60 110 L64 110 L66 138 Z"
-        stroke="#e8e6e1" strokeWidth="0.75" fill="#0a0a0a" strokeLinejoin="round" strokeOpacity="0.45"
+        stroke="#e8e6e1" strokeWidth="0.75" fill="#0e0e0e" strokeLinejoin="round" strokeOpacity="0.45"
       />
 
       {/* 灯室（シンプルな rect）*/}
       <rect x="59" y="105" width="6" height="5" rx="0.5"
-        stroke="#e8e6e1" strokeWidth="0.7" fill="#0a0a0a" strokeOpacity="0.50"
+        stroke="#e8e6e1" strokeWidth="0.7" fill="#0e0e0e" strokeOpacity="0.50"
       />
 
       {/* 基部（水平線）*/}

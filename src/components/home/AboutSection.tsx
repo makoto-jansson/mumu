@@ -27,17 +27,17 @@ function IllustAbout({ size = 46 }: { size?: number }) {
         opacity="0.65"
       />
       {/* 灯台の灯室 */}
-      <rect x="37" y="10" width="6" height="5" rx="0.5" stroke="#cfd57e" strokeWidth="0.9" opacity="0.9" fill="#cfd57e" fillOpacity="0.35" />
+      <rect x="37" y="10" width="6" height="5" rx="0.5" stroke="#a3a957" strokeWidth="0.9" opacity="0.9" fill="#a3a957" fillOpacity="0.35" />
       {/* 灯室の光源 */}
-      <circle cx="40" cy="12.5" r="1.3" fill="#cfd57e" opacity="0.9" />
+      <circle cx="40" cy="12.5" r="1.3" fill="#a3a957" opacity="0.9" />
       {/* 灯台の基部 */}
       <path d="M32 44 L48 44" stroke="#123656" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
       {/* 光線（左） */}
-      <path d="M37 12 L8 28" stroke="#cfd57e" strokeWidth="0.6" strokeLinecap="round" opacity="0.45" />
-      <path d="M37 12 L12 22" stroke="#cfd57e" strokeWidth="0.5" strokeLinecap="round" opacity="0.25" />
+      <path d="M37 12 L8 28" stroke="#a3a957" strokeWidth="0.6" strokeLinecap="round" opacity="0.45" />
+      <path d="M37 12 L12 22" stroke="#a3a957" strokeWidth="0.5" strokeLinecap="round" opacity="0.25" />
       {/* 光線（右） */}
-      <path d="M43 12 L72 28" stroke="#cfd57e" strokeWidth="0.6" strokeLinecap="round" opacity="0.45" />
-      <path d="M43 12 L68 22" stroke="#cfd57e" strokeWidth="0.5" strokeLinecap="round" opacity="0.25" />
+      <path d="M43 12 L72 28" stroke="#a3a957" strokeWidth="0.6" strokeLinecap="round" opacity="0.45" />
+      <path d="M43 12 L68 22" stroke="#a3a957" strokeWidth="0.5" strokeLinecap="round" opacity="0.25" />
       {/* 地平線 */}
       <line x1="0" y1="44" x2="80" y2="44" stroke="#123656" strokeWidth="0.7" opacity="0.45" />
       {/* 海の波 */}

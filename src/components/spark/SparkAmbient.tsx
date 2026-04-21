@@ -22,7 +22,7 @@ type OrbConfig = {
 function randomOrbs(): OrbConfig[] {
   return Array.from({ length: NUM_ORBS }, (_, i) => ({
     size: 20 + Math.random() * 60,
-    color: i % 2 === 0 ? "#EF9F27" : "#1D9E75",
+    color: i % 2 === 0 ? "#a3a957" : "#1D9E75",
     opacity: i % 2 === 0 ? 0.04 + Math.random() * 0.04 : 0.03 + Math.random() * 0.03,
     blur: 40,
     x: Math.random() * 100,
@@ -122,7 +122,7 @@ export default function SparkAmbient({ dimmed = false }: Props) {
           width: 280,
           height: 200,
           borderRadius: "50%",
-          backgroundColor: "#EF9F27",
+          backgroundColor: "#a3a957",
           opacity: glowOpacity,
           filter: "blur(60px)",
           willChange: "opacity",

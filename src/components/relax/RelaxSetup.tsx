@@ -52,7 +52,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-[#0a0a0a] flex flex-col max-w-sm mx-auto"
+      className="min-h-screen bg-[#0e0e0e] flex flex-col max-w-sm mx-auto"
     >
       <StepBar steps={RELAX_STEPS} current="setup" />
 
@@ -68,7 +68,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
 
         {/* ヘッダー */}
         <div className="mb-8">
-          <p className="text-[#EF9F27]/70 text-xs font-light tracking-[0.3em] mb-3">☽ Relax</p>
+          <p className="text-[#a3a957]/70 text-xs font-light tracking-[0.3em] mb-3">☽ Relax</p>
           <h1 className="text-[#e8e6e1] text-xl font-light leading-relaxed tracking-wide mb-2">
             珈琲を淹れて、
             <br />
@@ -91,7 +91,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
                 onClick={() => { playClick(); setMood(m); }}
                 className={`w-full py-3 px-4 text-left text-sm font-light tracking-wide border transition-all duration-200 ${
                   mood === m
-                    ? "border-[#EF9F27]/50 text-[#EF9F27] bg-[#EF9F27]/8"
+                    ? "border-[#a3a957]/50 text-[#a3a957] bg-[#a3a957]/8"
                     : "border-white/8 text-[#e8e6e1]/50 hover:border-white/20"
                 }`}
               >
@@ -115,7 +115,7 @@ export default function RelaxSetup({ onStart, onSkip }: Props) {
         <div className="flex flex-col gap-4 mt-auto">
           <button
             onClick={() => { cancelZyunnbiRef.current?.(); playClick(); onStart({ mood, duration }); }}
-            className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
+            className="relative overflow-hidden w-full py-4 bg-[#a3a957]/10 border border-[#a3a957]/40 text-[#a3a957] text-sm font-light tracking-[0.2em] hover:bg-[#a3a957]/20 transition-all duration-300"
           >
             <ButtonOrb />
             <span className="relative z-10">準備できました</span>

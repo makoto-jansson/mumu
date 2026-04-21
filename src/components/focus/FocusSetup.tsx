@@ -109,7 +109,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-[#0a0a0a] flex flex-col max-w-sm mx-auto"
+      className="min-h-screen bg-[#0e0e0e] flex flex-col max-w-sm mx-auto"
     >
       <StepBar steps={FOCUS_STEPS} current="setup" />
 
@@ -125,7 +125,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
 
         {/* ヘッダーテキスト */}
         <div className="mb-8">
-          <p className="text-[#EF9F27]/70 text-xs font-light tracking-[0.3em] mb-3">☀ Focus</p>
+          <p className="text-[#a3a957]/70 text-xs font-light tracking-[0.3em] mb-3">☀ Focus</p>
           <h1 className="text-[#e8e6e1] text-xl font-light leading-relaxed tracking-wide mb-2">
             珈琲を淹れてから
             <br />
@@ -165,7 +165,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
                 onClick={() => { playClick(); setAmbient(value); }}
                 className={`relative overflow-hidden flex-1 flex flex-col items-center gap-2 py-3 border text-xs font-light transition-all duration-200 ${
                   ambient === value
-                    ? "border-[#EF9F27] text-[#EF9F27] bg-[#EF9F27]/10"
+                    ? "border-[#a3a957] text-[#a3a957] bg-[#a3a957]/10"
                     : "border-white/10 text-[#e8e6e1]/50 hover:border-white/25"
                 }`}
               >
@@ -181,7 +181,7 @@ export default function FocusSetup({ onStart, onSkip }: Props) {
         <div className="flex flex-col gap-4 mt-auto">
           <button
             onClick={() => { cancelZyunnbiRef.current?.(); playClick(); onStart(config); }}
-            className="relative overflow-hidden w-full py-4 bg-[#EF9F27]/10 border border-[#EF9F27]/40 text-[#EF9F27] text-sm font-light tracking-[0.2em] hover:bg-[#EF9F27]/20 transition-all duration-300"
+            className="relative overflow-hidden w-full py-4 bg-[#a3a957]/10 border border-[#a3a957]/40 text-[#a3a957] text-sm font-light tracking-[0.2em] hover:bg-[#a3a957]/20 transition-all duration-300"
           >
             <ButtonOrb />
             <span className="relative z-10">準備できました</span>

@@ -1,7 +1,7 @@
 "use client";
 
 // 焚き火セッション用アニメーション — 森の中の焚き火
-// FocusScene と同じ細線モノクロスタイル（#e8e6e1 on #0a0a0a）
+// FocusScene と同じ細線モノクロスタイル（#e8e6e1 on #0e0e0e）
 
 import { motion } from "framer-motion";
 
@@ -18,11 +18,11 @@ function Sky() {
 
   return (
     <>
-      <rect width="360" height="240" fill="#0a0a0a" />
+      <rect width="360" height="240" fill="#0e0e0e" />
 
       {/* 月（三日月） */}
       <circle cx="295" cy="40" r="18" stroke="#e8e6e1" strokeWidth="0.8" opacity="0.45" fill="none" />
-      <circle cx="299" cy="37" r="14" fill="#0a0a0a" />
+      <circle cx="299" cy="37" r="14" fill="#0e0e0e" />
 
       {/* 星々（まばたき） */}
       {STARS.map(([x, y, r, i]) => (

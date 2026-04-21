@@ -82,7 +82,7 @@ export default function InstallBanner() {
               height="20"
               viewBox="0 0 22 22"
               fill="none"
-              stroke="#EF9F27"
+              stroke="#a3a957"
               strokeWidth="1.2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -110,7 +110,7 @@ export default function InstallBanner() {
               {!isIOSDevice && (
                 <button
                   onClick={handleInstall}
-                  className="text-[#EF9F27]/80 text-xs font-light tracking-wider border border-[#EF9F27]/30 px-3 py-1.5 hover:bg-[#EF9F27]/10 transition-colors duration-200"
+                  className="text-[#a3a957]/80 text-xs font-light tracking-wider border border-[#a3a957]/30 px-3 py-1.5 hover:bg-[#a3a957]/10 transition-colors duration-200"
                 >
                   追加する
                 </button>
