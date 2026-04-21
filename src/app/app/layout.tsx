@@ -24,6 +24,10 @@ export default function AppLayout({
 }) {
   return (
     <div className="relative min-h-screen bg-[#0e0e0e]">
+      {/* /app配下の間だけ html/body の背景も黒に揃える
+         （iOSのバウンススクロールやステータスバー領域で body の生成り白が見えないように）
+         /app から離れるとこの layout 自体がアンマウントされ、スタイルも消える */}
+      <style>{`html, body { background-color: #0e0e0e !important; }`}</style>
       {/* 効果音のプリロード（キャッシュ用、表示なし） */}
       <SoundPreloader />
       {/* ページコンテンツ（BottomNavの高さ分だけ下にpaddingを確保） */}
