@@ -84,16 +84,16 @@ export default function AboutSection() {
           className="font-mincho text-ink-primary font-medium leading-relaxed mt-3"
           style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}
         >
-          灯台のように、
+          灯台のように
           <br />
-          静かに光をともすこと。
+          ただそこで光っている
         </p>
 
         <p
           className="text-ink-secondary mt-1"
           style={{ fontSize: "12px", lineHeight: "2" }}
         >
-          忙しい日々のなかで、ふと自分に戻るための場所でありたくて。
+          忙しい日々のなかで、ふと自分に戻るための場所。
         </p>
 
         <Link

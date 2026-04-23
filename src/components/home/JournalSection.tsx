@@ -97,7 +97,7 @@ export default function JournalSection() {
             className="text-ink-secondary"
             style={{ fontSize: "13px", lineHeight: "2" }}
           >
-            淹れる手の記憶、季節の匂い、ふと思い出す風景のこと。
+            珈琲の記録。
           </p>
           <Link
             href="/journal"

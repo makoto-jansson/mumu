@@ -94,7 +94,7 @@ export default function RoasterProfile() {
               >
                 アプリ
               </a>
-              のほうは、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の
+              は、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の
               4モード構成で、すべて無料・インストール不要で使えるようにしています。
             </p>
 

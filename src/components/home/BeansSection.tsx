@@ -75,6 +75,12 @@ export default async function BeansSection() {
       queries: { limit: 10 },
     });
     beans = data.contents;
+    // エチオピアを先頭に表示（それ以外は取得順を維持）
+    beans.sort((a, b) => {
+      const aIsEthiopia = a.name.includes("エチオピア") ? -1 : 0;
+      const bIsEthiopia = b.name.includes("エチオピア") ? -1 : 0;
+      return aIsEthiopia - bIsEthiopia;
+    });
   } catch {
     beans = [];
   }
@@ -105,9 +111,9 @@ export default async function BeansSection() {
               className="font-mincho text-ink-primary font-medium leading-relaxed"
               style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}
             >
-              スペシャルティの豆を、
+              灯台の珈琲焙煎所mumu
               <br />
-              ていねいに焙煎して。
+              朝、夕、夜をコンセプトにした自家焙煎の珈琲豆ショップ
             </h3>
             <p
               className="text-ink-secondary"

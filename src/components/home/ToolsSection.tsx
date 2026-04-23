@@ -84,9 +84,9 @@ export default function ToolsSection() {
             className="font-mincho text-ink-primary font-medium leading-relaxed"
             style={{ fontSize: "clamp(17px, 2.5vw, 20px)" }}
           >
-            集中。リラックス。クリエイティブ。
+            感性を、取り戻す。
             <br />
-            感性が回復する、アプリ。
+            つくる人の、集中とひらめきのアプリ
           </h3>
           <p
             className="text-ink-secondary"
