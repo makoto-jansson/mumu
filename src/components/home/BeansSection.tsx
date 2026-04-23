@@ -113,7 +113,7 @@ export default async function BeansSection() {
             >
               灯台の珈琲焙煎所mumu
               <br />
-              朝、夕、夜をコンセプトにした自家焙煎の珈琲豆ショップ
+              朝、夕、夜をコンセプトにした自家焙煎の珈琲豆オンラインショップ
             </h3>
             <p
               className="text-ink-secondary"
