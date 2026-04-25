@@ -1,723 +1,315 @@
-# mumu ブランドサイト仕様書
+# mumu ブランドサイト仕様書（公式HP）
 
-## Claude Code 実装ガイド — 公式HP編
-
-**バージョン**: v2.0
-**更新日**: 2026年4月12日
-**優先度**: アプリ（/app）よりこちらを先に実装すること
+> **最終更新**: 2026-04-25
+> **対象URL**: `/`, `/about`, `/beans`, `/journal`
+> **コンセプト**: 「感性が、ふと、戻ってくる場所」
 
 ---
 
 ## 1. サイト概要
 
-### 1.1 このサイトは何か
+灯台の珈琲焙煎所mumu（ムーム）の公式サイト。「珈琲屋のホームページ」ではなく **ブランド体験サイト**。同じドメイン上に以下を統合：
 
-灯台の珈琲焙煎所mumu（ムーム）の公式Webサイト。「珈琲屋のホームページ」ではなく、**「感性が、ふと、戻ってくる場所」**としてのブランド体験サイト。
+- **HP**（`/`, `/about`, `/beans`, `/journal`）— ブランド・コンテンツ
+- **アプリ**（`/app/...`）— 別仕様書 [`mumu_app_spec_current.md`](./mumu_app_spec_current.md)
 
-珈琲豆の販売（BASE）、Webアプリ（集中・リラックス・アイデア・感性回復ツール）、読み物コンテンツ（ブログ・診断）のすべてがこの1つのドメインに統合される。
-
-### 1.2 サイトのコンセプト
-
-mumuは「珈琲屋」ではなく「感性の場所」。その場所の中に3つの柱がある：
-
-- **整える** — Webアプリ（Focus / Relax / Spark / Reclaimの4モード）
-- **珈琲** — 珈琲豆（BASEのECショップへリンク）
-- **読む** — 読み物・診断コンテンツ（ブログ、感性タイプ診断 等）
-
-※ナビゲーション上は「整える / 珈琲 / 読む / about」の4項目。
-
-### 1.3 ターゲットユーザー
-
-コーヒーガチ勢ではない。ものすごく詳しいわけじゃないけど美味しいから豆を挽いて飲む人、なんとなくカッコ良いと思って飲んでいる人。忙しい日常の中で「丁寧な時間」を取り戻したいと感じている20〜30代。
-
-### 1.4 流入経路
-
-- Instagram（@mumu_coffee_roaster）プロフィールリンクからの流入（メイン）
-- note の記事からのリンク流入
-- Google検索（SEO流入 — 中長期で育てる）
-- SNSでのシェア（Spark診断結果のバイラル等）
+**3つの柱**: 整える / 珈琲 / 読む（+ mumuについて）。Instagram（@mumu_coffee_roaster）流入が中心。
 
 ---
 
 ## 2. 技術スタック
 
-```
-フレームワーク: Next.js 16.2.2（App Router, Turbopack）
-言語: TypeScript
-スタイリング: Tailwind CSS
-アニメーション: Framer Motion
-CMS: microCMS（ブログ・珈琲豆データの管理画面）
-PWA: @serwist/next（本番のみ有効）
-ホスティング: Vercel
-ドメイン: 独自ドメイン（例: mumu-coffee.com）
-```
+| 項目 | 内容 |
+|------|------|
+| フレームワーク | Next.js 16.2.2（App Router, **webpack** ビルド） |
+| 言語 | TypeScript |
+| スタイリング | Tailwind CSS v4（`@theme` ブロック） |
+| アニメーション | Framer Motion 12 |
+| CMS | microCMS（`/journal`, `/beans` のみ） |
+| PWA | @serwist/next 9.5（本番のみ有効） |
+| ホスティング | Vercel（GitHub `main` ブランチ自動デプロイ） |
+| ドメイン | https://www.mumucoffee-feel.com/ |
+| アナリティクス | Google Tag Manager（GTM-5SDPJNKR） |
 
-※アプリ（/app 以下）はブランドサイトと同一プロジェクト内に実装済み。
-※PWA設定（manifest.webmanifest, sw.js）は実装済み。開発環境では `disable: process.env.NODE_ENV === "development"` で無効化。
-
-### 2.1 microCMS について（コンテンツ管理）
-
-microCMS はWordPressの「管理画面」だけを提供する日本製のサービス（ヘッドレスCMS）。
-ブラウザでログインして、タイトルと本文を書いて「公開」ボタンを押すだけで記事が公開される。WordPressと同じ感覚で更新できる。
-
-**microCMSで管理するコンテンツ:**
-- ブログ記事（/journal）— タイトル、本文、カテゴリ、アイキャッチ画像
-- 珈琲豆データ（/beans）— 豆の名前、焙煎度、価格、フレーバー、説明文、BASEのURL
-- 将来的に：診断コンテンツ、お知らせ等も追加可能
-
-**microCMSで管理しないコンテンツ:**
-- トップページ、Aboutページ等の固定ページ — コードに直接書く（頻繁に変更しないため）
-- アプリのUI — コードで管理
-
-**料金:** 無料プラン（Hobby）で開始。API数3つ、メンバー3人まで。個人運営には十分。
-
-**更新の流れ:**
-1. https://mumu-coffee.microcms.io にログイン（管理画面）
-2. 「ブログ」→「新規作成」
-3. タイトル・本文・画像を入力
-4. 「公開」ボタンを押す
-5. 数分でサイトに反映される（Vercelが自動で再ビルド）
-
-※コードは一切触らなくてOK。
+リポジトリ: `github.com/makoto-jansson/mumu`
 
 ---
 
-## 3. デザインの方向性
+## 3. デザイン
 
-### 3.1 トーン & ムード
+### 3.1 トーン・参考
 
-- **参考**: Endel（ミニマル・アンビエント・美しいアニメーション）
-- **キーワード**: 静か、丁寧、余白、夜の海、灯台の光
-- **絶対にやらないこと**: ポップすぎるデザイン、情報過多、派手な配色、安っぽいストックフォト
+- **参考**: Endel（ミニマル・アンビエント）、フィルム写真、紙・布の質感
+- **キーワード**: 静か、丁寧、余白、灯台の光
+- **NG**: ポップ、情報過多、派手な配色、安っぽいストックフォト
 
-### 3.2 モチーフ
-
-**灯台**がmumuのコアモチーフ。
-
-- 灯台 = 暗い海の中で方向を示す存在 = 忙しい日常で感性を取り戻すきっかけとしてのmumu
-- 波 = 時間の流れ、呼吸のリズム
-- ドリップ = 珈琲を淹れる行為、一滴一滴の丁寧さ
-
-### 3.3 アニメーション
-
-- 灯台の光がゆっくり回転するSVGアニメーション（トップのヒーロー）
-- 波がゆったりと寄せては返すSVGアニメーション（背景）
-- ドリップがポタポタと落ちるアニメーション（アクセント）
-- すべてシンプルな線画ベース。装飾を排した静かなデザイン
-- Framer Motion で実装。CSS @keyframes も併用可
-
-### 3.4 カラーパレット
+### 3.2 カラーパレット（[globals.css](src/app/globals.css) `@theme`）
 
 ```
-── ベースカラー ──
-背景（暗）: #0a0a0a または #0f0f0f（ほぼ黒。夜の海のイメージ）
-背景（明）: #fafaf8（温かみのあるオフホワイト。日中ページ用）
-テキスト（明るい背景上）: #1a1a1a
-テキスト（暗い背景上）: #e8e6e1
+── ベース（HP共通）──
+--color-base:           #fdf8ef   生成り白（ページ全体の背景）
+--color-ink-primary:    #123656   ネイビー（本文・見出し）
+--color-ink-secondary:  #2c6671   深いティール（サブテキスト）
 
-── アクセントカラー ──
-灯台の光: #EF9F27（暖色のアンバー。光、珈琲の色）
-海・夜空: #1D9E75（深いティール。静けさ、奥行き）
+── グラデ用 ──
+--color-grad-teal:      #60ae9d   明るいティール
+--color-grad-navy:      #123656   深いネイビー
+--color-grad-deep-teal: #2c6671   中間の青緑
 
-── サブカラー ──
-薄いボーダー: rgba(255,255,255,0.1)（暗い背景上）
-薄いボーダー: rgba(0,0,0,0.08)（明るい背景上）
+── アクセント ──
+--color-accent-lime:    #a3a957   差し色ライム（極小面積のみ・落ち着いたオリーブ寄り）
 ```
 
-### 3.5 タイポグラフィ
+`body` には `background-color: #fdf8ef; color: #123656;` を設定。
 
-```
-日本語: "Noto Sans JP", sans-serif
-英語 / 数字: "Inter", sans-serif（Noto Sans JPと相性が良い）
-ウェイト: 300（本文）, 400（やや強調）, 500（見出し）
-見出しサイズ: h1=40px, h2=28px, h3=20px（モバイル時はそれぞれ-4px）
-本文サイズ: 16px, line-height: 1.8
-```
+### 3.3 タイポグラフィ
 
-### 3.6 レスポンシブ
+| 用途 | フォント | 補足 |
+|------|---------|------|
+| 本文（和文） | Noto Sans JP | weight 300-500 / line-height 1.8 |
+| 装飾英文 | **Cormorant Garamond**（VariableFont, ローカル） | `--font-serif`、Italic も同梱（[`Cormorant_Garamond/`](Cormorant_Garamond/)） |
+| 見出し（和文） | **Shippori Mincho** | `--font-mincho`、weight 400-700 |
+| 補助 | Noto Serif JP, Inter | フォールバック |
 
-- **モバイルファースト**で設計（ターゲットのInstagram流入はほぼスマホ）
-- ブレイクポイント: sm=640px, md=768px, lg=1024px（Tailwind標準）
+すべて `next/font/local`（Cormorant）または Google Fonts（その他）で `display: swap`。
+
+### 3.4 SectionBlock + GradientBackground
+
+各セクションは [SectionBlock](src/components/ui/SectionBlock.tsx) でラップ：
+
+- `max-w-820`、`rounded-[18px]`、`min-h-460px`（Hero）
+- 内部に [GradientBackground](src/components/ui/GradientBackground.tsx)（SVG `radialGradient` 2-3層 + `feTurbulence` グレイン）
+
+セクション別の色温度：
+
+| Type | 役割 |
+|------|------|
+| `hero` | 3色フル、世界観の提示 |
+| `tools` | 朝の光・起動の印象（teal主体） |
+| `beans` | 深み・香り（navy主体） |
+| `journal` | 余白・静けさ（薄め） |
+| `about` | 瞑想・着地（強め navy） |
+
+### 3.5 グレイン（フィルム質感）
+
+[GrainOverlay](src/components/ui/GrainOverlay.tsx) を**全ページ最前面**（`z-index: 9999`）に配置：
+
+| 項目 | 値 |
+|------|----|
+| ノイズ | `feTurbulence type="fractalNoise" baseFrequency=1.2 numOctaves=4` |
+| カラー | `feColorMatrix saturate=0`（無彩色） |
+| 不透明度 | `0.025` |
+| pointer-events | `none`（外側 `<div>` ラップで Android Chrome バグ回避） |
+
+ビネットは廃止（ライト背景との相性が悪い）。
 
 ---
 
 ## 4. ページ構成
 
 ```
-mumu-coffee.com/
-├── /                    トップページ（ブランドLP）
-├── /about               mumuのストーリー
-├── /beans               珈琲豆一覧（microCMS + BASEへリンク）✅
-├── /journal             読み物一覧（microCMS） ✅
-├── /journal/[slug]      個別記事ページ（将来）
-├── /diagnosis/[slug]    診断コンテンツページ（将来）
-└── /app/...             Webアプリ（実装済み） ✅
+/             トップ（ブランドLP）         ✅
+/about        mumu のストーリー + 焙煎者プロフィール ✅
+/beans        珈琲豆一覧（microCMS）        ✅（ライトテーマで動的）
+/journal      読み物一覧（microCMS）        ✅
+/app/...      Web アプリ（別仕様書参照）     ✅
 ```
 
-### 実装済みページ
-
-1. トップページ（/）✅ — カード型セクション、SVGイラスト付き
-2. Aboutページ（/about）✅ — 本文テキスト更新済み
-3. 珈琲豆ページ（/beans）✅ — microCMSからデータ取得
-4. 読み物ページ（/journal）✅ — microCMSから記事一覧取得
+`Header` / `Footer` は [ConditionalLayout](src/components/layout/ConditionalLayout.tsx) によって `/app` 以下では非表示。
 
 ---
 
-## 5. 各ページの詳細仕様
+## 5. トップページ `/`
 
-### 5.1 トップページ（/）
+[page.tsx](src/app/page.tsx) は5つのセクションを縦に並べるだけ：
 
-サイトの顔。mumuの世界観を伝え、3つの柱（味わう・整える・読む）への入口になるランディングページ。
-
-#### ワイヤーフレーム（実装済み）
-
-```
-┌──────────────────────────────────┐
-│                                  │
-│  [灯台のSVGアニメーション]         │  ← フルスクリーン（100vh）
-│  光がゆっくり回転                  │     背景: #0a0a0a
-│  波がゆったり動く                  │
-│                                  │
-│  感性が、ふと、                    │  ← メインコピー（大きく）
-│  戻ってくる場所。                  │
-│                                  │
-│  灯台の珈琲焙煎所 mumu            │  ← サブコピー（小さく）
-│                                  │
-│          ▼ scroll                │  ← スクロールインジケーター
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  ── 整える ──                    │  ← セクション1（アプリ）
-│                                  │
-│  ┌────────────────────────────┐  │  ← カードブロック（border付き）
-│  │SP:  [夜明けSVGイラスト]     │  │     PC: イラスト左 / テキスト右
-│  │     集中。リラックス。       │  │
-│  │     クリエイティブ。         │  │
-│  │     感性が回復する、アプリ。  │  │
-│  │     自分らしさを取り戻す、   │  │
-│  │     4つのモード。            │  │
-│  │     アプリを使ってみる →     │  │  ← /app へリンク
-│  └────────────────────────────┘  │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  ── 珈琲 ──                      │  ← セクション2（珈琲豆）
-│  珈琲豆のオンラインショップ        │  ← ラベル外に配置
-│  浅煎り〜深煎りまで、             │
-│  スペシャルティコーヒーを...       │
-│                                  │
-│  ┌────────────────────────────┐  │  ← カードブロック
-│  │ [←→ 豆カード横スクロール]  │  │  ← microCMSから取得、w-48ずつ
-│  │  すべて見る →               │  │  ← /beans へリンク
-│  └────────────────────────────┘  │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  ── 読む ──                      │  ← セクション3（読み物）
-│                                  │
-│  ┌────────────────────────────┐  │  ← カードブロック
-│  │SP:  [開いた本SVGイラスト]   │  │     PC: イラスト左 / テキスト右
-│  │     珈琲と感性にまつわる...  │  │
-│  │     読み物を見る →          │  │  ← /journal へリンク
-│  └────────────────────────────┘  │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  ── mumuについて ──              │  ← セクション4
-│                                  │
-│  ┌────────────────────────────┐  │  ← カードブロック
-│  │SP:  [灯台SVGイラスト]       │  │     PC: イラスト左 / テキスト右
-│  │     灯台は、暗い海の中で... │  │
-│  │     ストーリーを読む →      │  │  ← /about へリンク
-│  └────────────────────────────┘  │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  灯台の珈琲焙煎所 mumu           │  ← フッター
-│  Instagram / note                │
-│  © 灯台の珈琲焙煎所mumu          │
-│                                  │
-└──────────────────────────────────┘
+```tsx
+<HeroSection />
+<ToolsSection />
+<BeansSection />
+<JournalSection />
+<AboutSection />
 ```
 
-#### 実装詳細
+### 5.1 [HeroSection](src/components/home/HeroSection.tsx)
 
-- **ヒーローセクション**: フルスクリーン（100vh）。`<Lighthouse />` + `<Waves />`（Framer Motion SVG）
-- **各セクション共通レイアウト**: `border border-white/8` のカードブロック。Framer Motion `whileInView` でフェードイン
-- **PC レスポンシブ**: `md:flex-row md:items-center` でイラストが左固定、テキストが右に展開
-- **「整える」セクション（ToolsSection）**:
-  - SVGイラスト: 夜明けの風景（月・星・山・地平線・波・月の水面反射）
-  - タイトル: 「集中。リラックス。クリエイティブ。／感性が回復する、アプリ。」
-  - 説明: 「自分らしさを取り戻す、4つのモード。」
-  - CTA: 「アプリを使ってみる →」→ `/app`
-- **「珈琲」セクション（BeansSection）**（Server Component）:
-  - ラベル・タイトル・説明はカード枠の**外側**に配置
-  - カード内: microCMSから取得した豆を横スクロール表示（`w-48` × `aspect-[2/3]`）
-  - 豆カード: 画像 + フレーバー + 価格 → 各豆のBASE商品ページへ直接リンク
-  - 「すべて見る →」→ `/beans`
-- **「読む」セクション（JournalSection）**: SVGイラスト（開いた本 + 月）
-- **「mumuについて」セクション（AboutSection）**: SVGイラスト（灯台 + 光線 + 海）
-- **リンク（CTA）**: テキストリンク + 矢印（→）。hover時に琥珀色に変化
-- **フッター**: ロゴ + SNSリンク（Instagram, note）+ コピーライト
+- ロゴ「mumu」（Cormorant Italic, 22.5px）+ PCナビ「整える / 珈琲 / 読む / mumuについて」
+- メインコピー：「**感性が、ふと、／戻ってくる場所。**」（Shippori Mincho, clamp 26-34px）
+- 写真スライダー（6枚、6秒間隔フェード、ドット手動切替可、キャプション英文 Italic）
+- ブランドバッジ：`LIGHTHOUSE COFFEE ROASTERY` + ライム丸（`#a3a957`）
+- ロゴ画像 + `— vol. 01, spring —`
 
-#### SEO設定
-
-```html
-<title>灯台の珈琲焙煎所mumu | 感性が、ふと、戻ってくる場所</title>
-<meta name="description" content="灯台の珈琲焙煎所mumu（ムーム）。スペシャルティコーヒーの焙煎と、珈琲のある時間をつくるツールをお届けします。" />
-```
-
-#### OGP設定
-
-```html
-<meta property="og:title" content="灯台の珈琲焙煎所mumu" />
-<meta property="og:description" content="感性が、ふと、戻ってくる場所。" />
-<meta property="og:image" content="https://mumu-coffee.com/og-image.jpg" />
-<meta property="og:url" content="https://mumu-coffee.com" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
-```
-
-※ og:image 用の画像（1200×630px）を用意する必要がある。灯台のビジュアル + ロゴを配置したもの。
-
----
-
-### 5.2 Aboutページ（/about）
-
-mumuのストーリーを伝えるページ。BASEのAboutをさらに発展させた内容。
-
-#### ワイヤーフレーム
+### 5.2 [ToolsSection](src/components/home/ToolsSection.tsx)（01 整える）
 
 ```
-┌──────────────────────────────────┐
-│  ← ホームに戻る                   │  ← テキストリンク
-│                                  │
-│  [灯台のイラスト or アニメーション] │  ← ヒーロー（トップより控えめ）
-│                                  │
-│  感性が、ふと、                    │
-│  戻ってくるような珈琲を            │
-│  届けたい。                       │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  （ストーリー本文）               │  ← BASEのAboutの内容を
-│                                  │     丁寧にリライトしたもの
-│  目まぐるしく変化の激しい          │
-│  世の中で、私たちは、             │
-│  気付けば目の前のことに            │
-│  流され、振り回されてばかりです。   │
-│                                  │
-│  ...（中略）...                   │
-│                                  │
-│  そんな風に、疲れて何も            │
-│  できない毎日が続いていたとしても、 │
-│  ムームの珈琲が「感性を            │
-│  取り戻すきっかけ」を作れたら      │
-│  いいなと思っております。          │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  珈琲豆を見る →                   │  ← /beans へリンク
-│  読み物を見る →                   │  ← /journal へリンク
-│                                  │
-├──────────────────────────────────┤
-│  [フッター]                       │
-└──────────────────────────────────┘
+番号 01 / 整える / — tools
+
+感性を、取り戻す。
+つくる人の、集中とひらめきのアプリ
+
+自分らしさを取り戻す、4つのモード。
+[アプリを使ってみる →]  → /app
 ```
 
-#### 本文テキスト（実装済み）
+### 5.3 [BeansSection](src/components/home/BeansSection.tsx)（02 珈琲）
+
+Server Component。microCMS（`endpoint: beans`）から豆を取得 → **エチオピア優先ソート** → 横スクロールで豆カード表示。
 
 ```
-目まぐるしく変化の激しい世の中で、私たちは、気付けば目の前のことに
-流され、振り回されてばかりです。
+番号 02 / 珈琲 / — coffee
 
-仕事、人間関係、情報の波。やるべきことは山積みで、感じたいことを
-感じる暇もない。そんな日々の中で、ふと「あれ、最近何も感じていないな」
-と気づく瞬間があります。
+灯台の珈琲焙煎所mumu
+朝、夕、夜をコンセプトにした自家焙煎の珈琲豆オンラインショップ
 
-mumuは、そんな現代の"鈍くなっていく感性"に抗うために生まれました。
+浅煎りから深煎りまで、そのときどきの一杯を。
 
-珈琲を淹れる、その一滴一滴の時間。豆を挽く音、湯気の香り、
-カップを包む温もり。それはほんの数分間のことかもしれないけれど、
-その小さなひとときが、少しだけ自分に戻るきっかけになる。
-
-私たちが目指しているのは、「世界一おいしい珈琲」ではありません。
-あなたの感性が、ふと戻ってくるような、そんな一杯です。
-
-灯台は、暗い海の中で方向を示す存在です。mumuの珈琲が、忙しい日常の中で
-感性を取り戻すための、小さな灯台になれたら幸いです。
+[← →  豆カード（width 190px, aspect 2/3）]   coming soon カード末尾
+[すべての豆を見る →]  → /beans
 ```
 
-#### 実装詳細
+豆カード: 画像 / 名前（serif italic）/ 焙煎度（uppercase）/ フレーバー / 価格。クリックで BASE 商品ページへ直接遷移。
 
-- 背景: `#0a0a0a`、`max-w-2xl` で読みやすい幅に制限
-- `FadeBlock` コンポーネント（Framer Motion `whileInView`）で段落ごとにフェードイン
-- 下部リンク: 「珈琲豆を見る →」（/beans）、「読み物を見る →」（/journal）
-
----
-
-### 5.3 珈琲豆ページ（/beans）
-
-mumuの珈琲豆を紹介し、BASEの商品ページへ誘導するページ。
-
-#### ワイヤーフレーム
+### 5.4 [JournalSection](src/components/home/JournalSection.tsx)（03 読む）
 
 ```
-┌──────────────────────────────────┐
-│  ← ホームに戻る                   │
-│                                  │
-│  珈琲                             │  ← パンくずも「珈琲」
-│                                  │
-│  スペシャルティコーヒーを、        │
-│  ていねいに焙煎しています。       │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │                            │  │
-│  │  エチオピア シダモ           │  │  ← 豆のカード
-│  │  浅煎り / 100g / ¥1,250    │  │
-│  │                            │  │
-│  │  グレープフルーツ、          │  │
-│  │  アプリコット、ベルガモット    │  │
-│  │  華やかで複雑なフレーバーに、 │  │
-│  │  優しい甘みのある味わい。     │  │
-│  │                            │  │
-│  │  ショップで見る →            │  │  ← BASEの商品ページへ外部リンク
-│  │                            │  │
-│  └────────────────────────────┘  │
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │                            │  │
-│  │  インドネシア マンデリン      │  │  ← 豆のカード
-│  │  深煎り / 100g / ¥1,200    │  │
-│  │                            │  │
-│  │  深いコク、スパイシー、       │  │
-│  │  ダークチョコレート           │  │
-│  │  しっかりとした苦味と         │  │
-│  │  重厚なコク。                │  │
-│  │                            │  │
-│  │  ショップで見る →            │  │  ← BASEの商品ページへ外部リンク
-│  │                            │  │
-│  └────────────────────────────┘  │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  1杯あたり約160円。               │
-│  全国送料一律（ゆうパケット）     │
-│                                  │
-├──────────────────────────────────┤
-│  [フッター]                       │
-└──────────────────────────────────┘
+番号 03 / 読む / — journal
+
+ちいさな読み物。
+珈琲の記録。
+
+[読み物を見る →]  → /journal
 ```
 
-#### 実装詳細
+### 5.5 [AboutSection](src/components/home/AboutSection.tsx)（04 mumuについて）
 
-- **豆のデータ**: microCMS の「珈琲豆」APIから取得。管理画面で豆を追加するだけでページに自動反映される
-- **カードデザイン**: 大きめのカード。アイキャッチ画像はmicroCMSの画像フィールドで管理
-- **リンク先**: 各豆のカードの「ショップで見る →」は `target="_blank"` でBASEの商品ページを開く
-- **豆が増えた時**: microCMSの管理画面で新しい豆を登録するだけ。コードの変更は不要
+```
+mumuについて
 
-**microCMS「珈琲豆」APIのスキーマ:**
+灯台のように
+ただそこで光っている
 
-| フィールド名 | フィールドID | 種類 | 説明 |
-|-------------|-------------|------|------|
-| 豆の名前 | name | テキストフィールド | 「エチオピア シダモ」等 |
-| 焙煎度 | roast | テキストフィールド | 「浅煎り」「深煎り」等 |
-| 重量 | weight | テキストフィールド | 「100g」等 |
-| 価格 | price | 数値 | 1250 等 |
-| 1杯あたり | pricePerCup | テキストフィールド | 「約160円」等 |
-| フレーバー | flavor | テキストフィールド | 「グレープフルーツ、アプリコット」等 |
-| 説明 | description | テキストエリア | 商品の説明文 |
-| 画像 | image | 画像 | 商品画像（任意） |
-| BASEのURL | shopUrl | テキストフィールド | BASEの商品ページURL |
+忙しい日々のなかで、ふと自分に戻るための場所。
 
-**初期データ（microCMSに手動で登録する）:**
-
-| 豆の名前 | 焙煎度 | 価格 | BASEのURL |
-|---------|-------|------|-----------|
-| エチオピア シダモ | 浅煎り | ¥1,250 | https://mumucoffee.theshop.jp/items/127027333 |
-| インドネシア マンデリン | 深煎り | ¥1,200 | https://mumucoffee.theshop.jp/items/127225149 |
+[ストーリーを読む →]  → /about
 ```
 
 ---
 
-### 5.4 読み物ページ（/journal）
+## 6. `/about`
 
-ブログ記事や診断コンテンツの一覧ページ。Phase 1では枠だけ作る。
+ブランドストーリーページ。[RoasterProfile](src/components/about/RoasterProfile.tsx) を含む（焙煎者プロフィール、SEO/E-E-A-T 強化用 Person JSON-LD あり）。
 
-#### ワイヤーフレーム
+本文中の重要な表現：
+- 「**アプリは、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の 4モード構成で、すべて無料・インストール不要で使えるようにしています。**」
+- 「最近、ドーパミン中毒だなあ...という方はぜひ使ってみてください。」
 
-```
-┌──────────────────────────────────┐
-│  ← ホームに戻る                   │
-│                                  │
-│  読む                             │
-│                                  │
-│  珈琲と感性にまつわる読み物。      │
-│                                  │
-├──────────────────────────────────┤
-│                                  │
-│  記事はまだありません。            │  ← 初期状態
-│                                  │
-│  noteでmumuのストーリーを          │
-│  読むことができます。              │
-│                                  │
-│  noteで読む →                     │  ← https://note.com/mumu_coffee へ
-│                                  │
-├──────────────────────────────────┤
-│  [フッター]                       │
-└──────────────────────────────────┘
-```
+### JSON-LD（[layout.tsx](src/app/layout.tsx)）
 
-#### 実装詳細
-
-- **記事のデータ**: microCMS の「ブログ」APIから取得。管理画面で記事を書いて「公開」するだけでサイトに反映
-- 記事がない間は「noteで読む」へのリンクを表示
-- 記事が増えてきたらカード形式で一覧表示（タイトル + 抜粋 + 日付 + カテゴリ）
-- 個別記事ページ（/journal/[slug]）もmicroCMSのデータから自動生成
-
-**microCMS「ブログ」APIのスキーマ:**
-
-| フィールド名 | フィールドID | 種類 | 説明 |
-|-------------|-------------|------|------|
-| タイトル | title | テキストフィールド | 記事のタイトル |
-| 本文 | body | リッチエディタ | 記事の本文（画像挿入・見出し・太字等が可能） |
-| 抜粋 | excerpt | テキストエリア | 一覧ページに表示する要約文 |
-| アイキャッチ | eyecatch | 画像 | 記事のサムネイル画像 |
-| カテゴリ | category | セレクトフィールド | 「珈琲」「感性」「暮らし」等 |
-
-**更新フロー（WordPressとほぼ同じ）:**
-1. microCMSの管理画面にログイン
-2. 「ブログ」→「新しく作る」
-3. タイトル、本文、画像、カテゴリを入力
-4. 「公開」ボタン
-5. 数分後にサイトに反映（Vercel Webhook で自動再ビルド）
+ルートレイアウトに Organization、`/about#mako` に Person を相互リンク。
 
 ---
 
-## 6. 共通コンポーネント
+## 7. `/beans`
 
-### 6.1 ヘッダー / ナビゲーション
+microCMS から全豆を取得して一覧表示。ライトテーマ（`#f7f9f7` 系）。各カードから BASE への外部リンク。
+
+## 8. `/journal`
+
+microCMS から記事一覧。各記事は note 等への外部リンク。ライトテーマ。
+
+---
+
+## 9. ヘッダー・フッター
+
+`/` および非 `/app` ページのみ表示：
+
+- [Header](src/components/layout/Header.tsx) — `mumu` ロゴ + ナビ
+- [Footer](src/components/layout/Footer.tsx) — ロゴ + Instagram / note / Shop リンク + コピーライト
+- [InstallBanner](src/components/layout/InstallBanner.tsx) — PWAインストール促進バナー
+
+---
+
+## 10. SEO / OGP
+
+[layout.tsx](src/app/layout.tsx) の `metadata` で一括設定：
+
+- title template: `%s | 灯台の珈琲焙煎所mumu`
+- default title: `灯台の珈琲焙煎所mumu | 感性が、ふと、戻ってくる場所`
+- description: スペシャルティコーヒーの焙煎と...
+- OGP: `/og-image.jpg`（1200×630、灯台ビジュアル + ロゴ）
+- Twitter card: `summary_large_image`
+- canonical: `https://mumucoffee-feel.com`
+- robots: `index: true, follow: true`（`/app` のみ noindex）
+
+---
+
+## 11. PWA
+
+- [manifest.ts](src/app/manifest.ts): `start_url: /app`、`theme_color: #0a0a0a`、アイコン `/icons/icon-192.png` etc.
+- Service Worker: serwist が `public/sw.js` をビルド時に自動生成
+- `apple-mobile-web-app-status-bar-style`: `black-translucent`
+
+---
+
+## 12. ファイル構成（HP関連）
 
 ```
-┌──────────────────────────────────┐
-│  [ロゴ] mumu  整える 珈琲 読む about│  ← デスクトップ
-└──────────────────────────────────┘
-
-┌──────────────────────────────────┐
-│  [ロゴ] mumu                  ☰  │  ← モバイル（ハンバーガーメニュー）
-└──────────────────────────────────┘
-```
-
-- ロゴ: 画像（`/mumu_logo_white.png`）+ テキスト「mumu」。クリックでトップへ
-- ナビリンク: 「整える」（/app）、「珈琲」（/beans）、「読む」（/journal）、「about」（/about）
-- スクロール前: 透明背景（ヒーローの暗い背景に溶け込む）
-- スクロール後: `bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-white/10`
-- モバイル: ハンバーガーボタン → フルスクリーンドロワー（`fixed inset-0 z-40`）
-- hover時: 琥珀色アンダーラインがスッと現れる
-
-### 6.2 フッター
-
-```
-┌──────────────────────────────────┐
-│                                  │
-│  灯台の珈琲焙煎所 mumu           │
-│                                  │
-│  Instagram    note    ショップ    │  ← 外部リンク3つ
-│                                  │
-│  © 2026 灯台の珈琲焙煎所mumu     │
-│                                  │
-└──────────────────────────────────┘
-```
-
-- 背景: 暗色（#0a0a0a）
-- SNSリンク: Instagram（https://www.instagram.com/mumu_coffee_roaster/）、note（https://note.com/mumu_coffee）
-- ショップリンク: https://mumucoffee.theshop.jp/
-
-### 6.3 灯台アニメーション（Lighthouse.tsx）
-
-トップページのヒーローで使用。将来アプリでも再利用する。
-
-```typescript
-// SVGベースのシンプルな線画灯台
-// 色: 線は #e8e6e1（暗い背景上の明るい線）
-// 光線: #EF9F27（アンバー）の半透明グラデーション
-// 光線が360度ゆっくり回転（1周 = 8秒）
-// Framer Motion: rotate: [0, 360], transition: { duration: 8, repeat: Infinity, ease: "linear" }
-```
-
-### 6.4 波アニメーション（Waves.tsx）
-
-トップページのヒーロー下部。将来アプリでも再利用する。
-
-```typescript
-// SVG path でサイン波を描画
-// 3〜4レイヤーで奥行き表現
-// 各レイヤーは異なる速度で左右にゆらぐ
-// 色: 各レイヤーで透明度を変える（#1D9E75 の alpha 0.1〜0.3）
+src/
+  app/
+    layout.tsx              ルートレイアウト（GTM, JSON-LD, Cormorantフォント）
+    page.tsx                / トップページ
+    about/page.tsx          /about
+    beans/page.tsx          /beans
+    journal/page.tsx        /journal
+    globals.css             カラーパレット・@theme・base style
+    manifest.ts             PWA manifest
+    sitemap.ts / robots.ts  SEO
+  components/
+    home/
+      HeroSection.tsx
+      ToolsSection.tsx
+      BeansSection.tsx      Server Component（microCMS fetch）
+      JournalSection.tsx
+      AboutSection.tsx
+    about/
+      RoasterProfile.tsx    焙煎者プロフィール（JSON-LD）
+    layout/
+      ConditionalLayout.tsx /app以下でHeader/Footer非表示
+      Header.tsx
+      Footer.tsx
+      InstallBanner.tsx
+    ui/
+      SectionBlock.tsx      角丸ブロック（max-w-820）
+      GradientBackground.tsx 5タイプの背景グラデ
+      GrainOverlay.tsx      フィルムグレイン（全ページ最前面）
+  libs/
+    microcms.ts             microCMSクライアント + Bean / Journal型
+Cormorant_Garamond/         ローカルフォント（git管理）
+public/
+  rogomain.png, og-image.jpg, profile.jpg, etc.
+  sounds/                   /app専用、HPでは未使用
 ```
 
 ---
 
-## 7. ディレクトリ構造（現行）
+## 13. 運用メモ
 
-```
-mumu/
-├── public/
-│   ├── og-image.jpg              # OGP画像（1200×630px）
-│   ├── mumu_logo_white.png       # ヘッダーロゴ
-│   ├── sounds/                   # アプリ用アンビエント音
-│   │   └── pour.wav
-│   ├── icons/                    # PWAアイコン
-│   ├── manifest.webmanifest      # PWAマニフェスト
-│   └── sw.js                     # Serwist生成（本番のみ）
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx            # ルートレイアウト（SEO meta）
-│   │   ├── page.tsx              # トップページ
-│   │   ├── about/
-│   │   │   ├── page.tsx          # Aboutページ（Server Component）
-│   │   │   └── AboutContent.tsx  # 本文コンテンツ（Client Component）
-│   │   ├── beans/
-│   │   │   └── page.tsx          # 珈琲豆ページ（microCMS）
-│   │   ├── journal/
-│   │   │   └── page.tsx          # 読み物一覧（microCMS）
-│   │   └── app/...               # Webアプリ（別仕様書参照）
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── Header.tsx               # ヘッダー（スクロール連動 + ドロワー）
-│   │   │   ├── Footer.tsx               # フッター
-│   │   │   ├── ConditionalLayout.tsx    # ブランドサイト用レイアウト切替
-│   │   │   └── InstallBanner.tsx        # PWAインストールバナー
-│   │   ├── home/
-│   │   │   ├── HeroSection.tsx          # トップヒーロー（100vh）
-│   │   │   ├── ToolsSection.tsx         #「整える」カードセクション
-│   │   │   ├── BeansSection.tsx         #「珈琲」カードセクション（Server）
-│   │   │   ├── JournalSection.tsx       #「読む」カードセクション
-│   │   │   └── AboutSection.tsx         #「mumuについて」カードセクション
-│   │   ├── beans/
-│   │   │   └── BeanCard.tsx             # /beans 用豆カード
-│   │   └── animations/
-│   │       ├── Lighthouse.tsx           # 灯台SVGアニメーション
-│   │       ├── Waves.tsx                # 波SVGアニメーション
-│   │       └── Drip.tsx                 # ドリップアニメーション（CoffeeTime用）
-│   ├── libs/
-│   │   └── microcms.ts                  # microCMSクライアント + Bean型定義
-│   └── styles/
-│       └── globals.css                  # グローバルCSS
-├── tailwind.config.ts
-├── next.config.ts
-├── tsconfig.json
-└── package.json
-```
+- **microCMS 更新**: `https://mumu-coffee.microcms.io` にログイン → 公開で自動デプロイ
+- **コピー変更**: 各 `Section.tsx` を直接編集 → push で反映
+- **テーマ切り替え**: globals.css の `@theme` を編集（HPはライト固定）
+- **ビルド検証**: `npm run build`（webpack）。デプロイ前に必ず通すこと
 
 ---
 
-## 8. SEO対策
+## 14. 主な仕様変更の履歴
 
-### 8.1 各ページの meta 設定
-
-| ページ | title | description |
-|-------|-------|-------------|
-| / | 灯台の珈琲焙煎所mumu \| 感性が、ふと、戻ってくる場所 | 灯台の珈琲焙煎所mumu（ムーム）。スペシャルティコーヒーの焙煎と、珈琲のある時間をつくるツールをお届けします。 |
-| /about | mumuのストーリー \| 灯台の珈琲焙煎所mumu | 「感性が、ふと、戻ってくるような珈琲を届けたい」灯台の珈琲焙煎所mumu（ムーム）のコンセプトとストーリー。 |
-| /beans | 珈琲豆 \| 灯台の珈琲焙煎所mumu | スペシャルティコーヒーをていねいに焙煎。エチオピア シダモ（浅煎り）、インドネシア マンデリン（深煎り）をお届けします。 |
-| /journal | 読み物 \| 灯台の珈琲焙煎所mumu | 珈琲と感性にまつわる読み物。灯台の珈琲焙煎所mumuが発信するコンテンツ。 |
-
-### 8.2 構造化データ（JSON-LD）
-
-トップページに組織情報の構造化データを設置：
-
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "灯台の珈琲焙煎所mumu",
-  "url": "https://mumu-coffee.com",
-  "logo": "https://mumu-coffee.com/logo.png",
-  "sameAs": [
-    "https://www.instagram.com/mumu_coffee_roaster/",
-    "https://note.com/mumu_coffee",
-    "https://mumucoffee.theshop.jp/"
-  ]
-}
-```
-
-### 8.3 その他のSEO対策
-
-- `sitemap.xml` を自動生成（next-sitemap パッケージ）
-- `robots.txt` を設置
-- 画像には alt 属性を必ず設定
-- Core Web Vitals を意識したパフォーマンス（画像遅延読み込み、フォントの最適化）
-
----
-
-## 9. 外部サービスへのリンク一覧
-
-| サービス | URL | 用途 |
-|---------|-----|------|
-| BASE（ショップ） | https://mumucoffee.theshop.jp/ | 珈琲豆の購入 |
-| BASE（エチオピア） | https://mumucoffee.theshop.jp/items/127027333 | 商品個別ページ |
-| BASE（マンデリン） | https://mumucoffee.theshop.jp/items/127225149 | 商品個別ページ |
-| Instagram | https://www.instagram.com/mumu_coffee_roaster/ | SNS |
-| note | https://note.com/mumu_coffee | コンテンツ |
-
----
-
-## 10. 実装状況
-
-### Phase 1（ブランドサイト）— ✅ 完了
-
-| # | 項目 | 状態 |
-|---|------|------|
-| 1 | Next.jsプロジェクトセットアップ | ✅ |
-| 2 | Tailwind + Framer Motion 設定 | ✅ |
-| 3 | Header（スクロール連動、ドロワー） | ✅ |
-| 4 | Footer | ✅ |
-| 5 | 灯台・波SVGアニメーション | ✅ |
-| 6 | トップページ（ヒーロー + 4セクション） | ✅ |
-| 7 | Aboutページ | ✅ |
-| 8 | 珈琲豆ページ（microCMS連携） | ✅ |
-| 9 | 読み物ページ（microCMS連携） | ✅ |
-| 10 | PWA設定（@serwist/next） | ✅ |
-| 11 | Vercel デプロイ | ✅ |
-
-### Phase 2（Webアプリ）— ✅ 完了
-
-Focus / Relax / Spark / Reclaimの4モード、ルーティン設定、ダッシュボードを実装済み。  
-詳細は `mumu_app_technical_spec.md` を参照。
-
-### Phase 3（今後）
-
-| 機能 | 状態 | 備考 |
-|------|------|------|
-| ブログ記事の充実 | 未着手 | microCMS管理画面で追加 |
-| 感性タイプ診断 | 未着手 | /diagnosis/[slug] |
-| 週次AIレポート | 未着手 | Anthropic API Haiku 4.5 |
-| Supabase永続化 | 未着手 | 現行はlocalStorageのみ |
-| Focus BGM追加 | 未着手 | 波・焚き火等 .wav ファイル |
-
----
-
-## 11. 運用メモ
-
-### コンテンツ更新（microCMS）
-
-- 珈琲豆を追加/編集: microCMS管理画面 → 「beans」APIで登録
-- ブログ記事を公開: microCMS管理画面 → 「ブログ」APIで作成・公開
-- 更新後は Vercel Webhook で自動再ビルド（数分で反映）
-
-### 外部サービス連携済み
-
-| サービス | 用途 |
-|---------|------|
-| microCMS | 珈琲豆・ブログ記事のCMS |
-| BASE（mumucoffee.theshop.jp） | ECショップ |
-| Vercel | ホスティング + 自動デプロイ |
-| Instagram (@mumu_coffee_roaster) | SNS流入 |
-| note (note.com/mumu_coffee) | コンテンツ流入 |
-
----
-
-*アプリ（/app 以下）の実装詳細は「mumu_app_technical_spec.md」を参照。*
+| 時期 | 変更 |
+|------|------|
+| 2026-03 初期 | ダーク基調 / アンバー（#EF9F27） |
+| 2026-04-08 | グレイン + ビネット導入 |
+| 2026-04-12 | beans / journal をライト化 |
+| 2026-04-19 | About に焙煎者プロフィール + Person JSON-LD |
+| 2026-04-20 | TOP デザイン刷新（SectionBlock + GradientBackground、Cormorant + Shippori） |
+| 2026-04-21 | アンバー → ライム化、ビネット廃止 |
+| 2026-04-22 | アクセントライムを `#a3a957`（少し暗めのオリーブ寄り）に確定 |
+| 2026-04-23 | TOP コピー全面刷新（4セクション）、エチオピア先頭ソート |

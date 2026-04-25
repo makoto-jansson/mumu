@@ -1,485 +1,452 @@
-# mumu アプリ 実装仕様書（現状版）
+# mumu アプリ仕様書（/app）
 
-> 最終更新: 2026-04-20（セッション3）
-> 開発フェーズ: Phase 2〜3 移行期（Focus / Relax 完成、Spark / Reclaim スタブ）
+> **最終更新**: 2026-04-25
+> **対象URL**: `/app/...`
+> **コンセプト**: 「珈琲のある時間をつくるアプリ」— 4つのモードで集中・リラックス・ひらめき・感性回復
+
+HP 側仕様は別ファイル [`mumu_brand_site_spec.md`](./mumu_brand_site_spec.md)。
 
 ---
 
-## 1. 全体構成
-
-### URL 構造
+## 1. URL 構造
 
 ```
-/                  公式HP トップ
-/about             ブランドストーリー
-/beans             珈琲豆一覧（microCMS）
-/journal           読み物一覧（microCMS）
-/app               アプリホーム ← 以下はアプリゾーン
-/app/focus         Focusモード
-/app/relax         Relaxモード
-/app/spark         Sparkモード（スタブ）
-/app/reclaim       Reclaimモード（スタブ）
-/app/dashboard     My cup（ダッシュボード）
-/app/routine       ルーティン設定
+/app                  アプリホーム（モード選択 + 今日のルーティン）
+/app/focus            Focus モード（集中）
+/app/relax            Relax モード（リラックス）
+/app/spark            Spark モード（ひらめき）
+/app/reclaim          Reclaim モード（感性回復）
+/app/dashboard        My cup（記録）
+/app/routine          週間ルーティン設定
 ```
 
-### 技術スタック
+`/app` 以下は `robots: { index: false, follow: false }`（[layout.tsx](src/app/app/layout.tsx)）。
+
+---
+
+## 2. 技術スタック
+
+HP と同じ。アプリ固有：
 
 | 項目 | 内容 |
 |------|------|
-| フレームワーク | Next.js 16（App Router, webpack） |
-| スタイリング | Tailwind CSS |
-| アニメーション | Framer Motion |
-| 状態管理 | Zustand（persist ミドルウェアで localStorage 永続化） |
-| 音声 | HTMLAudioElement + Web Audio API（GainNode） |
-| PWA | Serwist（next-pwa後継） |
-| CMS | microCMS（珈琲豆・記事） |
-| ホスティング | Vercel（GitHub 連携で自動デプロイ） |
+| 状態管理 | Zustand v5（`persist` で localStorage 永続化） |
+| 音声 | `HTMLAudioElement` + Web Audio API（`GainNode`、ライブラリ不使用） |
+| アニメーション | Framer Motion `AnimatePresence mode="wait"` でステップ間遷移 |
+| タイマー | `Date.now()` 差分方式の自前 `useTimer` フック（バックグラウンド対応） |
 
 ---
 
-## 2. アプリレイアウト（/app 以下共通）
+## 3. デザイン
 
-`src/app/app/layout.tsx` が /app 以下全ページに適用される。
+### 3.1 カラー
 
-- **BottomNav**: ホーム / My cup / ルーティン の3タブ（固定フッター）
-- **NowPlayingBar**: セッション中に再生中BGMを表示するミニプレイヤー
-- **SoundPreloader**: 効果音を起動時にプリロード（表示なし）
-- HP のヘッダー/フッターは非表示
+```
+背景:           #0e0e0e   /appゾーンのベース（[layout.tsx])
+html/body:      #111111   GrainOverlay を載せた後の実効色に合わせて少し明るく揃える
+テキスト:       #e8e6e1   生成り白
+アクセントライム: #a3a957   差し色（CTA、選択状態、強調）
+ボーダー:       white/8 〜 white/25  状況に応じて使い分け
+```
+
+`/app` 配下では [layout.tsx](src/app/app/layout.tsx) 内に `<style>` で `html, body { background-color: #111111 !important; }` を仕込む。`/app` から離れると layout がアンマウントされてスタイルも消える。
+
+### 3.2 グレイン
+
+HP と同じ [GrainOverlay](src/components/ui/GrainOverlay.tsx) がルートレイアウトから全ページに適用される。/app でも同様。
+
+### 3.3 タイポグラフィ
+
+`/app` は和文中心。Shippori Mincho（見出し）+ Noto Sans JP（本文）+ Cormorant Garamond（英文ラベル）。
+
+`tracking-[0.2em]` 〜 `tracking-[0.4em]` の文字間で「静かさ」を演出。
 
 ---
 
-## 3. アプリホーム（/app）
+## 4. 共通レイアウト（[layout.tsx](src/app/app/layout.tsx)）
 
-4つのモードカードを縦並びで表示。現状すべて `available: true`（Spark/Reclaimもリンク有効）。
+```
+┌─────────────────────┐
+│                     │
+│      コンテンツ       │  ← 各ページの page.tsx
+│                     │
+├─────────────────────┤
+│   NowPlayingBar     │  ← 再生中のみ表示（セッションページでは非表示）
+├─────────────────────┤
+│   BottomNav (h-16)  │  ← ホーム / My cup / ルーティン
+└─────────────────────┘
+```
 
-- 上部: 今日のルーティン（`TodayRoutine`）
-- 中央: 灯台アニメーション + キャッチコピー + 波アニメーション
-- 下部: モードカード一覧、mumuショップへのリンク、HPへ戻るリンク
+| コンポーネント | 役割 |
+|---|---|
+| [BottomNav](src/components/app/layout/BottomNav.tsx) | 3タブ固定フッター。タップ時 `stopZyunnbi()` |
+| [NowPlayingBar](src/components/app/layout/NowPlayingBar.tsx) | 再生中BGM + ラベル + 戻る + 停止ボタン。`audioStore` 監視 |
+| [SoundPreloader](src/components/app/layout/SoundPreloader.tsx) | 効果音をマウント時にプリロード（表示なし） |
 
-**モードカードの音アイコン**: Focus・Relax カードの右端に音アイコンを表示（BGMが鳴ることを示す）。Spark・Reclaimは非表示。
-
-**サウンド**: ホーム画面では効果音を一切鳴らさない。
+HP の Header / Footer は [ConditionalLayout](src/components/layout/ConditionalLayout.tsx) で非表示化済み。
 
 ---
 
-## 4. Focus モード（/app/focus）
+## 5. アプリホーム `/app`（[page.tsx](src/app/app/page.tsx)）
 
-### 画面フロー
+```
+┌─────────────────────────────┐
+│   今日のルーティン             │ ← TodayRoutine（routineStore参照）
+│   (Lighthouse animation)    │ ← 灯台SVGアニメーション
+│                             │
+│   感性を、取り戻す。           │
+│   つくる人の、集中とひらめきのアプリ │
+│                             │
+│   (Waves animation)         │ ← 波SVGアニメーション
+│                             │
+│   すべてのモード               │
+│   ┌─ Focus  集中する ──────┐ │ ← 4つのモードカード
+│   ├─ Relax  リラックス ────┤ │   全て available: true
+│   ├─ Spark  ひらめき ──────┤ │   音アイコンは Focus / Relax のみ
+│   └─ Reclaim 感性回復 ─────┘ │
+│                             │
+│   mumuの珈琲豆はこちら →      │ → BASE
+│   ← HPに戻る                  │ → /
+└─────────────────────────────┘
+```
+
+このページでは効果音もBGMも一切鳴らさない。
+
+---
+
+## 6. Focus モード `/app/focus`
 
 ```
 FocusSetup → CoffeeTime（任意） → FocusSession → FocusBreak → SessionSummary
 ```
 
-ページ内でステップ管理（`useState<"setup" | "coffee" | "session" | "break" | "done">`）。`AnimatePresence mode="wait"` でステップ間をフェード遷移。
+ステップ管理は [page.tsx](src/app/app/focus/page.tsx) 内の `useState<"setup" | "coffee" | "session" | "break" | "done">`。`AnimatePresence mode="wait"` で遷移。
 
-### FocusSetup（準備画面）
+### 6.1 [FocusSetup](src/components/focus/FocusSetup.tsx)
 
-`src/components/focus/FocusSetup.tsx`
+- 時間選択：[RollerPicker](src/components/focus/RollerPicker.tsx) で 5〜60分（5分刻み）
+- タスクメモ（任意）
+- BGM 4択：波 / 焚き火 / カフェ / 音楽
+- マウント時に `zyunnbi.m4a` を 0.175 で再生（既に他で再生中ならスキップ）
+- ボタン：
+  - 「準備できました」→ CoffeeTime
+  - 「珈琲なしで始める」→ FocusSession 直行
+  - 「← 戻る」→ ホーム
+- いずれも `cancelZyunnbiRef.current?.()` で zyunnbi を即停止 → `playClickSound()` → 遷移
 
-- **時間選択**: ロールピッカー（`RollerPicker`）で 5〜60分の任意の分数（5・10・15・…・60分の刻み）
-- **タスクメモ**: 任意のテキスト入力
-- **BGM選択**: 波 / 焚き火 / カフェ / 音楽 の4択（アイコン付きボタン）
-- **zyunnbi**: マウント時に準備音楽（zyunnbi.m4a）を再生
-  - ただし BGM が既に再生中（セッションから戻った場合）はスキップ
-  - `cancelZyunnbiRef` で画面遷移ボタン・戻るリンク押下時に即停止
-- **ボタン**:
-  - 「準備できました」→ CoffeeTime へ（zyunnbi停止 → clicksound）
-  - 「珈琲なしで始める」→ FocusSession へ直接（CoffeeTimeをスキップ）
-  - 「← 戻る」（Link /app）→ zyunnbi停止 → ホームへ
-
-### CoffeeTime（珈琲ページ）
-
-`src/components/focus/CoffeeTime.tsx`
+### 6.2 [CoffeeTime](src/components/focus/CoffeeTime.tsx)
 
 - ドリップアニメーション
-- 「ありがとう。行こう →」でセッション開始
-- `subtitle` props の型は `React.ReactNode`（JSX で改行を含めることが可能）
-- Relax モードのデフォルト subtitle: 「コーヒーの香り成分には、脳のα波（リラックス時に出る脳波）を<br/>増加させる効果があるという研究があります。」（2行）
+- subtitle は `React.ReactNode` 型（JSX 改行可能）
+- 「ありがとう。行こう →」で次へ
 
-### FocusSession（集中中）
+### 6.3 [FocusSession](src/components/focus/FocusSession.tsx)
 
-`src/components/focus/FocusSession.tsx`
+`fixed inset-0 z-[40] bg-[#0e0e0e]` でフルスクリーン（BottomNav を覆う）。
 
-- フルスクリーン固定（BottomNav を z-index でカバー）
-- 残り時間を大きく表示
-- BGMに応じてシーンアニメーションを切り替え:
-  - 波/カフェ/音楽 → `FocusScene`（灯台）
-  - 焚き火 → `CampfireScene`
-  - カフェ → `CafeScene`
-- **一時停止・終了ボタン**: 画面タップでナビ表示切り替え
-- **BGM再生**:
-  - ランダムトラック選択（各カテゴリのファイルプールから）
-  - 2要素ギャップレスループ（`timeupdate` でスタンバイを起動）
-  - `connectGain()` で GainNode 経由のフェードイン/アウト（iOS 対応）
-  - フェードイン時間: 波4秒 / 焚き火3秒 / カフェ・音楽1秒
-  - タイマー完了: 1.2秒でフェードアウト → endsound → FocusBreak
-  - 手動終了: 即停止 → endsound → FocusBreak
-- **タイマー**: `useTimer` フック（Date.now()差分方式、バックグラウンド対応）
-- **タイマー復元**: `/app` などへ一時離脱後に戻ってきた場合、`timerSnap` から残り時間を復元
-- **セッション状態**: `audioStore` でオーディオ要素とメタデータをグローバル管理
+| 項目 | 内容 |
+|------|------|
+| BGM | カテゴリ別ファイルプールからランダム選択、2要素ギャップレスループ |
+| フェード | `connectGain()` で GainNode 経由（iOS は HTMLAudioElement.volume が無視されるため） |
+| フェード時間 | 波 4s / 焚き火 3s / カフェ・音楽 1s |
+| 終了 | タイマー完了で 1.2s フェードアウト → `endsound.m4a` → FocusBreak |
+| 手動終了 | 即停止 → `endsound.m4a` → FocusBreak |
+| シーン | 波/カフェ/音楽 → [FocusScene](src/components/animations/FocusScene.tsx)（灯台）、焚き火 → [CampfireScene](src/components/animations/CampfireScene.tsx)、カフェ → [CafeScene](src/components/animations/CafeScene.tsx) |
+| 一時停止 | 画面タップでナビ表示切替 |
+| タイマー | `useTimer`（Date.now差分）+ `audioStore.timerSnap` で離脱→復帰時の残り時間復元 |
 
-### FocusBreak（休憩画面）
-
-`src/components/focus/FocusBreak.tsx`
+### 6.4 [FocusBreak](src/components/focus/FocusBreak.tsx)
 
 - 日替わり感性プロンプト（`getDailyPrompt`）
 - 5分休憩タイマー
-- 「もう1セット → セッションへ」「今日はここまで → サマリーへ」
+- 「もう1セット」/「今日はここまで」
 
-### SessionSummary（終了画面）
+### 6.5 [SessionSummary](src/components/focus/SessionSummary.tsx)
 
-`src/components/focus/SessionSummary.tsx`
-
-- セット数・合計時間・やったこと を表示
-- ふりかえりメモ（任意テキスト）
-- **珈琲豆レコメンド**: 前回表示から7日以上経過時のみ表示
-  - `useState` イニシャライザで初期値を固定（再レンダリングで消えないように）
-- 「← ホームに戻る」リンク
+- セット数 / 合計時間 / やったこと
+- ふりかえりメモ（任意）
+- **珈琲豆レコメンド**: `historyStore.shouldShowCoffeeRecommend()` が true（前回表示から7日以上経過）のときのみ表示
+  - **重要**: `useState(() => ...)` イニシャライザで初期値を固定。`markCoffeeRecommendShown()` 後の再レンダリングで消えないように
+- 「← ホームに戻る」
 
 ---
 
-## 5. Relax モード（/app/relax）
-
-### 画面フロー
+## 7. Relax モード `/app/relax`
 
 ```
-RelaxSetup → CoffeeTime（任意）→ RelaxSession → RelaxDone
+RelaxSetup → CoffeeTime（任意） → RelaxSession → RelaxDone
 ```
 
-### RelaxSetup（準備画面）
+### 7.1 [RelaxSetup](src/components/relax/RelaxSetup.tsx)
 
-`src/components/relax/RelaxSetup.tsx`
+- 気分：疲れた / もやもや / ぼんやりしたい
+- 時間：3・5・10・15・…・60分
 
-- **気分選択**: 疲れた / もやもや / ぼんやりしたい の3択
-- **時間選択**: ロールピッカーで 3・5・10・15・…・60分
-- zyunnbi・cancelZyunnbiRef の動作は FocusSetup と同様
+### 7.2 [RelaxSession](src/components/relax/RelaxSession.tsx)
 
-### RelaxSession（呼吸セッション）
+- 呼吸サークル（吸う4s / 止める4s / 吐く6s = 14s 1サイクル）
+- BGM: zyunnbi 系（お湯を注ぐ音）
+- GainNode 経由のフェード制御
 
-`src/components/relax/RelaxSession.tsx`
+### 7.3 [RelaxDone](src/components/relax/RelaxDone.tsx)
 
-- 呼吸サークル（吸う4秒・止める4秒・吐く6秒 = 14秒1サイクル）
-- BGM: お湯を注ぐ音（`zyunnbi.m4a` を転用、またはドリップ音）
-- BGM フェードは `connectGain()` で GainNode 制御
-
-### RelaxDone（完了画面）
-
-`src/components/relax/RelaxDone.tsx`
-
-- 日替わり一言（`getDailyPrompt`）
-- ペアリング提案: 音楽（Spotifyリンク）+ お菓子（`getPairing(mood)`）
-- **珈琲豆レコメンド**: SessionSummary と同様のロジック
-- 「← ホームに戻る」リンク
+- 日替わり一言
+- ペアリング提案（音楽 Spotifyリンク + お菓子）— `getPairing(mood)` から取得
+- 珈琲豆レコメンド（同上ロジック）
 
 ---
 
-## 6. Spark・Reclaim モード
+## 8. Spark モード `/app/spark`
 
-現在はスタブ（ページファイルのみ存在）。実装予定。
+ひらめき・アイデア発想モード。**実装済み**：
 
----
+| ステップ | コンポーネント | 役割 |
+|---|---|---|
+| Guide | [SparkGuide](src/components/spark/SparkGuide.tsx) | 導入・使い方説明 |
+| Shuffle | [SparkShuffle](src/components/spark/SparkShuffle.tsx) | カードをシャッフル / スワイプで採用・却下 |
+| Ambient | [SparkAmbient](src/components/spark/SparkAmbient.tsx) | アンビエント環境（思考のための余白） |
+| MyGrid | [SparkMyGrid](src/components/spark/SparkMyGrid.tsx) | 採用したカードのグリッド表示 |
+| Done | [SparkDone](src/components/spark/SparkDone.tsx) | 終了画面 |
 
-## 7. 音声システム
-
-`src/lib/playSound.ts` に集約。
-
-### 7.1 zyunnbi（準備音楽）
-
-| 項目 | 内容 |
-|------|------|
-| ファイル | `/sounds/zyunnbi.m4a` |
-| 方式 | `HTMLAudioElement` + iOS unlock パターン |
-| iOS unlock | 無音 WAV（data URI）で初回ジェスチャー時に iOS audio session を開放 |
-| 再生 | `playZyunnbi()` → unlock 済みなら即再生、未なら最大5秒ポーリング |
-| 停止 | 戻り値のキャンセル関数を呼ぶ（`cancelZyunnbiRef.current?.()`） |
-| 音量 | 0.175 |
-
-**停止タイミング（重要）**:
-- FocusSetup/RelaxSetup の「準備できました」「珈琲なしで始める」「← 戻る」ボタン押下時
-- BottomNav の全タブ押下時（`stopZyunnbi()`）
-- useEffect クリーンアップ時
-
-### 7.2 クリック音
-
-| 項目 | 内容 |
-|------|------|
-| ファイル | `/sounds/clicksound.wav` |
-| 方式 | `AudioBuffer`（事前デコード）→ `BufferSource.start()` で低遅延再生 |
-| フォールバック | AudioBuffer 未ロード時は HTMLAudioElement |
-| 音量 | 0.2625 |
-| 用途 | ボタン・選択肢のタップ時、ジェスチャーハンドラから直接呼ぶ |
-
-### 7.3 BGM フェード（GainNode）
-
-| 項目 | 内容 |
-|------|------|
-| 関数 | `connectGain(audio, initialVolume): FadeHandle \| null` |
-| 方式 | Web Audio API `MediaElementSource` → `GainNode` → `destination` |
-| iOS 対応 | `HTMLAudioElement.volume` は iOS で無視されるため GainNode で音量制御 |
-| PC 対応 | `_isIOS()` が false の場合は `null` を返す → 呼び出し側が `fadeVolume()`（audio.volume直接操作）にフォールバック |
-| AudioContext | モジュールロード時に即生成（suspended 状態）。ナビゲーションの touchstart で `resume()` |
-| fadeTo() | `ctx.state === "running"` になるまで最大 500ms ポーリングしてからフェード開始 |
-| 制約 | 同一の `HTMLAudioElement` に `createMediaElementSource` は1回のみ呼べる |
-
-### 7.4 MediaSession（バックグラウンド再生）
-
-FocusSession・RelaxSession で `navigator.mediaSession` を設定。
-
-```typescript
-navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
-navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
-navigator.mediaSession.setActionHandler("pause", () => { /* 空ハンドラ: バックグラウンド継続 */ });
-navigator.mediaSession.setActionHandler("stop",  () => { /* 空ハンドラ */ });
-```
-
-**重要**: `setActionHandler` を登録しないと iOS・Android がスクリーンロック時に pause アクションを送り、BGM が止まる。`pause`・`stop` を空ハンドラで登録することでバックグラウンド継続再生を実現する。
-
-**FadeHandle の API**:
-```typescript
-handle.setVolume(v: number)              // 即時音量変更
-handle.fadeTo(target, durationMs, onDone?) // なめらかにフェード
-handle.disconnect()                       // GainNode を切断
-```
-
-### 7.5 その他効果音
-
-| ファイル | 用途 | 方式 |
-|---------|------|------|
-| `/sounds/endsound.m4a` | セッション完了音 | `new Audio()` 都度生成 |
-
-### 7.6 BGM ファイル構成
-
-```
-public/sounds/
-  zyunnbi.m4a
-  clicksound.wav
-  endsound.m4a
-  ocean_sound/          ← Focusモード「波」
-    *.m4a, *.mp3 (3トラック)
-  campfire crackling_sound/  ← Focusモード「焚き火」
-    *.m4a, *.mp3 (3トラック)
-  cafe_sound/           ← Focusモード「カフェ」
-    *.m4a (3トラック)
-  Focus_music/          ← Focusモード「音楽」
-    *.m4a (10トラック)
-```
+カード選定ロジックは [`selectSessionCards.ts`](src/lib/selectSessionCards.ts)。
 
 ---
 
-## 8. 状態管理（Zustand）
+## 9. Reclaim モード `/app/reclaim`
 
-### audioStore（`src/store/audioStore.ts`）
+感性回復モード。**実装済み**：
 
-セッション中の BGM を全ページで共有するためのグローバルストア。
+| ステップ | コンポーネント |
+|---|---|
+| Intro | [ReclaimIntro](src/components/reclaim/ReclaimIntro.tsx) |
+| Sense | [ReclaimSense](src/components/reclaim/ReclaimSense.tsx) — 感覚を確認 |
+| Feel | [ReclaimFeel](src/components/reclaim/ReclaimFeel.tsx) — 感情を観察 |
+| Settle | [ReclaimSettle](src/components/reclaim/ReclaimSettle.tsx) — 落ち着きへ |
+| Snapshot | [ReclaimSnapshot](src/components/reclaim/ReclaimSnapshot.tsx) — その日の自分を写し取る |
+| Done | [ReclaimDone](src/components/reclaim/ReclaimDone.tsx) |
 
-```typescript
+日替わり感覚プロンプトは [`getDailySensePrompt.ts`](src/lib/getDailySensePrompt.ts)。
+
+---
+
+## 10. ダッシュボード `/app/dashboard`
+
+「My cup」。`historyStore.sessions` をもとに過去セッションを可視化。週間カレンダー / ストリーク等を表示。見出し：「今週の記録」。
+
+## 11. ルーティン `/app/routine`
+
+7曜日 × 朝/昼/夜の枠でモードを設定。曜日ヘッダーをタップでモーダル → 時間帯 + モード選択。エントリ長押しで削除。`routineStore` に永続化。今日の曜日はライム（`#a3a957`）でハイライト。
+
+ホーム画面の [TodayRoutine](src/components/app/TodayRoutine.tsx) はここのデータを参照して「今日のルーティン」を表示。
+
+---
+
+## 12. 状態管理（Zustand）
+
+### 12.1 [audioStore](src/store/audioStore.ts)
+
+```ts
 {
-  audio: HTMLAudioElement | null   // 現在再生中の音声要素
+  audio: HTMLAudioElement | null
   meta: {
-    label: string       // 表示用ラベル（例: "Focus · 波"）
-    route: string       // "/app/focus" | "/app/relax"
+    label: string                  // 例: "Focus · 波"
+    route: string                  // "/app/focus" | "/app/relax"
     mode: "focus" | "relax"
     config: FocusConfig | RelaxConfig
   } | null
-  timerSnap: TimerSnap | null      // 離脱時のタイマー状態
+  timerSnap: { remainingSeconds, savedAt, isPaused, route } | null
 }
 ```
 
-**TimerSnap**: `{ remainingSeconds, savedAt, isPaused, route }` — 画面離脱時に保存し復帰時に復元。
+セッション中の BGM をグローバル管理。`NowPlayingBar` と `audioStore` をつなぐ。離脱→復帰時のタイマー復元にも使う。
 
-### historyStore（`src/store/historyStore.ts`）
+### 12.2 [historyStore](src/store/historyStore.ts)
 
-セッション履歴と珈琲レコメンド表示制御。localStorage 永続化。
-
-```typescript
+```ts
 {
-  sessions: Session[]           // 過去セッションの記録
-  lastCoffeeRecommendAt: number // 最後に珈琲レコメンドを表示したタイムスタンプ
+  sessions: Session[]
+  lastCoffeeRecommendAt: number
 }
 ```
 
-- `addSession(session)`: セッション完了時に呼ぶ
-- `shouldShowCoffeeRecommend()`: 前回表示から7日以上経過で true
-- `markCoffeeRecommendShown()`: 表示後に呼んでタイムスタンプ更新
+`addSession()` / `shouldShowCoffeeRecommend()` / `markCoffeeRecommendShown()`。
 
-**珈琲レコメンドの実装注意**: `shouldShowCoffeeRecommend()` の結果は `useState(() => ...)` イニシャライザで初期値として固定すること。`markCoffeeRecommendShown()` が呼ばれて store が更新されると再レンダリングが走るため、セレクタで直接参照するとレコメンドが即消える。
+### 12.3 [routineStore](src/store/routineStore.ts)
+
+週間ルーティン設定（曜日 × 時間帯 × モード）。
 
 ---
 
-## 9. データファイル
+## 13. 音声システム（[playSound.ts](src/lib/playSound.ts) に集約）
+
+### 13.1 zyunnbi（準備音楽）
+
+| 項目 | 内容 |
+|---|---|
+| ファイル | `/sounds/zyunnbi.m4a` |
+| 方式 | `HTMLAudioElement` + iOS unlock パターン（無音 WAV data URI） |
+| 音量 | 0.175 |
+| 停止 | キャンセル関数（`cancelZyunnbiRef.current?.()`）or `stopZyunnbi()` |
+
+**停止タイミング（重要）**:
+- Focus/Relax Setup の各ボタン押下時
+- BottomNav の全タブ押下時
+- useEffect クリーンアップ時
+
+### 13.2 クリック音
+
+| 項目 | 内容 |
+|---|---|
+| ファイル | `/sounds/clicksound.wav` |
+| 方式 | `AudioBuffer` 事前デコード → `BufferSource.start()` で低遅延 |
+| 音量 | 0.2625 |
+| 用途 | ボタン・選択肢タップ時、ジェスチャーハンドラから直接呼ぶ |
+
+### 13.3 BGM フェード（GainNode）
+
+```ts
+const handle = connectGain(audio, initialVolume); // FadeHandle | null
+handle?.fadeTo(target, durationMs, onDone?);
+handle?.setVolume(v);
+handle?.disconnect();
+```
+
+- iOS のみ GainNode 経由（PCは null を返す → 呼び出し側が `audio.volume` 直接操作にフォールバック）
+- AudioContext はモジュールロード時に suspended で生成、初回タップで `resume()`
+- `ctx.state === "running"` を最大 500ms ポーリングしてからフェード開始
+- 制約：同一 `HTMLAudioElement` に `createMediaElementSource` は1回のみ
+
+### 13.4 MediaSession（バックグラウンド再生）
+
+```ts
+navigator.mediaSession.metadata = new MediaMetadata({ title: "mumu", artist: "Focus" });
+navigator.mediaSession.setActionHandler("play",  () => audioElRef.current?.play().catch(() => {}));
+navigator.mediaSession.setActionHandler("pause", () => {}); // 空ハンドラで停止命令を無効化
+navigator.mediaSession.setActionHandler("stop",  () => {}); // 同上
+```
+
+`pause` / `stop` を空で登録しないと、iOS / Android がスクリーンロック時に止めてしまう。
+
+### 13.5 BGM ファイル構成
+
+```
+public/sounds/
+  zyunnbi.m4a             準備音楽
+  clicksound.wav          クリック効果音
+  endsound.m4a            セッション完了音
+  ocean_sound/            Focus「波」
+  campfire crackling_sound/  Focus「焚き火」
+  cafe_sound/             Focus「カフェ」
+  Focus_music/            Focus「音楽」（10トラック）
+```
+
+---
+
+## 14. データユーティリティ
 
 | ファイル | 内容 |
-|---------|------|
-| `src/lib/getDailyPrompt.ts` | 日付ベースの日替わり感性プロンプト |
-| `src/lib/getPairing.ts` | 気分×時間帯×季節のペアリングマトリクス |
-| `src/data/pairings.json` | ペアリングデータ（Spotifyリンク + お菓子） |
+|---|---|
+| [`getDailyPrompt.ts`](src/lib/getDailyPrompt.ts) | 日付ベースの日替わり感性プロンプト（FocusBreak、RelaxDoneで使用） |
+| [`getDailySensePrompt.ts`](src/lib/getDailySensePrompt.ts) | Reclaim モード用の日替わり感覚プロンプト |
+| [`getPairing.ts`](src/lib/getPairing.ts) | 気分 × 時間帯 × 季節のペアリング選定 |
+| [`selectSessionCards.ts`](src/lib/selectSessionCards.ts) | Spark モードのカード選定 |
 
 ---
 
-## 10. ルーティン・ダッシュボード
-
-| ページ | 概要 |
-|--------|------|
-| `/app/routine` | 週間ルーティン設定（曜日×時間帯でモードを設定） |
-| `/app/dashboard` | My cup：過去セッションのカレンダー・ストリーク表示 |
-
----
-
-## 11. PWA（Progressive Web App）
-
-- **Service Worker**: Serwist（next-pwa後継）で静的アセット・音声ファイルをキャッシュ
-- **manifest**: `start_url: /app`、テーマカラー `#0a0a0a`
-- **sw.js**: ビルド時に自動生成（`public/sw.js`）
-
----
-
-## 12. HP（公式サイト）
-
-`/` 以下はブランドサイト。アプリとは別のレイアウト（Header/Footer あり）。
-
-| ページ | 内容 | 背景 |
-|--------|------|------|
-| `/` | トップ（灯台・波・モード紹介） | ダーク `#0a0a0a` |
-| `/about` | ブランドストーリー | ダーク `#0a0a0a` |
-| `/beans` | 珈琲豆一覧（microCMS API） | ライト `#f7f9f7` |
-| `/journal` | 読み物一覧（microCMS API） | ライト `#f7f9f7` |
-
-### ページ別テーマ
-
-**ダークテーマ（トップ・About）**: 背景 `#0a0a0a`、テキスト `#e8e6e1`、ボーダー `white/8`
-
-**ライトテーマ（beans・journal）**: 背景 `#f7f9f7`、テキスト `#1a1a1a`、ボーダー `black/10`
-- beans: 豆カードも `border-black/10`、テキスト `#1a1a1a`
-- journal: テキスト `#1a1a1a`、noteへの外部リンク
-
-### HP ヘッダー・フッター
-
-- **ヘッダー**: ダーク固定（`bg-[#0a0a0a]`、スクロールで背景表示）。白ロゴ + `#e8e6e1` テキスト
-- **フッター**: ダーク（`bg-[#0a0a0a]`）。ロゴ + Instagram / note / ショップリンク
-
-### HP ヒーローセクション
-
-- 背景色: `#0a0a0a`
-- 波の色: `#1D9E75`（ティール）
-
-### GTM（Google Tag Manager）
-
-ルートレイアウト（`layout.tsx`）に GTM-5SDPJNKR を設置。`<head>` にスクリプト、`<body>` に noscript iframe。
-
----
-
-## 13. デザイン — グレイン（フィルム質感）
-
-全ページ（HP・app含む）に `GrainOverlay`（`src/components/ui/GrainOverlay.tsx`）を適用。ルートレイアウト（`layout.tsx`）に配置。
-
-| 項目 | 値 |
-|------|----|
-| グレイン | SVG feTurbulence / fractalNoise / baseFrequency 1.2 / 4オクターブ / opacity 0.025 |
-| z-index | 9999（固定） |
-| pointer-events | none（クリック・タッチを一切ブロックしない） |
-
-※ ビネットは廃止（ライト背景ページとの相性が悪いため削除済み）
-
-**Android 実装上の注意**:  
-SVG + `position:fixed` + CSS filter（feTurbulence）の組み合わせで、Android Chrome は `pointer-events:none` を無視するバグがある。外側を `<div>` でラップして `position:fixed` / `pointer-events:none` を div に持たせ、SVG は内側で `position:absolute` にすることで回避。
-
----
-
-## 14. iOS・Android 対応まとめ
+## 15. iOS / Android 対応
 
 ### iOS
 
 | 問題 | 対策 |
 |------|------|
-| `HTMLAudioElement.volume` が無視される | Web Audio API GainNode で音量制御（`connectGain`、iOS専用） |
-| `AudioContext` がジェスチャーなしでは起動できない | モジュールロード時に生成（suspended）→ 初回タップで `resume()` |
-| `AudioContext.statechange` イベントが発火しない | `setInterval` でポーリング（statechange 非依存） |
-| useEffect からの `audio.play()` が失敗する | HTMLAudioElement unlock パターン（無音WAVで初回ジェスチャー時にセッション解放） |
-| zyunnbi の play→pause が一瞬聴こえる | unlock 専用の無音 WAV（data URI）を使用し、zyunnbi 本体には触れない |
-| スクリーンロック時に BGM が止まる | MediaSession `setActionHandler("pause", () => {})` で iOS からの停止命令を無効化 |
+| `HTMLAudioElement.volume` が無視される | `connectGain()` で GainNode 経由 |
+| `AudioContext` がジェスチャーなしで起動できない | suspended で生成 → 初回タップで `resume()` |
+| `statechange` イベントが発火しない | `setInterval` ポーリングで補完 |
+| useEffect からの `audio.play()` が失敗 | unlock パターン（無音 WAV data URI） |
+| zyunnbi の play→pause 残響 | unlock 専用の無音 WAV を使用、zyunnbi 本体は触れない |
+| スクリーンロックでBGMが止まる | `setActionHandler("pause", () => {})` |
+| バウンス領域で body 背景が見える | `/app` layout で `html/body { background-color: #111 !important }` |
 
 ### Android
 
 | 問題 | 対策 |
 |------|------|
-| SVG overlay がタッチを吸収する | GrainOverlay を `<div>` でラップ（SVG は内側 absolute） |
-| `scrollbar-none` クラスが Chrome で効かない | `globals.css` に `.scrollbar-none::-webkit-scrollbar { display: none }` を追加 |
-| BGM がバックグラウンドで止まる | MediaSession `setActionHandler` 登録（iOS と共通の対策） |
+| SVG overlay がタッチを吸収 | GrainOverlay を `<div>` でラップ（SVG は内側 absolute） |
+| `scrollbar-none` が Chrome で効かない | `globals.css` に `.scrollbar-none::-webkit-scrollbar { display: none }` |
+| バックグラウンドでBGMが止まる | iOS と同じ `setActionHandler` 対策 |
 
 ---
 
-## 15. 主要コンポーネント一覧
+## 16. PWA
+
+[manifest.ts](src/app/manifest.ts):
+- `start_url: /app` （ホームスクリーンから開いたら直接アプリへ）
+- `theme_color: #0a0a0a`
+- アイコン群（icon-192, icon-512 etc.）
+
+Service Worker（serwist）が `/sounds/` 配下と静的アセットをキャッシュ。
+
+---
+
+## 17. ファイル構成（/app関連）
 
 ```
 src/
-  app/
-    app/
-      page.tsx              アプリホーム
-      layout.tsx            アプリレイアウト
-      focus/page.tsx        Focusモード（ステップ管理）
-      relax/page.tsx        Relaxモード（ステップ管理）
-      dashboard/page.tsx    My cup
-      routine/page.tsx      ルーティン設定
-      spark/page.tsx        Spark（スタブ）
-      reclaim/page.tsx      Reclaim（スタブ）
+  app/app/
+    layout.tsx                   /app共通レイアウト（背景・BottomNav・NowPlayingBar）
+    page.tsx                     アプリホーム
+    focus/page.tsx               Focusモード（ステップ管理）
+    relax/page.tsx               Relaxモード（ステップ管理）
+    spark/page.tsx               Sparkモード
+    reclaim/page.tsx             Reclaimモード
+    dashboard/page.tsx           My cup
+    routine/page.tsx             ルーティン設定
   components/
-    focus/
-      FocusSetup.tsx
-      CoffeeTime.tsx
-      FocusSession.tsx
-      FocusBreak.tsx
-      SessionSummary.tsx
-      RollerPicker.tsx      時間選択ロールピッカー
-      StepBar.tsx           ステップ進捗バー
-    relax/
-      RelaxSetup.tsx
-      RelaxSession.tsx
-      RelaxDone.tsx
-    animations/
-      LighthouseThin.tsx    灯台アニメーション（アプリ用細線版）
-      WavesThin.tsx         波アニメーション
-      FocusScene.tsx        Focus集中中シーン
-      CampfireScene.tsx     焚き火シーン
-      CafeScene.tsx         カフェシーン
-      ButtonOrb.tsx         ボタン背景オーブエフェクト
-    ui/
-      GrainOverlay.tsx      フィルムグレイン（全ページ適用、ビネットなし）
-    app/layout/
-      BottomNav.tsx         アプリBottomNav（stopZyunnbi呼び出し）
-      NowPlayingBar.tsx     再生中ミニプレイヤー
-      SoundPreloader.tsx    効果音プリロード
+    focus/                       FocusSetup, CoffeeTime, FocusSession,
+                                 FocusBreak, SessionSummary, RollerPicker,
+                                 StepBar, BreathGuide
+    relax/                       RelaxSetup, RelaxSession, RelaxDone
+    spark/                       SparkGuide, SparkShuffle, SparkAmbient,
+                                 SparkMyGrid, SparkDone
+    reclaim/                     ReclaimIntro, ReclaimSense, ReclaimFeel,
+                                 ReclaimSettle, ReclaimSnapshot, ReclaimDone
+    animations/                  LighthouseThin, WavesThin, FocusScene,
+                                 CampfireScene, CafeScene, ButtonOrb, Drip,
+                                 Lighthouse
     app/
-      TodayRoutine.tsx      今日のルーティン表示
+      TodayRoutine.tsx           ホームの「今日のルーティン」
+      layout/
+        BottomNav.tsx
+        NowPlayingBar.tsx
+        SoundPreloader.tsx
   lib/
-    playSound.ts            音声ユーティリティ（全音声の一元管理）
+    playSound.ts                 音声ユーティリティ一式
     getDailyPrompt.ts
+    getDailySensePrompt.ts
     getPairing.ts
-    microcms.ts             microCMS API クライアント
+    selectSessionCards.ts
   store/
     audioStore.ts
     historyStore.ts
     routineStore.ts
   hooks/
-    useTimer.ts             Date.now()差分方式タイマー
+    useTimer.ts                  Date.now()差分タイマー（バックグラウンド対応）
+public/
+  sounds/                        BGM・効果音
 ```
 
 ---
 
-## 16. 元仕様書からの主な変更点
+## 18. 主な仕様変更の履歴
 
-| 項目 | 元の仕様 | 現在の実装 |
-|------|---------|-----------|
-| BGM 種別（Focus） | 雨・焚き火・カフェ・静寂 | **波・焚き火・カフェ・音楽** |
-| Focus 時間選択 | 固定25/45/60分 | **ロールピッカーで5〜60分の任意値** |
-| Relax 時間選択 | 固定3/5/10分 | **ロールピッカーで3〜60分の任意値** |
-| 音声ライブラリ | Howler.js | **ライブラリなし（HTMLAudioElement + Web Audio API直接実装）** |
-| BGM 音量フェード | Howler.js の fade | **Web Audio API GainNode（iOS対応）** |
-| Spark・Reclaim | 実装済み | **スタブ（未実装）** |
-| コーヒー補充提案 | 「2セット以上の場合のみ」 | **「前回表示から7日以上経過時のみ」** |
-| 全ページデザイン | フラットな純黒 | **フィルムグレイン（GrainOverlay、ビネット廃止）** |
-| beans・journal ページ | ダーク背景 | **ライト背景 `#f7f9f7` + ダークテキスト `#1a1a1a`** |
-| GTM | 未設定 | **GTM-5SDPJNKR を全ページに設置** |
-| バックグラウンド再生 | metadata のみ設定 | **MediaSession setActionHandler で pause/stop を無効化** |
-| Android タッチ | 未考慮 | **GrainOverlay を div ラップ、scrollbar-none webkit 対応** |
-| CoffeeTime subtitle | `string` 型 | **`React.ReactNode` 型（JSX改行対応）** |
+| 時期 | 変更 |
+|------|------|
+| 2026-04 初期 | Focus/Relax 完成、Spark/Reclaim はスタブ |
+| 2026-04-15 | Spark/Reclaim を本実装、4モード全 available 化 |
+| 2026-04-19 | MediaSession setActionHandler でバックグラウンド再生対応 |
+| 2026-04-20 | Android の SVG overlay タッチバグを `<div>` ラップで回避 |
+| 2026-04-21 | 一時的にライト化を試みるも、ダーク基調に戻す |
+| 2026-04-22 | 背景を段階的に暗く調整（#0a0a0a → #2a2a2a → #1d1d1d → 最終 **#0e0e0e**） |
+| 2026-04-22 | アクセントを アンバー → ライム → 最終 **#a3a957**（オリーブ寄り） |
+| 2026-04-23 | iOS バウンス領域の白帯対策で html/body を **#111111** に揃える |
+| 2026-04-25 | 仕様書を統合・最新化（本ファイル） |
