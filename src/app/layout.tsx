@@ -63,12 +63,12 @@ const cormorant = localFont({
   preload: false,
   src: [
     {
-      path: "../../Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf",
+      path: "../fonts/Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf",
       weight: "300 700",
       style: "normal",
     },
     {
-      path: "../../Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf",
+      path: "../fonts/Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf",
       weight: "300 700",
       style: "italic",
     },

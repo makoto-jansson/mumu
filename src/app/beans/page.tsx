@@ -3,7 +3,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getBeans } from "@/libs/microcms";
+import { getBeans } from "@/lib/microcms";
 import BeansFilter from "@/components/beans/BeansFilter";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 

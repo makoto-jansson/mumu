@@ -3,7 +3,7 @@
 // 固定ページに加え、microCMSの記事URL（日誌 /journal/[id]・読みもの /column/[id]）も含める。
 
 import type { MetadataRoute } from "next";
-import { getAllPosts, getAllColumns } from "@/libs/microcms";
+import { getAllPosts, getAllColumns } from "@/lib/microcms";
 
 const BASE_URL = "https://mumucoffee-feel.com";
 

@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import HomeV2 from "@/components/home-v2/HomeV2";
-import { getRecentPosts, formatPostDate } from "@/libs/microcms";
+import { getRecentPosts, formatPostDate } from "@/lib/microcms";
 
 // microCMSの記事は追加後すぐ反映したいので60秒ごとに再検証
 export const revalidate = 60;

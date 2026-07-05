@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
-import { getAllPosts, formatPostDate } from "@/libs/microcms";
+import { getAllPosts, formatPostDate } from "@/lib/microcms";
 import JournalContent from "./JournalContent";
 
 // 記事追加をすぐ反映（60秒ごと再検証）

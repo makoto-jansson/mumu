@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
-import { getColumn, formatPostDate } from "@/libs/microcms";
+import { getColumn, formatPostDate } from "@/lib/microcms";
 
 const BASE_URL = "https://mumucoffee-feel.com";
 

@@ -6,7 +6,7 @@
 // フェードインはCSS（.bean-card-in）で実装＝JS未読込でも確実に表示される
 
 import Image from "next/image";
-import type { Bean } from "@/libs/microcms";
+import type { Bean } from "@/lib/microcms";
 
 export default function BeanCard({ bean, index }: { bean: Bean; index: number }) {
   return (

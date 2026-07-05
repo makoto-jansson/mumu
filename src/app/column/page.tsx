@@ -5,7 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
-import { getAllColumns, formatPostDate } from "@/libs/microcms";
+import { getAllColumns, formatPostDate } from "@/lib/microcms";
 
 const BASE_URL = "https://mumucoffee-feel.com";
 

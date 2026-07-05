@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import type { Bean } from "@/libs/microcms";
+import type { Bean } from "@/lib/microcms";
 import BeanCard from "@/components/beans/BeanCard";
 
 // タブの種類
