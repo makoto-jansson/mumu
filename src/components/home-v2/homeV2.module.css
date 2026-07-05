@@ -99,6 +99,10 @@
   transition: color 0.25s;
   padding: 4px 2px;
 }
+/* SP専用の折り返し用<br>。PCでは無効化して1行のまま（SPの media query で display:block） */
+.brSp {
+  display: none;
+}
 .obiNav a:hover,
 .obiNav a:focus-visible {
   color: #fff;
@@ -379,7 +383,13 @@
   mix-blend-mode: multiply;
 }
 .aboutLead {
-  margin-top: 36px;
+  /* 線なし・四角の、ごく薄い半透明グレーのボックスに本文を収める
+     （半透明なので背景の紙テクスチャがうっすら透ける） */
+  margin: 40px auto 0;
+  max-width: 560px;
+  background: rgba(60, 62, 60, 0.02);
+  border-radius: 0;
+  padding: clamp(28px, 5vw, 40px) clamp(22px, 5vw, 44px);
   font-size: 14px;
   color: var(--text-sub);
   line-height: 2.3;
@@ -547,6 +557,28 @@
   color: #fff;
   border-color: rgba(247, 249, 247, 0.8);
 }
+/* フッターのSNSアイコン（深緑地に明るいアイコン。SPで帯のSNSが隠れる分の受け皿） */
+.footSns {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin: 2px 0 16px;
+}
+.footSns a {
+  color: rgba(247, 249, 247, 0.75);
+  display: block;
+  transition: color 0.3s, transform 0.3s;
+}
+.footSns a:hover,
+.footSns a:focus-visible {
+  color: #fff;
+  transform: translateY(-2px);
+}
+.footSns svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 
 .reveal {
   opacity: 0;
@@ -616,10 +648,19 @@
   .obiNav li {
     margin: 0;
   }
+  .obiNav ul {
+    align-items: center;
+  }
   .obiNav a {
     font-size: 11px;
     letter-spacing: 0.06em;
     padding: 3px 2px;
+    text-align: center;
+    line-height: 1.35;
+  }
+  /* SP のみ指定位置で2行に折り返す（PCは display:none で1行） */
+  .brSp {
+    display: block;
   }
   .obiFoot {
     display: none;

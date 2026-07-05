@@ -5,15 +5,17 @@
 //  - 下層ページでは hrefPrefix="/" → TOP該当セクションへ戻る（/#about）
 // nav に data-obi-nav を付与し、HomeV2 のスクロールスパイが該当リンクを走査できるようにする。
 
-import { INSTAGRAM_URL, YOUTUBE_URL } from "./links";
+import SnsLinks from "./SnsLinks";
 import styles from "./homeV2.module.css";
 
 // to が "#xxx" ならTOPセクションへのアンカー（hrefPrefixを前置）、
 // "/xxx" なら別ページへの絶対リンク（アプリは /app ページなのでアンカーではない）。
-const NAV_ITEMS = [
-  { to: "#about", label: "mumuについて" },
-  { to: "#beans", label: "珈琲をえらぶ" },
-  { to: "#journal", label: "灯台守の日誌" },
+// sp: SP（横並び）時に指定位置で2行に折り返すための分割。PCでは brSp を display:none で1行のまま。
+type NavItem = { to: string; label: string; sp?: [string, string] };
+const NAV_ITEMS: NavItem[] = [
+  { to: "#about", label: "mumuについて", sp: ["mumu", "について"] },
+  { to: "#beans", label: "珈琲をえらぶ", sp: ["珈琲を", "えらぶ"] },
+  { to: "#journal", label: "灯台守の日誌", sp: ["灯台守の", "日誌"] },
   { to: "#podcast", label: "Podcast" },
   { to: "/app", label: "アプリ" },
 ];
@@ -33,41 +35,24 @@ export default function Obi({ hrefPrefix = "" }: { hrefPrefix?: string }) {
               : item.to;
             return (
               <li key={item.to}>
-                <a href={href}>{item.label}</a>
+                <a href={href}>
+                  {item.sp ? (
+                    <>
+                      {item.sp[0]}
+                      <br className={styles.brSp} />
+                      {item.sp[1]}
+                    </>
+                  ) : (
+                    item.label
+                  )}
+                </a>
               </li>
             );
           })}
         </ul>
       </nav>
       <div className={styles.obiSns}>
-        <a href={INSTAGRAM_URL} target="_blank" rel="noopener" aria-label="Instagram">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.2" cy="6.8" r="0.7" fill="currentColor" stroke="none" />
-          </svg>
-        </a>
-        <a href={YOUTUBE_URL} target="_blank" rel="noopener" aria-label="YouTube">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" />
-            <path d="M10.2 9.3v5.4l4.8-2.7z" fill="currentColor" stroke="none" />
-          </svg>
-        </a>
+        <SnsLinks />
       </div>
       <p className={styles.obiFoot}>mumu roastery</p>
     </aside>
