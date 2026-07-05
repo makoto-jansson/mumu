@@ -70,10 +70,10 @@ function ComingSoonCard() {
 export default async function BeansSection() {
   let beans: Bean[] = [];
   try {
-    const data = await client.getList<Bean>({
-      endpoint: "beans",
-      queries: { limit: 10 },
-    });
+    // client は env 未設定時 null（ビルドを止めないため）。その場合は空のまま。
+    const data = client
+      ? await client.getList<Bean>({ endpoint: "beans", queries: { limit: 10 } })
+      : { contents: [] as Bean[] };
     beans = data.contents;
     // エチオピアを先頭に表示（それ以外は取得順を維持）
     beans.sort((a, b) => {

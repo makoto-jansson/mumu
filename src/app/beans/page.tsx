@@ -3,7 +3,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { client, type Bean } from "@/libs/microcms";
+import { getBeans } from "@/libs/microcms";
 import BeansFilter from "@/components/beans/BeansFilter";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 
@@ -25,13 +25,8 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function BeansPage() {
-  // microCMSの「beans」エンドポイントから全商品を取得
-  const data = await client.getList<Bean>({
-    endpoint: "beans",
-    queries: { limit: 100 },
-  });
-
-  const beans = data.contents;
+  // microCMSの「beans」エンドポイントから全商品を取得（env未設定/失敗時は空配列）
+  const beans = await getBeans();
 
   return (
     // v2の帯レイアウトで囲む。地色(bg-base)は敷かず背景テクスチャを透かす。
