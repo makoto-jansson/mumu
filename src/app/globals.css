@@ -59,9 +59,14 @@ html {
   }
 }
 
-/* 新トップページ(v2): body背景を紙色に（コンテンツ領域の下地） */
+/* 新トップページ(v2): body背景は透明にする。
+   html:has(...) に #004648 を敷いた結果、body に不透明な紙色を置くと
+   その紙色がキャンバスに伝播せず body 通常描画レイヤーで塗られ、
+   z-index:-1 の .paperBg（紙テクスチャ）を覆い隠してしまう（テクスチャが消える）。
+   → body を透明にし、紙のベース色＋テクスチャは .paperBg（不透明・固定）に一任する。
+   通常表示は全面 .paperBg が覆い、オーバースクロール時のみ html の緑が覗く。 */
 body:has([data-home-root]) {
-  background-color: #f7f9f7;
+  background-color: transparent;
 }
 
 /* v2ページの html(=キャンバス)背景を深緑に。
