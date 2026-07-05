@@ -50,18 +50,18 @@ export default function RoasterProfile() {
 
           <div className="space-y-6 text-ink-secondary leading-loose text-[15px]">
             <p>
-              自家焙煎珈琲豆のオンラインショップを運営しています。
+              自家焙煎珈琲豆のオンラインショップを運営。「感性が、ふと、戻ってくる」をコンセプトに、珈琲豆の焙煎や、音楽制作、瞑想アプリ等の開発に従事しています。
             </p>
 
-            <p>
-              「感性が、ふと、戻ってくる」をコンセプトに
-              珈琲豆の焙煎や、瞑想アプリの開発を行っています。
+            {/* ▼珈琲 */}
+            <p className="pt-2">
+              <a
+                href="/beans"
+                className="inline-block text-ink-primary font-medium tracking-wide hover:opacity-70 transition"
+              >
+                ▼珈琲
+              </a>
             </p>
-
-            {/* 区切り */}
-            <div className="py-2">
-              <span className="block h-px w-12 bg-ink-primary/20" aria-hidden="true" />
-            </div>
 
             <p>
               焙煎は、Aillioという焙煎機で少量ずつ焙煎しています。
@@ -87,19 +87,23 @@ export default function RoasterProfile() {
               初めての方にも気軽に試していただけるように「まず100gから」お届けしています。
             </p>
 
-            <p>
+            {/* ▼アプリ */}
+            <p className="pt-2">
               <a
                 href="/app"
-                className="text-ink-primary underline decoration-accent-lime/60 underline-offset-4 hover:decoration-accent-lime transition"
+                className="inline-block text-ink-primary font-medium tracking-wide hover:opacity-70 transition"
               >
-                アプリ
+                ▼アプリ
               </a>
-              は、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の
-              4モード構成で、すべて無料・インストール不要で使えるようにしています。
+            </p>
+
+            <p>
+              感性を、取り戻す。つくる人の、集中とひらめきのアプリです。
+              モードは、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の4モード構成。すべて無料・インストール不要で使えます。
             </p>
 
             <p className="text-ink-secondary/85">
-              最近、ドーパミン中毒だなあ...という方はぜひ使ってみてください。
+              SNSなどで情報疲れしている方は、ぜひ使ってみてください。
             </p>
 
             {/* 区切り */}

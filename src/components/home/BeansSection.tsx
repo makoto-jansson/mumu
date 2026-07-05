@@ -85,6 +85,11 @@ export default async function BeansSection() {
     beans = [];
   }
 
+  // TOPは常に3枠表示。公開済みの豆を先頭から並べ、3枠に満たない分は coming soon で埋める
+  const TOTAL_SLOTS = 3;
+  const displayBeans = beans.slice(0, TOTAL_SLOTS);
+  const comingSoonCount = Math.max(0, TOTAL_SLOTS - displayBeans.length);
+
   return (
     <SectionBlock>
       <GradientBackground type="beans" />
@@ -127,10 +132,12 @@ export default async function BeansSection() {
         {/* 豆カード横スクロール */}
         <div className="-mx-6 md:-mx-10 px-6 md:px-10 overflow-x-auto scrollbar-none">
           <div className="flex gap-3 w-max pb-1">
-            {beans.map((bean) => (
+            {displayBeans.map((bean) => (
               <BeanCardCompact key={bean.id} bean={bean} />
             ))}
-            <ComingSoonCard />
+            {Array.from({ length: comingSoonCount }).map((_, i) => (
+              <ComingSoonCard key={`coming-soon-${i}`} />
+            ))}
           </div>
         </div>
 

@@ -96,7 +96,7 @@ export default function GradientBackground({ type }: { type: SectionType }) {
         </filter>
       </defs>
       {/* 生成り白のベース */}
-      <rect width="100%" height="100%" fill="#fdf8ef" />
+      <rect width="100%" height="100%" fill="#f8f9f7" />
       {/* 各 radialGradient を重ねる */}
       {stops.map((_, i) => (
         <rect key={i} width="100%" height="100%" fill={`url(#${prefix}-${i})`} />

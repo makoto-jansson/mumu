@@ -20,7 +20,7 @@ function IllustTools({ size = 52 }: { size?: number }) {
     >
       {/* 月 */}
       <circle cx="62" cy="11" r="5.5" stroke="#123656" strokeWidth="0.8" opacity="0.55" />
-      <circle cx="64.5" cy="9.5" r="4.2" fill="#fdf8ef" />
+      <circle cx="64.5" cy="9.5" r="4.2" fill="#f8f9f7" />
       {/* 遠くの山のシルエット */}
       <path
         d="M0 36 L10 22 L18 30 L28 14 L38 26 L50 16 L62 28 L72 18 L80 24 L80 36 Z"

@@ -22,7 +22,8 @@ function FadeBlock({ children, delay = 0 }: { children: React.ReactNode; delay?:
 
 export default function AboutContent() {
   return (
-    <div className="min-h-screen bg-base pt-32 pb-24 px-6">
+    // 地色(bg-base)は敷かない — 背景の紙テクスチャ(PaperBackdrop)を透かすため
+    <div className="min-h-screen pt-32 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
 
         {/* ホームに戻るリンク */}
@@ -78,9 +79,17 @@ export default function AboutContent() {
             </p>
           </FadeBlock>
 
-          {/* 区切り */}
+          {/* 区切り（TOPと同じ手書き罫線） */}
           <FadeBlock>
-            <p className="text-center text-ink-secondary/40 tracking-[0.5em]">・・・・・・</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/v2/line.png"
+              alt=""
+              aria-hidden="true"
+              width={1400}
+              height={209}
+              className="mx-auto w-[180px] opacity-80 mix-blend-multiply"
+            />
           </FadeBlock>
 
           <FadeBlock>
@@ -94,11 +103,6 @@ export default function AboutContent() {
               <br />
               私含めそんな人がとても増えているように感じます。
             </p>
-          </FadeBlock>
-
-          {/* 区切り */}
-          <FadeBlock>
-            <p className="text-center text-ink-secondary/40 tracking-[0.5em]">・・・・・・</p>
           </FadeBlock>
 
           <FadeBlock>

@@ -4,7 +4,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { client, type Bean } from "@/libs/microcms";
-import BeanCard from "@/components/beans/BeanCard";
+import BeansFilter from "@/components/beans/BeansFilter";
+import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 
 export const metadata: Metadata = {
   title: "珈琲豆",
@@ -33,7 +34,9 @@ export default async function BeansPage() {
   const beans = data.contents;
 
   return (
-    <div className="min-h-screen bg-base pt-32 pb-24 px-6">
+    // v2の帯レイアウトで囲む。地色(bg-base)は敷かず背景テクスチャを透かす。
+    <SiteChromeV2>
+      <div className="min-h-screen pt-32 pb-24 px-6">
       <div className="max-w-2xl mx-auto">
 
         {/* ホームに戻るリンク */}
@@ -61,13 +64,9 @@ export default async function BeansPage() {
           </h1>
         </div>
 
-        {/* 豆のカード一覧（microCMSのデータから自動生成） */}
+        {/* 豆のカード一覧（タブで すべて/浅煎り/深煎り を切り替え） */}
         {beans.length > 0 ? (
-          <div className="flex flex-col gap-6 mb-20">
-            {beans.map((bean, index) => (
-              <BeanCard key={bean.id} bean={bean} index={index} />
-            ))}
-          </div>
+          <BeansFilter beans={beans} />
         ) : (
           // データがない場合のフォールバック
           <div className="border-t border-ink-primary/15 pt-16 mb-20">
@@ -78,6 +77,7 @@ export default async function BeansPage() {
         )}
 
       </div>
-    </div>
+      </div>
+    </SiteChromeV2>
   );
 }

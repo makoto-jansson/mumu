@@ -1,6 +1,7 @@
 // Aboutページ — mumuのストーリーを伝えるページ
 
 import type { Metadata } from "next";
+import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import AboutContent from "./AboutContent";
 
 const BASE_URL = "https://mumucoffee-feel.com";
@@ -59,7 +60,10 @@ export default function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
       />
-      <AboutContent />
+      {/* v2の帯レイアウトで囲む（TOPと共通の帯・背景テクスチャ・フッター） */}
+      <SiteChromeV2>
+        <AboutContent />
+      </SiteChromeV2>
     </>
   );
 }

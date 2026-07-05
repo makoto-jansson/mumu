@@ -1,18 +1,22 @@
-/* Google Fonts: 和文（Noto Sans JP・Noto Serif JP・Shippori Mincho）＋ Inter */
+/* Google Fonts: 和文（Noto Sans JP・Noto Serif JP・Shippori Mincho）＋ Inter
+   ※ 旧デザインページ用。next/font移行はCSSバンドル肥大（@font-face定義+300KB）で
+   逆効果だったため@importを維持。下層ページ作り替え時にZen Maru Gothicへ統合予定 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
 
 @import "tailwindcss";
 
 /* mumuカラーパレット・フォントのカスタム定義（Tailwind v4） */
 @theme {
-  /* === 新カラーパレット（2026リニューアル） === */
-  --color-base: #fdf8ef;           /* 生成り白（ページ全体の背景） */
-  --color-ink-primary: #123656;    /* ネイビー（本文・見出し） */
-  --color-ink-secondary: #2c6671;  /* 深いティール（サブテキスト） */
-  --color-grad-teal: #60ae9d;      /* グラデ明るいティール */
-  --color-grad-navy: #123656;      /* グラデ深いネイビー */
-  --color-grad-deep-teal: #2c6671; /* グラデ中間の青緑 */
-  --color-accent-lime: #a3a957;    /* 差し色ライム（極小面積のみ） */
+  /* === カラーパレット（2026リニューアル v2 — TOPの帯レイアウトに全ページ統一）===
+     TOP(v2)のトークン: 紙 #f7f9f7 / 深緑インク #004648 / 本文 #2b2b28 / サブ #5a5f5c。
+     semantic token の役割はそのまま、値だけを v2 の色相へ差し替えた。 */
+  --color-base: #f7f9f7;           /* 紙の生成り（ページ全体の背景） */
+  --color-ink-primary: #004648;    /* 深緑インク（見出し・リンク・強調） */
+  --color-ink-secondary: #2b2b28;  /* 本文（濃いスミ） */
+  --color-grad-teal: #5a5f5c;      /* 補足ラベル（ミュートグレー） */
+  --color-grad-navy: #004648;      /* 深緑 */
+  --color-grad-deep-teal: #5a5f5c; /* 中間グレー */
+  --color-accent-lime: #004648;    /* アクセント＝深緑（下線等。ライムは廃止） */
 
   /* === 旧カラー（既存コンポーネントの互換用・段階的に廃止） === */
   --color-mumu-dark: #0a0a0a;
@@ -29,10 +33,10 @@
   --font-mincho: 'Shippori Mincho', 'Noto Serif JP', serif;
 }
 
-/* ベーススタイル（リニューアル後: 生成り白 × ネイビー） */
+/* ベーススタイル（リニューアル v2: 紙の生成り × 深緑インク） */
 body {
-  background-color: #fdf8ef;
-  color: #123656;
+  background-color: #f7f9f7;
+  color: #2b2b28;
   font-family: 'Noto Sans JP', 'Inter', sans-serif;
   font-weight: 300;
   line-height: 1.8;
@@ -42,10 +46,115 @@ body {
 /* スクロールバーを非表示（モバイルのUX向上） */
 html {
   scroll-behavior: smooth;
+  /* 上下端のオーバースクロール(ゴムバンド)を止める。
+     v2の緑フッター下に紙色の下地が覗いて「隙間」に見えるのを防ぐ。
+     リファレンス実装(mumu-site-v2)と同じ挙動。 */
+  overscroll-behavior-y: none;
+}
+
+/* モーション抑制設定時はスムーススクロールも無効化 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* 新トップページ(v2): body背景を紙色に（コンテンツ領域の下地） */
+body:has([data-home-root]) {
+  background-color: #f7f9f7;
+}
+
+/* v2ページの html(=キャンバス)背景を深緑に。
+   慣性スクロールでフッター下にバウンドしても、覗くのはフッターと同色の緑になり
+   「隙間」が見えない。overscroll-behavior が効かないブラウザ(Safari等)向けの確実策。
+   紙色の下地は body:has(...) が担うため通常表示は紙のまま。
+   :has で v2ページ限定 → /app 等の暗色ページには影響しない。 */
+html:has([data-home-root]) {
+  background-color: #004648;
+}
+
+/* 日誌記事本文（microCMSのリッチエディタHTML）のprose整形 — v2トーン */
+.article-body {
+  color: #2b2b28;
+  font-size: 15px;
+  line-height: 2.1;
+  letter-spacing: 0.04em;
+}
+.article-body h2 {
+  font-family: var(--font-mincho), serif;
+  color: #004648;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.7;
+  margin: 2.6em 0 1em;
+}
+.article-body h3 {
+  font-family: var(--font-mincho), serif;
+  color: #004648;
+  font-size: 1.12rem;
+  font-weight: 500;
+  margin: 2.2em 0 0.9em;
+}
+.article-body p {
+  margin: 1.2em 0;
+}
+.article-body a {
+  color: #004648;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.article-body ul,
+.article-body ol {
+  margin: 1.2em 0;
+  padding-left: 1.4em;
+}
+.article-body li {
+  margin: 0.4em 0;
+  list-style: revert;
+}
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 1.8em 0;
+}
+.article-body blockquote {
+  border-left: 2px solid rgba(0, 70, 72, 0.3);
+  padding-left: 1em;
+  margin: 1.4em 0;
+  color: #5a5f5c;
+}
+.article-body code {
+  background: rgba(0, 70, 72, 0.06);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
 }
 
 /* scrollbar-none クラス: Webkit（Android Chrome / Safari）対応 */
 /* Firefox は inline style の scrollbarWidth: "none" で対応済み   */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* 珈琲豆カードのフェードイン */
+/* JS(Framer Motion)ではなくCSSで実装＝ハイドレーション前でも確実に表示される */
+@keyframes beanCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.bean-card-in {
+  animation: beanCardIn 0.6s ease-out both;
+}
+/* モーション抑制設定の場合はアニメーションせず即表示 */
+@media (prefers-reduced-motion: reduce) {
+  .bean-card-in {
+    animation: none;
+  }
 }

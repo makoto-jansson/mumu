@@ -1,0 +1,667 @@
+/* mumu 公式サイト TOP（v2）— mumu-site-v2/index.html の <style> を忠実移植
+   CSS Modules 化にあたり、全体を .root 配下へスコープし、BEM をキャメルケースへ変換した。
+   デザイン・余白・アニメーションのタイミング数値は変更禁止（指示書「禁止事項」）。 */
+
+.root {
+  --ink: #004648;
+  --paper: #f7f9f7;
+  --text: #2b2b28;
+  --text-sub: #5a5f5c;
+  --sidebar-w: 232px;
+  /* --font-gothic / --font-mincho / --font-hand は layout.tsx の next/font が
+     :root（html要素）に注入する。ここでは再定義せずそのまま参照する。 */
+
+  /* 背景色はここに置かない。.root は通常の <div> のため不透明背景を敷くと
+     負のz-index（-1）の .paperBg / .inkLine テクスチャを覆い隠してしまう。
+     紙色の下地は globals.css の body:has([data-home-root]) が担当する。 */
+  color: var(--text);
+  font-family: var(--font-gothic), sans-serif;
+  font-size: 15px;
+  line-height: 1.9;
+  letter-spacing: 0.06em;
+}
+/* box-sizing のみ継承させる。
+   ※ margin:0 / padding:0 の全子孫リセットは入れない —
+   下層ページ(about/beans)は .root 配下で Tailwind のスペーシング
+   (pt-32 / mb-16 等)を使うため、同一詳細度の全称リセットと衝突して
+   余白が打ち消され、文章が帯に重なる不具合が出る。
+   要素デフォルト余白は Tailwind preflight が既にリセット済み。 */
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+.root img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.paperBg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--paper) url("/v2/paper.png") repeat;
+  background-size: 280px 280px;
+}
+
+.inkLine {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 20px;
+  width: 20px;
+  z-index: -1;
+  background: url("/v2/ink-line.png") repeat-y;
+  background-size: 20px 280px;
+  pointer-events: none;
+}
+.inkLineLeft {
+  right: auto;
+  left: calc(var(--sidebar-w) + 20px);
+}
+
+/* ---------- 左カラム(本の帯) ---------- */
+.obi {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar-w);
+  background: var(--ink);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 16px;
+}
+.obiLogo {
+  width: 128px;
+}
+.obiNav {
+  margin-top: 72px;
+}
+.obiNav ul {
+  list-style: none;
+  text-align: center;
+}
+.obiNav li {
+  margin: 26px 0;
+}
+.obiNav a {
+  position: relative;
+  display: inline-block;
+  color: rgba(247, 249, 247, 0.88);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  transition: color 0.25s;
+  padding: 4px 2px;
+}
+.obiNav a:hover,
+.obiNav a:focus-visible {
+  color: #fff;
+}
+.obiNav a:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 4px;
+}
+/* 現在地:すっと引かれる下線 */
+.obiNav a.active {
+  color: #fff;
+}
+.obiNav a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0.5px;
+  background: rgba(247, 249, 247, 0.6);
+  transform-origin: left;
+  animation: navDraw 0.5s ease forwards;
+}
+@keyframes navDraw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.obiNav a.active::before {
+  content: "";
+  position: absolute;
+  right: -7px;
+  bottom: -1.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(247, 249, 247, 0.9);
+  opacity: 0;
+  transform: scale(0);
+  animation: navDot 0.25s ease 0.45s forwards;
+}
+@keyframes navDot {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.obiFoot {
+  margin-top: auto;
+  color: rgba(247, 249, 247, 0.45);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.obiSns {
+  margin-top: 52px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.obiSns a {
+  color: rgba(247, 249, 247, 0.7);
+  display: block;
+  transition: color 0.3s, transform 0.3s;
+}
+.obiSns a:hover,
+.obiSns a:focus-visible {
+  color: #fff;
+  transform: translateY(-2px);
+}
+.obiSns svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+/* ---------- 右上の豆 ---------- */
+.bean {
+  position: fixed;
+  top: 88px;
+  right: 44px;
+  width: 52px;
+  z-index: 90;
+}
+.bean a {
+  display: block;
+}
+.bean img {
+  width: 100%;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transition: filter 0.3s;
+}
+.bean a:hover img,
+.bean a:focus-visible img {
+  filter: drop-shadow(0 4px 10px rgba(0, 70, 72, 0.35));
+}
+.beanLabel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-sub);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.bean a:hover + .beanLabel,
+.bean a:focus-visible + .beanLabel {
+  opacity: 1;
+  transform: none;
+}
+
+.main {
+  margin-left: var(--sidebar-w);
+}
+.section {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 120px 48px;
+}
+
+/* ---------- Hero:ロード時シーケンス ---------- */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 80px;
+}
+.heroCup {
+  width: min(280px, 56vw);
+  opacity: 0;
+  animation: fadeUp 1.4s ease-out 0.15s forwards;
+}
+.heroTagline {
+  width: min(190px, 42vw);
+  margin-top: 40px;
+}
+.heroLogo {
+  width: min(330px, 62vw);
+  margin-top: 18px;
+}
+.heroScrollhint {
+  margin-top: 72px;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--text-sub);
+  writing-mode: vertical-rl;
+  height: 72px;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 1s ease 3.6s forwards;
+}
+.heroScrollhint::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -28px;
+  width: 1px;
+  height: 24px;
+  background: var(--text-sub);
+  animation: drip 2.2s ease-in-out infinite;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes drip {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* ---------- 手書きワイプ(左から書かれていくように出現) ---------- */
+.write {
+  -webkit-mask-image: linear-gradient(to right, #000 40%, transparent 60%);
+  mask-image: linear-gradient(to right, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+}
+.write.on {
+  animation: writeOn 1.3s ease-out forwards;
+}
+@keyframes writeOn {
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+/* Heroだけはロード時に自動再生(遅延はインラインstyleで指定) */
+.writeAuto {
+  animation: writeOn 1.3s ease-out forwards;
+  animation-delay: inherit;
+}
+@supports not (mask-image: linear-gradient(#000, #000)) {
+  .write {
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .write.on,
+  .writeAuto {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+.divider {
+  width: min(260px, 46vw);
+  margin: 0 auto;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+}
+
+/* 章見出し:手書きロゴタイプ(大胆サイズ) */
+.sectionHand {
+  display: block;
+  margin: 0 auto;
+  max-width: 86vw;
+  height: auto;
+}
+.root h1,
+.root h2,
+.root h3 {
+  margin: 0;
+  font-weight: 400;
+}
+.sectionHead {
+  text-align: center;
+  margin-bottom: 72px;
+}
+
+.about {
+  text-align: center;
+}
+.aboutLighthouse {
+  width: min(140px, 32vw);
+  margin: 0 auto;
+  mix-blend-mode: multiply;
+}
+.aboutCatch {
+  width: min(450px, 80vw);
+  margin: 44px auto 0;
+  mix-blend-mode: multiply;
+}
+.aboutLead {
+  margin-top: 36px;
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 2.3;
+}
+
+.more {
+  display: inline-block;
+  font-family: var(--font-mincho), serif;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  margin-top: 44px;
+  position: relative;
+  padding-bottom: 4px;
+}
+.more::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--text);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.more:hover::after,
+.more:focus-visible::after {
+  transform: scaleX(1);
+}
+.more .arrow {
+  display: inline-block;
+  transition: transform 0.35s;
+}
+.more:hover .arrow {
+  transform: translateX(6px);
+}
+/* 商品CTAボタン(手描き風の丸み) */
+.btn {
+  display: inline-block;
+  font-family: var(--font-mincho), serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 6px 20px;
+  margin-top: 40px;
+  transition: background 0.3s, color 0.3s;
+}
+.btn .arrow {
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.3s;
+}
+.btn:hover,
+.btn:focus-visible {
+  background: var(--ink);
+  color: #f7f9f7;
+}
+.btn:hover .arrow {
+  transform: translateX(5px);
+}
+
+.beans {
+  display: flex;
+  flex-direction: column;
+  gap: 140px;
+}
+.beanItem {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.beanItemImg {
+  width: 100%;
+  box-shadow: 0 18px 44px rgba(0, 70, 72, 0.12);
+}
+.beanItemBody {
+  text-align: center;
+}
+.beanItemCaption {
+  width: min(300px, 90%);
+  margin: 0 auto;
+}
+.beanItemNote {
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+.beanItemRev .beanItemVisual {
+  order: 2;
+}
+.beanItemRev .beanItemBody {
+  order: 1;
+}
+
+.journal {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.journalEntry {
+  display: block;
+  padding: 30px 8px;
+  border-bottom: 1px solid rgba(0, 70, 72, 0.18);
+  transition: background 0.3s;
+}
+.journalEntry:first-of-type {
+  border-top: 1px solid rgba(0, 70, 72, 0.18);
+}
+.journalEntry:hover {
+  background: rgba(0, 70, 72, 0.045);
+}
+.journalDate {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-sub);
+}
+.journalTitle {
+  font-family: var(--font-mincho), serif;
+  font-size: 17px;
+  margin-top: 6px;
+}
+.journalMoreWrap,
+.podcast {
+  text-align: center;
+}
+.podcastCopy {
+  font-family: var(--font-hand), cursive;
+  font-size: 17px;
+}
+.podcastSub {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.footer {
+  margin-left: var(--sidebar-w);
+  background: var(--ink);
+  color: rgba(247, 249, 247, 0.75);
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  padding: 28px 16px;
+  /* フッター下方向を緑で埋める。慣性スクロールでフッターが持ち上がっても、
+     下に覗くのは常にフッターと同色の緑になり「隙間」が見えない。
+     box-shadow はレイアウト・スクロール量に影響しないため副作用がない。
+     offsetY と spread を同値にして上端はフッター上端に揃える（上のコンテンツは覆わない）。 */
+  box-shadow: 0 50vh 0 50vh var(--ink);
+}
+.footer nav {
+  margin-bottom: 14px;
+}
+.footer nav a {
+  color: rgba(247, 249, 247, 0.75);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(247, 249, 247, 0.3);
+  transition: color 0.3s, border-color 0.3s;
+}
+.footer nav a:hover,
+.footer nav a:focus-visible {
+  color: #fff;
+  border-color: rgba(247, 249, 247, 0.8);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.reveal.on {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .heroCup,
+  .heroScrollhint {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+  }
+  .write,
+  .writeAuto {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: none;
+    opacity: 1;
+  }
+  .heroScrollhint::after {
+    animation: none;
+  }
+  .obiNav a.active::after {
+    animation: none;
+  }
+  .obiNav a.active::before {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .bean img {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .root {
+    --sidebar-w: 0px;
+  }
+  .obi {
+    inset: 0 0 auto 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+  }
+  .obiLogo {
+    width: 54px;
+  }
+  .obiNav {
+    margin: 0;
+  }
+  .obiNav ul {
+    display: flex;
+    gap: 16px;
+  }
+  .obiNav li {
+    margin: 0;
+  }
+  .obiNav a {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 3px 2px;
+  }
+  .obiFoot {
+    display: none;
+  }
+  .obiSns {
+    display: none;
+  }
+  .main,
+  .footer {
+    margin-left: 0;
+  }
+  .hero {
+    padding-top: 190px;
+    justify-content: flex-start;
+  }
+  .bean {
+    top: 104px;
+    right: 18px;
+    width: 40px;
+  }
+  .inkLine {
+    right: 5px;
+  }
+  .inkLineLeft {
+    left: 5px;
+  }
+  .section {
+    padding: 88px 24px;
+    scroll-margin-top: 64px;
+  }
+  .beanItem,
+  .beanItemRev {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .beanItemRev .beanItemVisual {
+    order: 1;
+  }
+  .beanItemRev .beanItemBody {
+    order: 2;
+  }
+  .beans {
+    gap: 96px;
+  }
+}

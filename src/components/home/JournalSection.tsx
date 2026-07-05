@@ -20,7 +20,7 @@ function IllustJournal({ size = 52 }: { size?: number }) {
     >
       {/* 月 */}
       <circle cx="68" cy="10" r="5" stroke="#123656" strokeWidth="0.7" opacity="0.5" />
-      <circle cx="70" cy="8.5" r="3.8" fill="#fdf8ef" />
+      <circle cx="70" cy="8.5" r="3.8" fill="#f8f9f7" />
       {/* 本の背表紙 */}
       <line
         x1="40"
