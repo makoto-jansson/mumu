@@ -28,7 +28,7 @@ const personSchema = {
   name: "マコ",
   alternateName: "Mako",
   url: `${BASE_URL}/about`,
-  image: `${BASE_URL}/profile.jpg`,
+  image: `${BASE_URL}/images/profile.jpg`,
   jobTitle: "焙煎者・アプリ開発者",
   description:
     "灯台の珈琲焙煎所mumuを運営。「感性が、ふと、戻ってくる」をコンセプトに、自家焙煎珈琲豆のオンラインショップと瞑想アプリの開発を行っています。",

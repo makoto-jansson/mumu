@@ -26,7 +26,7 @@ export default function RoasterProfile() {
         <div className="flex-shrink-0 mb-8 md:mb-0">
           <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border border-ink-primary/20">
             <Image
-              src="/profile.jpg"
+              src="/images/profile.jpg"
               alt="灯台の珈琲焙煎所mumu 焙煎者 マコ"
               fill
               sizes="(max-width: 768px) 160px, 192px"
