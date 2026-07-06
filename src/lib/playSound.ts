@@ -176,7 +176,8 @@ type FadeHandle = {
 };
 
 // iOS 判定（audio.volume が無視される環境かどうか）
-function _isIOS(): boolean {
+// audioStore からも参照するため export する
+export function isIOS(): boolean {
   if (typeof navigator === "undefined") return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.userAgent.includes("Mac") && "ontouchend" in document);
@@ -187,7 +188,7 @@ export function connectGain(audio: HTMLAudioElement, initialVolume: number): Fad
   // iOS のみ audio.volume が読み取り専用（常に1）なので GainNode で音量制御する。
   // PC で AudioContext を使うと Chrome の autoplay policy により
   // resume() がブロックされて BGM が無音になるため、iOS 以外は null を返す。
-  if (!_isIOS()) return null;
+  if (!isIOS()) return null;
 
   const ctx = getCtx();
   if (!ctx) return null;

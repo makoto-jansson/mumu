@@ -5,6 +5,7 @@
 // - 新しいセッションが始まったら前の音楽をフェードアウトして切り替え
 
 import { create } from "zustand";
+import { isIOS } from "@/lib/playSound";
 
 // 音量を滑らかに変化させてコールバックを呼ぶ
 function fadeVolume(
@@ -66,10 +67,18 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
   setAudio: (audio, meta) => {
     const prev = get().audio;
     if (prev && prev !== audio) {
-      // 前の音楽をフェードアウトしてから解放
-      fadeVolume(prev, 0, 800, () => {
+      if (isIOS()) {
+        // iOS は audio.volume が無視されフェードが効かない。
+        // volume フェードだと旧BGMが下がらないまま鳴り続け、新BGMと重なる
+        // （focus↔relax 切替時の「2つ重なって鳴る」不具合）。
+        // GainNode ハンドルはストア側に無いため、重なりを断つべく即停止する。
         prev.pause();
-      });
+      } else {
+        // PC は volume が有効なのでクロスフェードして解放
+        fadeVolume(prev, 0, 800, () => {
+          prev.pause();
+        });
+      }
     }
     set({ audio, meta });
   },
