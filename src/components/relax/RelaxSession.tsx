@@ -347,14 +347,14 @@ export default function RelaxSession({ config, onDone }: Props) {
       audioElRef.current = storeAudio;
       // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
       // iOS: audio.volumeは無視されるため connectGain を試み、失敗時のみ fadeVolume で補正
-      if (storeAudio.volume < 0.2) {
+      if (storeAudio.volume < 0.9) {
         const handle = connectGain(storeAudio, storeAudio.volume || 0.001);
         if (handle) {
           gainHandleRef.current = handle;
           handle.fadeTo(TARGET_VOL, 1000);
         } else {
           // GainNodeが既に接続済みの場合（前回mountのhandleが継続中）は何もしない
-          if (storeAudio.volume < 0.2) {
+          if (storeAudio.volume < 0.9) {
             fadeTimerRef.current = fadeVolume(storeAudio, TARGET_VOL, 1000);
           }
         }
@@ -368,8 +368,17 @@ export default function RelaxSession({ config, onDone }: Props) {
       // 0.001から開始（iOSは volume=0 だとオーディオセッションが起動しないため）
       audio.volume = 0.001;
       audioElRef.current = audio;
-      // グローバルストアに登録（既存の音楽は自動停止）
-      setAudio(audio, { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config });
+      // グローバルストアに登録（既存セッションは teardown で完全停止される）。
+      // このセッションの停止処理も登録：要素停止＋GainNode切断。
+      setAudio(
+        audio,
+        { label: "Relax · 呼吸", route: "/app/relax", mode: "relax", config },
+        () => {
+          gainHandleRef.current?.disconnect();
+          gainHandleRef.current = null;
+          audio.pause();
+        },
+      );
 
       // setActionHandler を登録しないと iOS がロック時に pause を送って止めてしまう
       if ("mediaSession" in navigator) {
@@ -377,6 +386,8 @@ export default function RelaxSession({ config, onDone }: Props) {
         navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
         navigator.mediaSession.setActionHandler("pause", () => { /* 一時停止を許可しない（バックグラウンド継続） */ });
         navigator.mediaSession.setActionHandler("stop",  () => { /* 同上 */ });
+        // 再生中を明示（iOSがバックグラウンドで再生セッションを維持しやすくなる）
+        navigator.mediaSession.playbackState = "playing";
       }
 
       audio.play().catch(console.error);

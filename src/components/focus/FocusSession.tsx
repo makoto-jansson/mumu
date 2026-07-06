@@ -95,6 +95,7 @@ export default function FocusSession({ config, onBreak }: Props) {
   const gainHandleRef = useRef<ReturnType<typeof connectGain>>(null);
   const timeLeftRef   = useRef(durationSec); // アンマウント時に最新値を参照するためのref
   const sessionEndedRef = useRef(false); // 完了・手動終了時はtimerSnap保存をスキップ
+  const killedRef     = useRef(false); // teardown済みフラグ（ギャップレスループの再生を止める）
   const { setAudio, stopAndClear, timerSnap, saveTimerSnap } = useAudioStore();
 
   // timeLeftが変わるたびにrefを同期
@@ -125,7 +126,9 @@ export default function FocusSession({ config, onBreak }: Props) {
       start();
     }
 
-    const TARGET_VOL = 0.35;
+    // 音量は BGM ファイル側に焼き込み済み(focus 0.35)のため、コードは volume=1.0 で鳴らす
+    // （iOS は volume 無視でファイル音量そのまま／PC は 1.0 で同じ実効音量）
+    const TARGET_VOL = 1.0;
 
     if (isReturning) {
       // ホームから戻ってきた場合：既存の音楽をそのまま引き継ぐ
@@ -133,7 +136,7 @@ export default function FocusSession({ config, onBreak }: Props) {
       storeAudio.loop = true; // ギャップレスループは再設定不要、loop=trueで継続
       // StrictMode等でフェードタイマーが中断されていた場合は補正フェードを開始
       // iOS: audio.volumeは無視されるため connectGain を試み、失敗時のみ fadeVolume で補正
-      if (storeAudio.volume < 0.3) {
+      if (storeAudio.volume < 0.9) {
         const handle = connectGain(storeAudio, storeAudio.volume || 0.001);
         if (handle) {
           gainHandleRef.current = handle;
@@ -141,7 +144,7 @@ export default function FocusSession({ config, onBreak }: Props) {
         } else {
           // GainNodeが既に接続済みの場合（前回mountのhandleが継続中）は何もしない
           // audio.volumeが低い場合のみfadeVolume（非iOS向けフォールバック）
-          if (storeAudio.volume < 0.3) {
+          if (storeAudio.volume < 0.9) {
             fadeTimerRef.current = fadeVolume(storeAudio, TARGET_VOL, 1000);
           }
         }
@@ -163,8 +166,19 @@ export default function FocusSession({ config, onBreak }: Props) {
       audioElRef.current   = audio;
       standbyAudio.current = audio2;
 
-      // グローバルストアに登録（既存の音楽は自動停止）
-      setAudio(audio, { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config });
+      // グローバルストアに登録（既存セッションは teardown で完全停止される）。
+      // このセッションの停止処理も登録：ギャップレスの2要素とハンドラを丸ごと止める。
+      setAudio(
+        audio,
+        { label: `Focus · ${config.ambient}`, route: "/app/focus", mode: "focus", config },
+        () => {
+          killedRef.current = true; // timeupdateハンドラの再生を止める
+          gainHandleRef.current?.disconnect();
+          gainHandleRef.current = null;
+          audioElRef.current?.pause();
+          standbyAudio.current?.pause();
+        },
+      );
 
       // ロック画面・コントロールセンターにメタデータを表示
       // setActionHandler を登録しないと iOS がロック時に pause を送って止めてしまう
@@ -173,11 +187,20 @@ export default function FocusSession({ config, onBreak }: Props) {
         navigator.mediaSession.setActionHandler("play",  () => { audioElRef.current?.play().catch(() => {}); });
         navigator.mediaSession.setActionHandler("pause", () => { /* 一時停止を許可しない（バックグラウンド継続） */ });
         navigator.mediaSession.setActionHandler("stop",  () => { /* 同上 */ });
+        // 再生中を明示（iOSがバックグラウンドで再生セッションを維持しやすくなる）
+        navigator.mediaSession.playbackState = "playing";
       }
 
       // トラック終了 0.15秒前にスタンバイを再生開始 → ループ切れ目なし
       const scheduleGaplessLoop = (active: HTMLAudioElement, sb: HTMLAudioElement) => {
         const handler = () => {
+          // teardown済みなら再生を再開させない（停止・切替後に鳴り続けるのを防ぐ）
+          if (killedRef.current) {
+            active.removeEventListener('timeupdate', handler);
+            active.pause();
+            sb.pause();
+            return;
+          }
           if (!active.duration || active.currentTime < active.duration - 0.15) return;
           active.removeEventListener('timeupdate', handler);
           sb.currentTime = 0;

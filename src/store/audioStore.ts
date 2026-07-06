@@ -49,11 +49,14 @@ type AudioStore = {
   audio: HTMLAudioElement | null;
   meta:  NowPlayingMeta | null;
   timerSnap: TimerSnap | null;
-  // 新しい音声を登録（既存があればフェードアウトして差し替え）
-  setAudio: (audio: HTMLAudioElement, meta: NowPlayingMeta) => void;
+  // 現セッションを丸ごと停止する処理（focusはギャップレスで2要素+ハンドラを持つため、
+  // audio.pause() だけでは止めきれない。各セッションが登録する）
+  teardown: (() => void) | null;
+  // 新しい音声を登録（既存セッションは teardown で完全停止してから差し替え）
+  setAudio: (audio: HTMLAudioElement, meta: NowPlayingMeta, teardown?: () => void) => void;
   // タイマー状態を保存（アンマウント・一時停止時）
   saveTimerSnap: (snap: TimerSnap) => void;
-  // 明示的にフェードアウトして停止（セッション終了時）
+  // 明示的に停止（セッション終了・停止ボタン）
   stopAndClear: () => void;
 };
 
@@ -61,31 +64,36 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
   audio: null,
   meta:  null,
   timerSnap: null,
+  teardown: null,
 
   saveTimerSnap: (snap) => set({ timerSnap: snap }),
 
-  setAudio: (audio, meta) => {
+  setAudio: (audio, meta, teardown) => {
     const prev = get().audio;
+    const prevTeardown = get().teardown;
     if (prev && prev !== audio) {
+      // 旧セッションを完全停止（2要素・ハンドラ・GainNodeを含めて）。
+      // teardown が無い場合のみ従来どおり要素を停止するフォールバック。
       if (isIOS()) {
-        // iOS は audio.volume が無視されフェードが効かない。
-        // volume フェードだと旧BGMが下がらないまま鳴り続け、新BGMと重なる
-        // （focus↔relax 切替時の「2つ重なって鳴る」不具合）。
-        // GainNode ハンドルはストア側に無いため、重なりを断つべく即停止する。
-        prev.pause();
+        // iOS は audio.volume が無視されフェードが効かないため即停止（重なり防止）
+        if (prevTeardown) prevTeardown();
+        else prev.pause();
       } else {
-        // PC は volume が有効なのでクロスフェードして解放
+        // PC は volume が有効なのでクロスフェードしてから完全停止
         fadeVolume(prev, 0, 800, () => {
-          prev.pause();
+          if (prevTeardown) prevTeardown();
+          else prev.pause();
         });
       }
     }
-    set({ audio, meta });
+    set({ audio, meta, teardown: teardown ?? null });
   },
 
   stopAndClear: () => {
-    const { audio } = get();
-    if (audio) audio.pause();
-    set({ audio: null, meta: null, timerSnap: null });
+    const { audio, teardown } = get();
+    // teardown があれば全要素・ハンドラごと停止（無ければ従来どおり）
+    if (teardown) teardown();
+    else if (audio) audio.pause();
+    set({ audio: null, meta: null, timerSnap: null, teardown: null });
   },
 }));

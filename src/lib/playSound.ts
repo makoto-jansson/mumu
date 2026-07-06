@@ -130,45 +130,6 @@ export function playSound(path: string, volume = 1.0) {
   audio.play().catch(console.error);
 }
 
-// ─── BGM フェード用 GainNode ヘルパー ────────────────────────────────────────
-// iOS は HTMLAudioElement.volume を無視するため
-// Web Audio API の MediaElementSource + GainNode 経由で音量を制御する
-//
-// iOS / PC 両対応の unlock 方針:
-//   AudioContext は「モジュールロード時ではなくジェスチャー時に生成 + resume」する。
-//   - モジュールロード時に生成すると PC (Chrome) では「ユーザー操作なしに生成済み」
-//     とみなされより厳しく suspended → 2分以上 BGM が出ない問題が発生する。
-//   - touchstart / mousedown の _unlockCtx で getCtx() を呼んで「生成も一緒に行い」
-//     そのまま resume() する。これにより:
-//       iOS: ナビゲーションのタップ時点で生成 + resume → useEffect 到達時は running
-//       PC : mousedown で生成 + resume → useEffect 到達時は running
-
-let _ctx: AudioContext | null = null;
-
-function getCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  if (_ctx && _ctx.state === "closed") _ctx = null;
-  if (!_ctx) {
-    try {
-      const AC = window.AudioContext
-        ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AC) _ctx = new AC();
-    } catch { /* 非対応環境は null のまま */ }
-  }
-  return _ctx;
-}
-
-// BGM 用 AudioContext unlock（ジェスチャーで生成 + resume）
-// getCtx() で存在しなければ生成もするため iOS / PC どちらでも機能する
-if (typeof window !== "undefined") {
-  const _unlockCtx = () => {
-    const ctx = getCtx();
-    if (ctx?.state === "suspended") ctx.resume().catch(() => {});
-  };
-  window.addEventListener("touchstart", _unlockCtx, { capture: true, passive: true });
-  window.addEventListener("mousedown",  _unlockCtx, { capture: true });
-}
-
 type FadeHandle = {
   setVolume:  (v: number) => void;
   fadeTo:     (target: number, durationMs: number, onDone?: () => void) => void;
@@ -183,69 +144,15 @@ export function isIOS(): boolean {
     (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
 
-export function connectGain(audio: HTMLAudioElement, initialVolume: number): FadeHandle | null {
-  // PC では HTMLAudioElement.volume が正常に動作するため GainNode は不要。
-  // iOS のみ audio.volume が読み取り専用（常に1）なので GainNode で音量制御する。
-  // PC で AudioContext を使うと Chrome の autoplay policy により
-  // resume() がブロックされて BGM が無音になるため、iOS 以外は null を返す。
-  if (!isIOS()) return null;
-
-  const ctx = getCtx();
-  if (!ctx) return null;
-
-  ctx.resume().catch(() => {});
-
-  let source: MediaElementAudioSourceNode;
-  try {
-    source = ctx.createMediaElementSource(audio);
-  } catch {
-    return null;
-  }
-
-  const gain = ctx.createGain();
-  gain.gain.value = initialVolume;
-  source.connect(gain);
-  gain.connect(ctx.destination);
-
-  let fadeId: ReturnType<typeof setInterval> | null = null;
-
-  // AudioContext が running になるまで最大 500ms ポーリングしてからフェードを開始
-  // iOS では resume() が非同期なため、suspended のままフェードを始めると無音になる
-  function startFade(target: number, durationMs: number, onDone?: () => void) {
-    if (fadeId) clearInterval(fadeId);
-    const startMs = Date.now();
-    const pollId = setInterval(() => {
-      if (ctx!.state === "running" || Date.now() - startMs > 500) {
-        clearInterval(pollId);
-        if (fadeId) clearInterval(fadeId);
-        const steps  = 30;
-        const stepMs = durationMs / steps;
-        const from   = gain.gain.value;
-        const delta  = (target - from) / steps;
-        let   count  = 0;
-        fadeId = setInterval(() => {
-          count++;
-          gain.gain.value = Math.max(0, Math.min(1, from + delta * count));
-          if (count >= steps) {
-            if (fadeId) clearInterval(fadeId);
-            gain.gain.value = target;
-            onDone?.();
-          }
-        }, stepMs);
-      }
-    }, 30);
-  }
-
-  return {
-    setVolume(v: number) {
-      gain.gain.value = Math.max(0, Math.min(1, v));
-    },
-    fadeTo(target: number, durationMs: number, onDone?: () => void) {
-      startFade(target, durationMs, onDone);
-    },
-    disconnect() {
-      if (fadeId) clearInterval(fadeId);
-      try { gain.disconnect(); source.disconnect(); } catch { /* ignore */ }
-    },
-  };
+// ─── BGM 音量制御ポリシー ────────────────────────────────────────────────────
+// 以前は iOS で audio.volume が無視される問題に対し Web Audio(MediaElementSource
+// + GainNode)で音量を制御していた。しかし iOS はバックグラウンド(ロック/アプリ切替)で
+// AudioContext を suspend するため、GainNode 経由の BGM が背景で止まってしまう。
+// → BGM をバックグラウンド継続させるため Web Audio は使わず、素の HTMLAudioElement で
+//   再生する。狙いの音量は各 BGM ファイル側に焼き込んである(focus 0.35 / relax 0.25)ため、
+//   コード側は volume=1.0（＝ファイル通り）で鳴らせばよい。
+// connectGain は常に null を返し、呼び出し側は audio.volume ベースにフォールバックする
+// （PC は volume でフェード可、iOS は volume 無視でファイル音量そのまま=背景継続）。
+export function connectGain(_audio: HTMLAudioElement, _initialVolume: number): FadeHandle | null {
+  return null;
 }
