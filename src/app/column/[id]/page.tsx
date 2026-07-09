@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
+import RoasterProfile from "@/components/about/RoasterProfile";
+import RelatedColumns from "@/components/column/RelatedColumns";
 import { getColumn, formatPostDate } from "@/lib/microcms";
 
 const BASE_URL = "https://mumucoffee-feel.com";
@@ -90,6 +92,12 @@ export default async function ColumnPostPage({
             className="article-body"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+
+          {/* 記事末尾に著者プロフィール（about下部と同一・E-E-A-T強化） */}
+          <RoasterProfile />
+
+          {/* プロフィールの下に関連記事レコメンド（カード型） */}
+          <RelatedColumns currentId={id} />
         </div>
       </article>
     </SiteChromeV2>
