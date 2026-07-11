@@ -20,6 +20,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        // コラム「コーヒー豆の種類」のコンテンツID変更に伴う恒久リダイレクト（308）
+        source: "/column/op5pjz1nt2f",
+        destination: "/column/coffee-bean-types",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withSerwist(nextConfig);
