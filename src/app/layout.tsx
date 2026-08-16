@@ -13,7 +13,7 @@ import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import InstallBanner from "@/components/layout/InstallBanner";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 // Cormorant Garamond（英文セリフ体・装飾用）
 // Variable Font で upright と italic を軽量に提供

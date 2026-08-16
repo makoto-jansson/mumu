@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import AboutContent from "./AboutContent";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 export const metadata: Metadata = {
   title: "mumuのストーリー",

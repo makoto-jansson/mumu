@@ -8,7 +8,7 @@ import Image from "next/image";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import { getPost, formatPostDate } from "@/lib/microcms";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 // 記事追加・更新をすぐ反映（60秒ごと再検証）
 export const revalidate = 60;

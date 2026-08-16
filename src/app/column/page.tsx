@@ -7,7 +7,7 @@ import Link from "next/link";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import { getAllColumns, formatPostDate } from "@/lib/microcms";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 export const metadata: Metadata = {
   title: "コーヒーの読みもの一覧",

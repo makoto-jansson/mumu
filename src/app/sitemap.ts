@@ -5,7 +5,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts, getAllColumns } from "@/lib/microcms";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 // 記事追加を反映（60秒ごと再検証）
 export const revalidate = 60;

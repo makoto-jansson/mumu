@@ -10,7 +10,7 @@ import RoasterProfile from "@/components/about/RoasterProfile";
 import RelatedColumns from "@/components/column/RelatedColumns";
 import { getColumn, formatPostDate } from "@/lib/microcms";
 
-const BASE_URL = "https://mumucoffee-feel.com";
+const BASE_URL = "https://www.mumucoffee-feel.com";
 
 export const revalidate = 60;
 

@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/app/", // アプリページはクロール不要
     },
-    sitemap: "https://mumucoffee-feel.com/sitemap.xml",
+    sitemap: "https://www.mumucoffee-feel.com/sitemap.xml",
   };
 }
