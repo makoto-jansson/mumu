@@ -108,7 +108,8 @@ export async function getAllColumns(): Promise<BlogPost[]> {
   try {
     const data = await client.getList<BlogPost>({
       endpoint: "columns",
-      queries: { limit: 100, fields: "id,title,publishedAt,eyecatch" },
+      // content も取得して一覧カードの抜粋に使う（limit100で全件）
+      queries: { limit: 100, fields: "id,title,publishedAt,eyecatch,content" },
     });
     return data.contents;
   } catch {
