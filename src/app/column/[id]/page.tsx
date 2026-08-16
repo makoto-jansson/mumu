@@ -16,10 +16,30 @@ export const revalidate = 60;
 
 function toPlain(html: string, len = 110): string {
   return html
+    .replace(/<figure[\s\S]*?<\/figure>/gi, "")
     .replace(/<[^>]+>/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, len);
+}
+
+// 本文HTMLの「よくある質問」節から Q&A を抽出（FAQPage構造化データ用）。
+// 基礎記事(<strong>Q. …</strong>)・産地記事(<strong>質問？</strong>)の両形式に対応。
+function parseFaq(html: string): { q: string; a: string }[] {
+  const h = html.search(/<h2[^>]*>\s*よくある質問/);
+  if (h < 0) return [];
+  let seg = html.slice(h);
+  const after = seg.slice(5).search(/<h2/i);
+  if (after > 0) seg = seg.slice(0, after + 5);
+  const items: { q: string; a: string }[] = [];
+  const re = /<p>\s*<strong>\s*([\s\S]*?)<\/strong>\s*([\s\S]*?)<\/p>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(seg))) {
+    const q = m[1].replace(/^Q[.．]?\s*/, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    const a = m[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    if (q && a) items.push({ q, a });
+  }
+  return items;
 }
 
 export async function generateMetadata({
@@ -54,8 +74,59 @@ export default async function ColumnPostPage({
   const post = await getColumn(id);
   if (!post) notFound();
 
+  const url = `${BASE_URL}/column/${id}`;
+  const description = toPlain(post.content, 140);
+  const image = post.eyecatch?.url || `${BASE_URL}/opengraph-image`;
+  const faq = parseFaq(post.content);
+
+  // 構造化データ: Article ＋（あれば）FAQPage ＋ Breadcrumb。
+  // 既存の Organization(#organization)・Person(/about#mako) と @id で連携。
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${url}#article`,
+        headline: post.title,
+        description,
+        image: [image],
+        datePublished: post.publishedAt,
+        dateModified: post.publishedAt,
+        inLanguage: "ja",
+        author: { "@type": "Person", "@id": `${BASE_URL}/about#mako`, name: "マコ" },
+        publisher: { "@id": `${BASE_URL}/#organization` },
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        isPartOf: { "@type": "CollectionPage", "@id": `${BASE_URL}/column` },
+      },
+      ...(faq.length
+        ? [{
+            "@type": "FAQPage",
+            "@id": `${url}#faq`,
+            mainEntity: faq.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          }]
+        : []),
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "ホーム", item: BASE_URL },
+          { "@type": "ListItem", position: 2, name: "読みもの", item: `${BASE_URL}/column` },
+          { "@type": "ListItem", position: 3, name: post.title, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
-    <SiteChromeV2>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <SiteChromeV2>
       <article className="min-h-screen pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="mb-14">
@@ -100,6 +171,7 @@ export default async function ColumnPostPage({
           <RelatedColumns currentId={id} />
         </div>
       </article>
-    </SiteChromeV2>
+      </SiteChromeV2>
+    </>
   );
 }
