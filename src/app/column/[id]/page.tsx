@@ -91,7 +91,7 @@ export default async function ColumnPostPage({
         description,
         image: [image],
         datePublished: post.publishedAt,
-        dateModified: post.publishedAt,
+        dateModified: post.updatedAt || post.publishedAt,
         inLanguage: "ja",
         author: { "@type": "Person", "@id": `${BASE_URL}/about#mako`, name: "マコ" },
         publisher: { "@id": `${BASE_URL}/#organization` },
@@ -129,14 +129,14 @@ export default async function ColumnPostPage({
       <SiteChromeV2>
       <article className="min-h-screen pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
-          <div className="mb-14">
-            <Link
-              href="/column"
-              className="text-ink-secondary/70 text-sm font-light tracking-wider hover:text-ink-primary transition-colors duration-300 inline-flex items-center gap-2"
-            >
-              <span>←</span> 読みもの一覧へ
-            </Link>
-          </div>
+          {/* 可視パンくず（BreadcrumbList構造化データと対応） */}
+          <nav aria-label="パンくず" className="mb-14 text-[11px] tracking-[0.15em] text-ink-secondary/70 flex items-center gap-2 flex-wrap">
+            <Link href="/" className="hover:text-ink-primary transition-colors">ホーム</Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/column" className="hover:text-ink-primary transition-colors">読みもの</Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-ink-primary/80 truncate max-w-[16rem]">{post.title}</span>
+          </nav>
 
           <p className="text-ink-secondary/60 text-[11px] tracking-[0.2em] mb-4">
             {formatPostDate(post.publishedAt)}

@@ -36,6 +36,7 @@ export type BlogPost = {
   title: string;
   content: string; // リッチエディタのHTML
   publishedAt: string;
+  updatedAt?: string; // microCMSが自動付与（構造化データのdateModifiedに使用）
   eyecatch?: {
     url: string;
     width: number;

@@ -109,6 +109,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large", // 画像の大きなプレビューを許可（Discover・画像検索露出）
+    },
   },
 
   // canonical URL（重複コンテンツ防止）
