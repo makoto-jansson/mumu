@@ -19,8 +19,10 @@ export type JournalItem = { id: string; date: string; title: string };
 
 export default function HomeV2({
   journalPosts = [],
+  columnPosts = [],
 }: {
   journalPosts?: JournalItem[];
+  columnPosts?: JournalItem[]; // 読みもの（columns）最新3件。型は日誌と共通
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -503,6 +505,44 @@ export default function HomeV2({
           <div className={styles.journalMoreWrap} data-reveal>
             <a className={styles.btn} href="/journal">
               日誌をよむ<span className={styles.arrow}>→</span>
+            </a>
+          </div>
+        </section>
+
+        <img
+          className={`${styles.divider} ${styles.write}`}
+          data-depth="0.03"
+          data-write=""
+          src="/v2/line.png"
+          alt=""
+          aria-hidden="true"
+          width={1400}
+          height={209}
+          loading="lazy"
+        />
+
+        {/* ---------- 読みもの（SEOコラム・最新3件） ---------- */}
+        <section className={styles.section} id="column">
+          <div className={styles.sectionHead}>
+            <h2 className={styles.columnHeading}>読みもの</h2>
+          </div>
+          {columnPosts.length > 0 && (
+            <div className={styles.journal} data-reveal>
+              {columnPosts.map((post) => (
+                <a
+                  key={post.id}
+                  className={styles.journalEntry}
+                  href={`/column/${post.id}`}
+                >
+                  <p className={styles.journalDate}>{post.date}</p>
+                  <p className={styles.journalTitle}>{post.title}</p>
+                </a>
+              ))}
+            </div>
+          )}
+          <div className={styles.journalMoreWrap} data-reveal>
+            <a className={styles.btn} href="/column">
+              読みものをみる<span className={styles.arrow}>→</span>
             </a>
           </div>
         </section>

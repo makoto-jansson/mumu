@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import HomeV2 from "@/components/home-v2/HomeV2";
-import { getRecentPosts, formatPostDate } from "@/lib/microcms";
+import { getRecentPosts, getAllColumns, formatPostDate } from "@/lib/microcms";
 
 // microCMSの記事は追加後すぐ反映したいので60秒ごとに再検証
 export const revalidate = 60;
@@ -34,5 +34,11 @@ export default async function Home() {
     date: formatPostDate(p.publishedAt),
     title: p.title,
   }));
-  return <HomeV2 journalPosts={journalPosts} />;
+  // 読みもの（columns）最新3件（SEO記事へのトップ導線）
+  const columns = await getAllColumns();
+  const columnPosts = [...columns]
+    .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1))
+    .slice(0, 3)
+    .map((p) => ({ id: p.id, date: formatPostDate(p.publishedAt), title: p.title }));
+  return <HomeV2 journalPosts={journalPosts} columnPosts={columnPosts} />;
 }
