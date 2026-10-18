@@ -7,8 +7,10 @@ import { getAllPosts, getAllColumns } from "@/lib/microcms";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
-// 記事追加を反映（60秒ごと再検証）
-export const revalidate = 60;
+// sitemap.ts は「特殊なRoute Handler」で、ページと違い revalidate では再検証されず
+// ビルド時の内容が配信され続ける（Next 16系の仕様）。実際に2026-09-10以降の記事12本が
+// サイトマップから抜け落ちていたため、dynamic 指定でリクエストごとに生成する。
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
