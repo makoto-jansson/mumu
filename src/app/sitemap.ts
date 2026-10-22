@@ -26,16 +26,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // CMSの記事URL（取得失敗時は空配列にフォールバック）
   const [posts, columns] = await Promise.all([getAllPosts(), getAllColumns()]);
 
+  // lastModified は更新日時を優先する。公開日のままだと、記事をリライトしても
+  // Googleに「更新された」と伝わらず再クロールされない（2026-10-22に判明）。
   const journalPages: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${BASE_URL}/journal/${p.id}`,
-    lastModified: new Date(p.publishedAt),
+    lastModified: new Date(p.updatedAt ?? p.publishedAt),
     changeFrequency: "monthly",
     priority: 0.6,
   }));
 
   const columnPages: MetadataRoute.Sitemap = columns.map((p) => ({
     url: `${BASE_URL}/column/${p.id}`,
-    lastModified: new Date(p.publishedAt),
+    lastModified: new Date(p.updatedAt ?? p.publishedAt),
     changeFrequency: "monthly",
     priority: 0.6,
   }));
