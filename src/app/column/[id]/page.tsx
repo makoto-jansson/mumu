@@ -14,13 +14,26 @@ const BASE_URL = "https://www.mumucoffee-feel.com";
 
 export const revalidate = 60;
 
-function toPlain(html: string, len = 110): string {
-  return html
+// 記事本文から meta description / og:description を作る。
+// microCMSに説明文の専用フィールドがないため本文の冒頭を使うが、
+// 単純に文字数で切ると「〜そして正」のように文の途中で途切れ、検索結果での
+// クリック率を落とす。句点で切り、要点を先に置く引用ブロックがあればそれを優先する。
+function toPlain(html: string, len = 120): string {
+  // 冒頭の「先に要点を置く」引用ブロックは、説明文として最も適した要約になっている
+  const quote = html.match(/<blockquote[\s\S]*?<\/blockquote>/i);
+  const body = html
     .replace(/<figure[\s\S]*?<\/figure>/gi, "")
-    .replace(/<[^>]+>/g, "")
+    .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, len);
+    .trim();
+  const source = quote
+    ? quote[0].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+    : body;
+  if (source.length <= len) return source;
+  // len を超えない範囲で最後の句点までを採用。句点が無ければ読点、それも無ければそのまま切る
+  const head = source.slice(0, len);
+  const lastStop = Math.max(head.lastIndexOf("。"), head.lastIndexOf("、"));
+  return lastStop >= len * 0.5 ? head.slice(0, lastStop + 1) : head;
 }
 
 // 本文HTMLの「よくある質問」節から Q&A を抽出（FAQPage構造化データ用）。
