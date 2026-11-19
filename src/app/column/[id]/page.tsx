@@ -15,25 +15,44 @@ const BASE_URL = "https://www.mumucoffee-feel.com";
 export const revalidate = 60;
 
 // 記事本文から meta description / og:description を作る。
-// microCMSに説明文の専用フィールドがないため本文の冒頭を使うが、
-// 単純に文字数で切ると「〜そして正」のように文の途中で途切れ、検索結果での
-// クリック率を落とす。句点で切り、要点を先に置く引用ブロックがあればそれを優先する。
+// microCMSに説明文の専用フィールドがないため本文の冒頭を使う。単純に文字数で切ると
+// 「〜そして正」のように文の途中で途切れるので句点で切る。また要点を先に置く引用ブロックが
+// あればそれを優先するが、ブロック内は「導入1行＋ハイフン箇条書き」の形なので、
+// そのまま流すと検索結果に「- 粉12g」のようにハイフンが出てしまう。箇条書きだけを拾って
+// 記号を外し、導入の1行（「先に要点を置いておきます」等）は情報量がないので捨てる。
 function toPlain(html: string, len = 120): string {
-  // 冒頭の「先に要点を置く」引用ブロックは、説明文として最も適した要約になっている
+  const strip = (s: string) =>
+    s
+      .replace(/<figure[\s\S]*?<\/figure>/gi, "")
+      .replace(/<(?:br|hr)\s*\/?>/gi, "\n")
+      .replace(/<\/(?:p|li|h[1-6]|div|td|th|tr|blockquote)>/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/[ \t\u3000]+/g, " ")
+      .replace(/\s*\n\s*/g, "\n")
+      .trim();
+
   const quote = html.match(/<blockquote[\s\S]*?<\/blockquote>/i);
-  const body = html
-    .replace(/<figure[\s\S]*?<\/figure>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  const source = quote
-    ? quote[0].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-    : body;
+  let source: string;
+  if (quote) {
+    const lines = strip(quote[0]).split("\n").filter(Boolean);
+    const bullets = lines
+      .filter((l) => /^[-・*]\s/.test(l))
+      .map((l) => l.replace(/^[-・*]\s*/, "").trim());
+    source = bullets.length ? bullets.join("／") : lines.join(" ");
+  } else {
+    source = strip(html).replace(/\n/g, " ");
+  }
+
   if (source.length <= len) return source;
-  // len を超えない範囲で最後の句点までを採用。句点が無ければ読点、それも無ければそのまま切る
+  // len を超えない範囲で、箇条書きの区切り「／」か句点までを採用する
   const head = source.slice(0, len);
-  const lastStop = Math.max(head.lastIndexOf("。"), head.lastIndexOf("、"));
-  return lastStop >= len * 0.5 ? head.slice(0, lastStop + 1) : head;
+  const idx = Math.max(
+    head.lastIndexOf("。"),
+    head.lastIndexOf("／"),
+    head.lastIndexOf("、"),
+  );
+  if (idx < len * 0.5) return head;
+  return head[idx] === "／" ? head.slice(0, idx) : head.slice(0, idx + 1);
 }
 
 // 本文HTMLの「よくある質問」節から Q&A を抽出（FAQPage構造化データ用）。
