@@ -44,15 +44,19 @@ function toPlain(html: string, len = 120): string {
   }
 
   if (source.length <= len) return source;
-  // len を超えない範囲で、箇条書きの区切り「／」か句点までを採用する
+  // len を超えない範囲で切る。読点より句点を優先しないと「〜そして、」のように
+  // 接続詞で終わってしまう（2026-11-20に coffee-focus-brain で判明）。
+  // 箇条書きを繋いだ場合は区切りの「／」がいちばん自然な切れ目になる。
   const head = source.slice(0, len);
-  const idx = Math.max(
-    head.lastIndexOf("。"),
-    head.lastIndexOf("／"),
-    head.lastIndexOf("、"),
-  );
-  if (idx < len * 0.5) return head;
-  return head[idx] === "／" ? head.slice(0, idx) : head.slice(0, idx + 1);
+  const bullet = source.includes("／");
+  const period = head.lastIndexOf("。");
+  const slash = head.lastIndexOf("／");
+  const comma = head.lastIndexOf("、");
+  if (bullet && slash >= len * 0.5) return head.slice(0, slash);
+  if (period >= len * 0.5) return head.slice(0, period + 1);
+  if (slash >= len * 0.5) return head.slice(0, slash);
+  if (comma >= len * 0.5) return head.slice(0, comma + 1);
+  return head;
 }
 
 // 本文HTMLの「よくある質問」節から Q&A を抽出（FAQPage構造化データ用）。
