@@ -74,6 +74,29 @@ function parseFaq(html: string): { q: string; a: string }[] {
   return items;
 }
 
+// 本文内のショップ（mumucoffee.theshop.jp）へのリンクにUTMを付ける。
+// ショップはGA4のクロスドメイン設定で「内部」扱いのため外部クリックが記録されず、
+// 参照元もドメイン名までしか残らない。UTMで「どの記事のどのリンクから来たか」を
+// ショップ側のセッション参照元として取れるようにする。
+// 原稿（microCMS）は書き換えず表示時に付与するので、今後の記事にも自動で効く。
+// style付きの<a>は豆カード（visual-style.mdの豆カード）、それ以外は本文中の文字リンク。
+function addShopUtm(html: string, slug: string): string {
+  return html.replace(/<a\b[^>]*>/gi, (tag) => {
+    const m = tag.match(/href="(https:\/\/mumucoffee\.theshop\.jp[^"]*)"/i);
+    if (!m || /utm_source=/.test(m[1])) return tag;
+    const [base, hash = ""] = m[1].split("#");
+    const params = new URLSearchParams({
+      utm_source: "mumucoffee-feel",
+      utm_medium: "column",
+      utm_campaign: slug,
+      utm_content: /\sstyle="/i.test(tag) ? "card" : "text",
+    });
+    const sep = base.includes("?") ? "&" : "?";
+    const next = `${base}${sep}${params.toString()}${hash ? `#${hash}` : ""}`;
+    return tag.replace(m[0], `href="${next.replace(/&/g, "&amp;")}"`);
+  });
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -193,7 +216,7 @@ export default async function ColumnPostPage({
 
           <div
             className="article-body"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: addShopUtm(post.content, id) }}
           />
 
           {/* 記事末尾に著者プロフィール（about下部と同一・E-E-A-T強化） */}
