@@ -8,7 +8,8 @@ import Image from "next/image";
 import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import RoasterProfile from "@/components/about/RoasterProfile";
 import RelatedColumns from "@/components/column/RelatedColumns";
-import { getColumn, formatPostDate } from "@/lib/microcms";
+import ColumnBeans from "@/components/column/ColumnBeans";
+import { getColumn, getBeans, formatPostDate, type Bean } from "@/lib/microcms";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
@@ -101,6 +102,31 @@ function addShopUtm(html: string, slug: string): string {
   });
 }
 
+// 銘柄名の比較用（半角・全角スペースの揺れを吸収）
+const normName = (s: string) => s.replace(/[\s\u3000]/g, "");
+
+// 本文の豆カード（style付き<a>）は原稿上どれもショップのトップを指している（2026-11-24時点で
+// 45記事・77枚）。トップに飛ばすと読者が豆を探し直すことになるので、カード内の銘柄名
+// （<strong>）を microCMS beans の name と照合し、その豆の個別商品ページへ差し替える。
+// 原稿は書き換えず表示時に置換する。照合できないカードはトップのまま残す。
+function linkBeanCards(html: string, beans: Bean[]): string {
+  const byName = new Map(beans.map((b) => [normName(b.name), b.shopUrl]));
+  return html.replace(
+    /(<a\b[^>]*\bstyle="[^"]*"[^>]*>)([\s\S]*?<\/a>)/gi,
+    (whole, open: string, rest: string) => {
+      if (!/href="https:\/\/mumucoffee\.theshop\.jp\/?"/i.test(open)) return whole;
+      const name = rest.match(/<strong\b[^>]*>([^<]+)<\/strong>/i)?.[1];
+      const url = name ? byName.get(normName(name)) : undefined;
+      if (!url) return whole;
+      return open.replace(/href="[^"]*"/i, `href="${url}"`) + rest;
+    }
+  );
+}
+
+// 本文に豆カードがあるか（ない記事だけ末尾に豆ブロックを出し、二重に売り込まない）
+const hasBeanCard = (html: string) =>
+  /<a\b[^>]*href="https:\/\/mumucoffee\.theshop\.jp[^"]*"[^>]*\bstyle="|<a\b[^>]*\bstyle="[^"]*"[^>]*href="https:\/\/mumucoffee\.theshop\.jp/i.test(html);
+
 export async function generateMetadata({
   params,
 }: {
@@ -130,8 +156,10 @@ export default async function ColumnPostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = await getColumn(id);
+  const [post, beans] = await Promise.all([getColumn(id), getBeans()]);
   if (!post) notFound();
+  const body = addShopUtm(linkBeanCards(post.content, beans), id);
+  const showBeanBlock = !hasBeanCard(post.content);
 
   const url = `${BASE_URL}/column/${id}`;
   const description = toPlain(post.content, 140);
@@ -220,8 +248,11 @@ export default async function ColumnPostPage({
 
           <div
             className="article-body"
-            dangerouslySetInnerHTML={{ __html: addShopUtm(post.content, id) }}
+            dangerouslySetInnerHTML={{ __html: body }}
           />
+
+          {/* 本文に豆カードが無い記事だけ、末尾で mumu の豆を紹介する */}
+          {showBeanBlock && <ColumnBeans beans={beans} slug={id} />}
 
           {/* 記事末尾に著者プロフィール（about下部と同一・E-E-A-T強化） */}
           <RoasterProfile />

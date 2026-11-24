@@ -15,7 +15,8 @@ type NavItem = { to: string; label: string; sp?: [string, string] };
 const NAV_ITEMS: NavItem[] = [
   { to: "#about", label: "mumuについて", sp: ["mumu", "について"] },
   { to: "#beans", label: "珈琲をえらぶ", sp: ["珈琲を", "えらぶ"] },
-  { to: "#journal", label: "灯台守の日誌", sp: ["灯台守の", "日誌"] },
+  // 日誌は廃止（2026-11-24）。集客の柱である読みもの（/column）へ差し替え
+  { to: "#column", label: "読みもの", sp: ["読み", "もの"] },
   { to: "#podcast", label: "Podcast" },
   { to: "/app", label: "アプリ" },
 ];

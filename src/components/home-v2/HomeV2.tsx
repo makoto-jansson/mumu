@@ -14,15 +14,13 @@ import FooterV2 from "./FooterV2";
 import { SHOP_URL, PODCAST_URL } from "./links";
 import styles from "./homeV2.module.css";
 
-// 日誌エントリ（表示用の整形済みデータ。CMS取得・整形は page.tsx 側で行う）
-export type JournalItem = { id: string; date: string; title: string };
+// 読みもの一覧の1件（表示用の整形済みデータ。CMS取得・整形は page.tsx 側で行う）
+export type ColumnItem = { id: string; date: string; title: string };
 
 export default function HomeV2({
-  journalPosts = [],
   columnPosts = [],
 }: {
-  journalPosts?: JournalItem[];
-  columnPosts?: JournalItem[]; // 読みもの（columns）最新3件。型は日誌と共通
+  columnPosts?: ColumnItem[]; // 読みもの（columns）最新3件
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +64,7 @@ export default function HomeV2({
           navEl.querySelectorAll<HTMLAnchorElement>("a")
         ) as HTMLAnchorElement[])
       : [];
-    const spyIds = ["about", "beans", "journal", "podcast"];
+    const spyIds = ["about", "beans", "column", "podcast"];
     const spySecs = spyIds.map((id) => document.getElementById(id));
     // メニューにアプリ(/app・ハッシュ無し)等が混在しても正しく点灯するよう、
     // 順番(index)ではなくリンク先のセクションid一致で active を判定する。
@@ -451,61 +449,6 @@ export default function HomeV2({
                 </a>
               </div>
             </article>
-          </div>
-        </section>
-
-        <img
-          className={`${styles.divider} ${styles.write}`}
-          data-depth="0.03"
-          data-write=""
-          src="/v2/line.png"
-          alt=""
-          aria-hidden="true"
-          width={1400}
-          height={209}
-          loading="lazy"
-        />
-
-        {/* ---------- 灯台守の日誌 ---------- */}
-        <section className={styles.section} id="journal">
-          <div className={styles.sectionHead}>
-            <h2>
-              <img
-                className={`${styles.sectionHand} ${styles.write}`}
-                data-depth="0.07"
-                data-write=""
-                style={{ width: "min(191px,36vw)" }}
-                src="/v2/h-journal.png"
-                alt="灯台守の日誌"
-                width={1400}
-                height={272}
-                loading="lazy"
-              />
-            </h2>
-          </div>
-          {/* microCMS(blogs)の最新記事。0件時はnote案内へフォールバック */}
-          {journalPosts.length > 0 ? (
-            <div className={styles.journal} data-reveal>
-              {journalPosts.map((post) => (
-                <a
-                  key={post.id}
-                  className={styles.journalEntry}
-                  href={`/journal/${post.id}`}
-                >
-                  <p className={styles.journalDate}>{post.date}</p>
-                  <p className={styles.journalTitle}>{post.title}</p>
-                </a>
-              ))}
-            </div>
-          ) : (
-            <p className={styles.podcastSub} data-reveal style={{ textAlign: "center" }}>
-              ただいま準備中です。noteでも綴っています。
-            </p>
-          )}
-          <div className={styles.journalMoreWrap} data-reveal>
-            <a className={styles.btn} href="/journal">
-              日誌をよむ<span className={styles.arrow}>→</span>
-            </a>
           </div>
         </section>
 

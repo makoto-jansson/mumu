@@ -1,9 +1,10 @@
 // sitemap.xml を自動生成（Next.js の App Router 組み込み機能）
 // https://mumucoffee-feel.com/sitemap.xml でアクセス可能になる
-// 固定ページに加え、microCMSの記事URL（日誌 /journal/[id]・読みもの /column/[id]）も含める。
+// 固定ページに加え、microCMSの記事URL（読みもの /column/[id]）も含める。
+// 日誌（/journal）は 2026-11-24 に廃止し /column へ転送しているので含めない。
 
 import type { MetadataRoute } from "next";
-import { getAllPosts, getAllColumns } from "@/lib/microcms";
+import { getAllColumns } from "@/lib/microcms";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
@@ -19,22 +20,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE_URL, lastModified: now, changeFrequency: "monthly", priority: 1 },
     { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/beans`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/journal`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${BASE_URL}/column`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
   ];
 
   // CMSの記事URL（取得失敗時は空配列にフォールバック）
-  const [posts, columns] = await Promise.all([getAllPosts(), getAllColumns()]);
+  const columns = await getAllColumns();
 
   // lastModified は更新日時を優先する。公開日のままだと、記事をリライトしても
   // Googleに「更新された」と伝わらず再クロールされない（2026-10-22に判明）。
-  const journalPages: MetadataRoute.Sitemap = posts.map((p) => ({
-    url: `${BASE_URL}/journal/${p.id}`,
-    lastModified: new Date(p.updatedAt ?? p.publishedAt),
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
   const columnPages: MetadataRoute.Sitemap = columns.map((p) => ({
     url: `${BASE_URL}/column/${p.id}`,
     lastModified: new Date(p.updatedAt ?? p.publishedAt),
@@ -42,5 +35,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...journalPages, ...columnPages];
+  return [...staticPages, ...columnPages];
 }

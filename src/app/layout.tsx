@@ -80,11 +80,11 @@ const cormorant = localFont({
 export const metadata: Metadata = {
   // デフォルトtitle（各ページで上書き可能）
   title: {
-    default: "灯台の珈琲焙煎所mumu | 感性が、ふと、戻ってくる場所",
+    default: "灯台の珈琲焙煎所mumu｜自家焙煎スペシャルティコーヒー豆の通販",
     template: "%s | 灯台の珈琲焙煎所mumu",
   },
   description:
-    "灯台の珈琲焙煎所mumu（ムーム）。スペシャルティコーヒーの焙煎と、珈琲のある時間をつくるツールをお届けします。",
+    "灯台の珈琲焙煎所mumu（ムーム）の自家焙煎コーヒー豆。スペシャルティコーヒーを100gから販売しています。淹れ方や産地の読みものも。",
   metadataBase: new URL(BASE_URL),
 
   // OGP（SNSシェア時の表示）
@@ -129,11 +129,12 @@ const jsonLd = {
   "@type": "Organization",
   "@id": `${BASE_URL}/#organization`,
   name: "灯台の珈琲焙煎所mumu",
-  alternateName: "mumu",
+  // 同名の別店舗と区別できるよう、読み・英字表記も列挙する（指名検索対策）
+  alternateName: ["mumu", "ムーム", "mumu coffee", "灯台の珈琲焙煎所 mumu"],
   url: BASE_URL,
   logo: `${BASE_URL}/opengraph-image`,
   description:
-    "感性が、ふと、戻ってくる場所。スペシャルティコーヒーの焙煎と、珈琲のある時間をつくるツールをお届けします。",
+    "自家焙煎のスペシャルティコーヒー豆を100gから販売する珈琲焙煎所。淹れ方や産地の読みものも発信しています。",
   founder: {
     "@type": "Person",
     "@id": `${BASE_URL}/about#mako`,
@@ -143,6 +144,9 @@ const jsonLd = {
     "https://www.instagram.com/mumu_coffee_roaster/",
     "https://note.com/mumu_coffee",
     "https://mumucoffee.theshop.jp/",
+    // 公式アカウントを網羅して「同じ店」だとGoogleに伝える（links.ts と同じURL）
+    "https://www.youtube.com/@mu-mu-coffee",
+    "https://open.spotify.com/show/3wZxHzof3AVoqdJ0PYm0G5",
   ],
 };
 

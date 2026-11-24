@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
         destination: "/column/coffee-bean-types",
         permanent: true,
       },
+      // 日誌（/journal）は記事0件のまま廃止（2026-11-24）。読みものへ恒久転送する
+      { source: "/journal", destination: "/column", permanent: true },
+      { source: "/journal/:id", destination: "/column", permanent: true },
     ];
   },
 };

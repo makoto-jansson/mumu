@@ -165,7 +165,7 @@ export default function AboutContent() {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-accent-lime group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="/journal"
+              href="/column"
               className="inline-flex items-center gap-2 text-ink-secondary text-sm font-light tracking-wider group hover:text-ink-primary transition-colors duration-300 relative w-fit"
             >
               読み物を見る
