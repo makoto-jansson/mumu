@@ -28,6 +28,7 @@ export type Bean = {
     height: number;
   };
   shopUrl: string;
+  updatedAt?: string; // microCMSが自動付与（サイトマップのlastModifiedに使用）
 };
 
 // ブログ記事（灯台守の日誌 / 読み物）の型定義（microCMS「blogs」エンドポイント）

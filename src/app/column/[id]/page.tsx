@@ -9,7 +9,8 @@ import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
 import RoasterProfile from "@/components/about/RoasterProfile";
 import RelatedColumns from "@/components/column/RelatedColumns";
 import ColumnBeans from "@/components/column/ColumnBeans";
-import { getColumn, getBeans, formatPostDate, type Bean } from "@/lib/microcms";
+import { getColumn, formatPostDate, type Bean } from "@/lib/microcms";
+import { getBeanViews } from "@/lib/beans";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
@@ -156,9 +157,10 @@ export default async function ColumnPostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [post, beans] = await Promise.all([getColumn(id), getBeans()]);
+  const [post, beans] = await Promise.all([getColumn(id), getBeanViews()]);
   if (!post) notFound();
-  const body = addShopUtm(linkBeanCards(post.content, beans), id);
+  // 販売中の豆だけに差し替える（BASEで非公開の豆へは飛ばさず、ショップトップのまま残す）
+  const body = addShopUtm(linkBeanCards(post.content, beans.filter((b) => b.onSale)), id);
   const showBeanBlock = !hasBeanCard(post.content);
 
   const url = `${BASE_URL}/column/${id}`;
@@ -252,7 +254,7 @@ export default async function ColumnPostPage({
           />
 
           {/* 本文に豆カードが無い記事だけ、末尾で mumu の豆を紹介する */}
-          {showBeanBlock && <ColumnBeans beans={beans} slug={id} />}
+          {showBeanBlock && <ColumnBeans beans={beans.filter((b) => b.onSale)} slug={id} />}
 
           {/* 記事末尾に著者プロフィール（about下部と同一・E-E-A-T強化） */}
           <RoasterProfile />

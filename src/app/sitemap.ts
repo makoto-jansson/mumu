@@ -5,6 +5,7 @@
 
 import type { MetadataRoute } from "next";
 import { getAllColumns } from "@/lib/microcms";
+import { getBeanViews } from "@/lib/beans";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
@@ -20,11 +21,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE_URL, lastModified: now, changeFrequency: "monthly", priority: 1 },
     { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/beans`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/guide`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/column`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
   ];
 
   // CMSの記事URL（取得失敗時は空配列にフォールバック）
-  const columns = await getAllColumns();
+  const [columns, beans] = await Promise.all([getAllColumns(), getBeanViews()]);
+
+  // 豆の詳細ページ（/beans/[slug]）
+  const beanPages: MetadataRoute.Sitemap = beans.map((b) => ({
+    url: `${BASE_URL}/beans/${b.slug}`,
+    lastModified: new Date(b.updatedAt ?? now),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
 
   // lastModified は更新日時を優先する。公開日のままだと、記事をリライトしても
   // Googleに「更新された」と伝わらず再クロールされない（2026-10-22に判明）。
@@ -35,5 +45,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...columnPages];
+  return [...staticPages, ...beanPages, ...columnPages];
 }

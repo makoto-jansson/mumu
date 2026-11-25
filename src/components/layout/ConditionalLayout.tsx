@@ -16,18 +16,17 @@ export default function ConditionalLayout({
   const pathname = usePathname();
   // /app で始まるパスはアプリゾーン → Header/Footer非表示
   const isApp = pathname.startsWith("/app");
-  // v2デザイン（帯レイアウト）を採用するページ群。TOPと下層(about/beans/journal)は
+  // v2デザイン（帯レイアウト）を採用するページ群。TOPと下層(about/beans/guide/column)は
   // 独自の帯(obi)・フッター・背景テクスチャを SiteChromeV2 / HomeV2 が持つため、
   // 旧 Header/Footer/GrainOverlay は掛けない（二重掛け防止）。
   const isV2 =
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/beans" ||
-    pathname === "/journal" ||
+    pathname === "/guide" ||
     pathname === "/column" ||
     pathname.startsWith("/about/") ||
     pathname.startsWith("/beans/") ||
-    pathname.startsWith("/journal/") ||
     pathname.startsWith("/column/");
 
   return (
