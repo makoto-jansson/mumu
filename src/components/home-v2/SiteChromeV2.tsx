@@ -18,8 +18,8 @@ export default function SiteChromeV2({
   return (
     <div className={styles.root} data-home-root>
       <PaperBackdrop />
-      {/* 下層ページなので帯リンクは TOP のセクションへ戻る（/#about 等） */}
-      <Obi hrefPrefix="/" />
+      {/* 左の帯（グローバルナビ）。現在地は URL で判定 */}
+      <Obi />
       {/* 右上の豆（自転）— TOPと共通 */}
       <FloatingBean />
       <main id="top" className={styles.main}>

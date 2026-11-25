@@ -36,7 +36,9 @@ function roastKind(roast: string): BeanView["roastKind"] {
   return "other";
 }
 
-// 全豆を表示用に整形して返す。並び順は 浅煎り → 深煎り（味の地図の左から右）
+// 販売中の豆を表示用に整形して返す。並び順は 浅煎り → 深煎り（味の地図の左から右）。
+// BASEで404（非公開・販売終了）の豆は一覧・詳細・サイトマップから外す
+// （2026-11-25 ユーザー判断：トバコは外してよい）。BASEで再公開すれば自動で戻る（最大1時間）。
 export async function getBeanViews(): Promise<BeanView[]> {
   const beans = await getBeans();
   const views = await Promise.all(
@@ -53,7 +55,7 @@ export async function getBeanViews(): Promise<BeanView[]> {
     })
   );
   const order = { light: 0, other: 1, dark: 2 };
-  return views.sort((a, b) => order[a.roastKind] - order[b.roastKind]);
+  return views.filter((v) => v.onSale).sort((a, b) => order[a.roastKind] - order[b.roastKind]);
 }
 
 export async function getBeanBySlug(slug: string): Promise<BeanView | null> {
