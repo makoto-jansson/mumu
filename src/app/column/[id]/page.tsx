@@ -124,6 +124,31 @@ function linkBeanCards(html: string, beans: Bean[]): string {
   );
 }
 
+// 冒頭の要点ブロック（「先に要点を置いておきます。」＋ハイフン箇条書き）を、表示用に本物の箇条書きにする。
+// 原稿は引用ブロック内に導入1行と「- 」の行を続けて書く形で、markdown変換では全体が1つの<p>になる。
+// そのままだと改行が詰められ「… - 粉12g… - 粉24g…」と1段落につながって表示される（2026-11-25に20記事で判明）。
+// meta description（toPlain）は変換前の本文から作るので、ここでの変換は検索結果の文面に影響しない。
+// 「導入の行 → 箇条書きの行」の順に並んでいるブロックだけを対象にし、それ以外の形は触らない。
+function formatSummaryLists(html: string): string {
+  return html.replace(
+    /<blockquote>\s*<p>([\s\S]*?)<\/p>\s*<\/blockquote>/gi,
+    (all, inner: string) => {
+      const lines = inner.split("\n").map((l) => l.trim()).filter(Boolean);
+      const isItem = (l: string) => /^[-・*]\s+/.test(l);
+      const first = lines.findIndex(isItem);
+      if (first < 0 || !lines.slice(first).every(isItem)) return all;
+      const intro = lines.slice(0, first);
+      const items = lines.slice(first).map((l) => l.replace(/^[-・*]\s+/, ""));
+      return (
+        "<blockquote>" +
+        (intro.length ? `<p>${intro.join("<br>")}</p>` : "") +
+        `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>` +
+        "</blockquote>"
+      );
+    },
+  );
+}
+
 // 本文に豆カードがあるか（ない記事だけ末尾に豆ブロックを出し、二重に売り込まない）
 const hasBeanCard = (html: string) =>
   /<a\b[^>]*href="https:\/\/mumucoffee\.theshop\.jp[^"]*"[^>]*\bstyle="|<a\b[^>]*\bstyle="[^"]*"[^>]*href="https:\/\/mumucoffee\.theshop\.jp/i.test(html);
@@ -160,7 +185,10 @@ export default async function ColumnPostPage({
   const [post, beans] = await Promise.all([getColumn(id), getBeanViews()]);
   if (!post) notFound();
   // 販売中の豆だけに差し替える（BASEで非公開の豆へは飛ばさず、ショップトップのまま残す）
-  const body = addShopUtm(linkBeanCards(post.content, beans.filter((b) => b.onSale)), id);
+  const body = addShopUtm(
+    linkBeanCards(formatSummaryLists(post.content), beans.filter((b) => b.onSale)),
+    id,
+  );
   const showBeanBlock = !hasBeanCard(post.content);
 
   const url = `${BASE_URL}/column/${id}`;
