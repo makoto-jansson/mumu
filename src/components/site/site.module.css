@@ -96,21 +96,20 @@
   flex-direction: column;
   gap: 4px;
 }
-/* トップページだけ: 文字ロゴの左に灯台の丸窓（文字ロゴ2行ぶんより一回り大きく） */
+/* トップページだけ: 文字ロゴの左に灯台の線画（丸い枠なし・元の黒い線画のまま）。
+   高さは文字ロゴ2行ぶんより少し大きく */
 .logoWithMark {
-  gap: 10px;
+  gap: 8px;
 }
-.logo .logoMark {
+.logoMark {
+  position: relative;
   flex: none;
-  width: 44px;
-  border-width: 1.5px;
+  display: block;
+  height: 40px;
+  aspect-ratio: 900 / 1255;
 }
-/* 小さな丸窓では線画が小さくなりすぎるので、丸の中で大きめに収める（色は変えない） */
-.logo .logoMark img {
-  left: 19%;
-  top: 9%;
-  width: 62%;
-  height: 82%;
+.logoMark img {
+  object-fit: contain;
 }
 .logoTagline,
 .logoScript {
@@ -132,8 +131,10 @@
 .logoScript {
   width: 116px;
   height: 19px;
-  -webkit-mask-image: url("/v2/mumu-script.png");
-  mask-image: url("/v2/mumu-script.png");
+  /* 筆記体は線が太く、上の「灯台の珈琲焙煎所」と太さがそろわなかったので、線を細くした版を使う
+     （2026-11-28。太い部分ほど削り、細いつなぎ目は残す加工。元の mumu-script.png は共有画像で使用） */
+  -webkit-mask-image: url("/v2/mumu-script-thin.png");
+  mask-image: url("/v2/mumu-script-thin.png");
 }
 @media (min-width: 900px) {
   .logoText {
@@ -142,8 +143,11 @@
   .logoWithMark {
     gap: 14px;
   }
-  .logo .logoMark {
-    width: 58px;
+  .logoWithMark {
+    gap: 10px;
+  }
+  .logoMark {
+    height: 52px;
   }
   .logoTagline {
     width: 120px;
