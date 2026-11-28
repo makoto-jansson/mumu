@@ -60,6 +60,7 @@
   top: 10px;
   right: -12px;
   width: 92px;
+  border-width: 3px;
 }
 .catch {
   grid-area: catch;
@@ -115,6 +116,7 @@
     top: 20px;
     right: -32px;
     width: 128px;
+    border-width: 4px;
   }
   .catch {
     font-size: clamp(40px, 4.1vw, 52px);
