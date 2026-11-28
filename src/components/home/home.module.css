@@ -1,0 +1,300 @@
+/* トップページ（v3・青×白） — Figma「PC｜トップ」5:37 /「スマホ｜トップ（390）」6:465
+   900px で PC とスマホを切り替える。数値は Figma のまま（PCの値は 900px 以上）。 */
+
+/* ---------- ファーストビュー ---------- */
+/* スマホ: Coffee → 絵 → キャッチ → 説明 → ボタン の1列
+   PC: 左に Coffee・キャッチ・説明・ボタン、右に絵。下端をそろえる */
+.hero {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "pic"
+    "catch"
+    "lead"
+    "btns";
+  row-gap: 22px;
+  padding-block: 20px 64px;
+}
+.heroTitle {
+  grid-area: title;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+}
+/* 縦書きの欧文ラベル（下から上へ読む） */
+.vLabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 14px;
+}
+.coffee {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: clamp(72px, 26.6vw, 104px);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+}
+.pic {
+  grid-area: pic;
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  justify-self: center;
+  container-type: inline-size;
+}
+.picFrame {
+  position: relative;
+  display: block;
+  aspect-ratio: 350 / 385;
+  overflow: hidden;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 50cqw 50cqw 20px 20px;
+}
+.picFrame img {
+  object-fit: cover;
+}
+.catch {
+  grid-area: catch;
+  margin: 0;
+  font-family: var(--font-old-mincho), "Zen Old Mincho", serif;
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1.45;
+}
+.lead {
+  grid-area: lead;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.btns {
+  grid-area: btns;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    grid-template-rows: 1fr auto auto auto;
+    grid-template-areas:
+      "title pic"
+      "catch pic"
+      "lead pic"
+      "btns pic";
+    column-gap: 48px;
+    row-gap: 28px;
+    padding-block: 32px 96px;
+  }
+  .heroTitle {
+    align-self: end;
+    gap: 14px;
+  }
+  .vLabel {
+    font-size: 20px;
+  }
+  .coffee {
+    font-size: clamp(112px, 13.2vw, 168px);
+  }
+  .pic {
+    max-width: none;
+  }
+  .picFrame {
+    aspect-ratio: 4 / 5;
+    border-radius: 50cqw 50cqw 24px 24px;
+  }
+  .catch {
+    font-size: clamp(40px, 4.1vw, 52px);
+    line-height: 1.4;
+  }
+  .lead {
+    max-width: 520px;
+    font-size: 15px;
+  }
+  .btns {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* ---------- 共通：セクションの余白 ---------- */
+.section {
+  padding-block: 64px;
+}
+.pale {
+  background: var(--mumu-pale);
+}
+.blue {
+  background: var(--mumu-blue);
+  color: var(--mumu-white);
+}
+.spLink {
+  display: block;
+  text-align: right;
+}
+@media (min-width: 900px) {
+  .section {
+    padding-block: 96px;
+  }
+  .spLink {
+    display: none;
+  }
+}
+
+/* ---------- 珈琲豆 ---------- */
+.beans {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.beanList {
+  display: grid;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.empty {
+  margin: 0;
+  font-size: 14px;
+}
+@media (min-width: 900px) {
+  .beans {
+    gap: 40px;
+  }
+  .beanList {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* PCだけで効かせる改行（mumuについての本文） */
+.brPc {
+  display: none;
+}
+@media (min-width: 900px) {
+  .brPc {
+    display: inline;
+  }
+}
+
+/* ---------- 読みもの ---------- */
+.reading {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+/* スマホは右端まで横にすべらせる（右の余白を取らない） */
+.reading.readingSection {
+  padding-right: 0;
+}
+.readingSection .titleRow {
+  padding-right: 20px;
+}
+.readingList {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0 20px 4px 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.readingList::-webkit-scrollbar {
+  display: none;
+}
+.readingList li {
+  flex: none;
+  width: 220px;
+  scroll-snap-align: start;
+}
+.readingSection .spLink {
+  padding-right: 20px;
+}
+@media (min-width: 900px) {
+  .reading {
+    gap: 40px;
+  }
+  .reading.readingSection {
+    padding-right: var(--gutter);
+  }
+  .readingSection .titleRow {
+    padding-right: 0;
+  }
+  .readingList {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    padding: 0;
+    overflow: visible;
+  }
+  .readingList li {
+    width: auto;
+  }
+}
+
+/* ---------- mumuについて ---------- */
+.about {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.aboutWindow {
+  width: 200px;
+}
+.aboutText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+}
+.aboutLabel {
+  font-size: 17px;
+}
+.aboutTitle {
+  margin: 0;
+  font-family: var(--font-old-mincho), "Zen Old Mincho", serif;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1.45;
+}
+.aboutBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.about .aboutBtn {
+  display: flex;
+  width: 100%;
+}
+@media (min-width: 900px) {
+  .about {
+    flex-direction: row;
+    align-items: center;
+    gap: 64px;
+  }
+  .aboutWindow {
+    flex: none;
+    width: 300px;
+  }
+  .aboutLabel {
+    font-size: 20px;
+  }
+  .aboutTitle {
+    font-size: 34px;
+    line-height: 1.5;
+  }
+  .aboutBody {
+    font-size: 15px;
+  }
+  .about .aboutBtn {
+    display: inline-flex;
+    width: auto;
+    padding: 9px 20px;
+    font-size: 14px;
+  }
+}

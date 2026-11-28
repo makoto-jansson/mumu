@@ -1,0 +1,436 @@
+/* mumuについて /about（v3・青×白）
+   正本は Figma「PC｜mumuについて」66:371 /「スマホ｜mumuについて」67:155。
+   900px で PC とスマホを切り替える（PCの値は 900px 以上）。 */
+
+/* ---------- 頭 ---------- */
+/* スマホ: About mumu → 絵 → キャッチ → 店名 / PC: 左に文字、右に絵（下端をそろえる） */
+.hero {
+  display: grid;
+  grid-template-areas:
+    "en"
+    "pic"
+    "title"
+    "name";
+  row-gap: 20px;
+  padding-block: 20px 56px;
+}
+.heroEn {
+  grid-area: en;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+}
+.heroLabel {
+  font-size: 14px;
+}
+.heroBig {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: clamp(72px, 23.6vw, 92px);
+  line-height: 0.9;
+  letter-spacing: 0;
+}
+.heroPic {
+  grid-area: pic;
+  width: 100%;
+  max-width: 460px;
+  container-type: inline-size;
+}
+.heroPicFrame {
+  position: relative;
+  display: block;
+  aspect-ratio: 350 / 400;
+  overflow: hidden;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 50cqw 50cqw 24px 24px;
+}
+.heroPicFrame img {
+  object-fit: cover;
+}
+.heroTitle {
+  grid-area: title;
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 28px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.heroName {
+  grid-area: name;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-rows: 1fr auto auto;
+    grid-template-areas:
+      "en pic"
+      "title pic"
+      "name pic";
+    column-gap: 48px;
+    row-gap: 28px;
+    padding-block: 32px 96px;
+  }
+  .heroEn {
+    align-self: end;
+    gap: 14px;
+  }
+  .heroLabel {
+    font-size: 22px;
+  }
+  .heroBig {
+    font-size: 168px;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
+  }
+  .heroPic {
+    max-width: none;
+    margin-top: 32px;
+  }
+  .heroPicFrame {
+    aspect-ratio: 400 / 500;
+  }
+  .heroTitle {
+    font-size: 44px;
+    letter-spacing: 0.02em;
+  }
+  .heroName {
+    font-size: 15px;
+  }
+}
+
+/* ---------- 見出し（左）＋本文（右）の段 ---------- */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.rowTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.rowEn {
+  margin: 0;
+  font-size: 14px;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 15px;
+  line-height: 1.95;
+  letter-spacing: 0;
+}
+.text p {
+  margin: 0;
+}
+@media (min-width: 900px) {
+  .row {
+    flex-direction: row;
+    gap: 56px;
+  }
+  .rowTitle {
+    flex: none;
+    width: 300px;
+    gap: 8px;
+    font-size: 26px;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+  }
+  .rowEn {
+    font-size: 18px;
+  }
+  .text {
+    gap: 20px;
+    font-size: 16px;
+    line-height: 2;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* mumuのこと（淡い青の帯） */
+.concept {
+  padding-block: 56px;
+  background: var(--mumu-pale);
+}
+@media (min-width: 900px) {
+  .concept {
+    padding-block: 88px;
+  }
+  .concept .text {
+    max-width: 820px;
+  }
+}
+
+/* ストーリー */
+.story {
+  padding-block: 64px;
+}
+.storyHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.storyWindow {
+  width: 96px;
+  flex: none;
+}
+.storyText {
+  gap: 22px;
+}
+.sign {
+  font-weight: 700;
+}
+.sign span {
+  font-size: 1.05em;
+}
+@media (min-width: 900px) {
+  .story {
+    padding-block: 112px;
+  }
+  /* PCは見出しの下に丸窓 */
+  .storyHead {
+    flex: none;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 24px;
+    width: 300px;
+  }
+  .storyWindow {
+    width: 240px;
+  }
+  .storyText {
+    max-width: 680px;
+    gap: 30px;
+  }
+}
+
+/* ---------- 焙煎しているひと（青い線の箱） ---------- */
+.roasterSection {
+  padding-bottom: 64px;
+}
+.roaster {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 22px;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 28px;
+}
+.roasterSide {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.photo {
+  position: relative;
+  display: block;
+  width: 180px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 999px;
+}
+.photo img {
+  object-fit: cover;
+}
+.roasterText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: 0;
+}
+.roasterText p {
+  margin: 0;
+}
+.roasterText p a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.roasterName {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1.3;
+}
+.roasterRole {
+  font-family: var(--f-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.sub {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 8px 0 -4px;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.sub .label,
+.sub span {
+  font-size: 13px;
+}
+.sub a {
+  text-decoration: none;
+}
+.sub a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.rule {
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin-block: 6px;
+  background: var(--mumu-blue);
+}
+.roasterSign {
+  font-size: 15px;
+}
+.sns {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.snsPc {
+  display: none;
+}
+.snsSp {
+  width: 100%;
+  padding-top: 6px;
+}
+.snsSp li {
+  flex: 1;
+}
+.snsSp a {
+  width: 100%;
+}
+@media (min-width: 900px) {
+  .roasterSection {
+    padding-bottom: 112px;
+  }
+  .roaster {
+    flex-direction: row;
+    gap: 64px;
+    padding: 64px 56px;
+    border-radius: 32px;
+  }
+  .roasterSide {
+    flex: none;
+    width: 280px;
+  }
+  .photo {
+    width: 280px;
+  }
+  .snsPc {
+    display: flex;
+  }
+  .snsSp {
+    display: none;
+  }
+  .roasterText {
+    flex: 1;
+    gap: 18px;
+    padding-top: 8px;
+    font-size: 15px;
+    line-height: 1.95;
+    letter-spacing: 0.02em;
+  }
+  .roasterName {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 40px;
+    line-height: 1.45;
+  }
+  .roasterRole {
+    font-size: 14px;
+  }
+  .sub {
+    font-size: 18px;
+  }
+  .sub span {
+    font-size: 15px;
+  }
+  .rule {
+    width: 48px;
+  }
+}
+
+/* ---------- 次へ（淡い青の帯） ---------- */
+.next {
+  padding-block: 56px;
+  background: var(--mumu-pale);
+}
+.nextInner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.nextLabel {
+  margin: 0;
+  font-size: 14px;
+}
+.nextTitle {
+  margin: 10px 0 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.nextBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 900px) {
+  .next {
+    padding-block: 72px;
+  }
+  .nextInner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .nextLabel {
+    font-size: 18px;
+  }
+  .nextTitle {
+    margin-top: 6px;
+    font-size: 26px;
+    letter-spacing: 0.02em;
+  }
+  .nextBtns {
+    flex-direction: row;
+    gap: 24px;
+  }
+}

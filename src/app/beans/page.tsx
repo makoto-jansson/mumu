@@ -1,14 +1,18 @@
-// 珈琲豆の一覧 /beans（リニューアル段階Bで作り直し）
+// 珈琲豆の一覧 /beans（v3・青×白 2026-11 リニューアル）
 //
-// 豆は少数なので、絞り込みタブではなく「味のものさし」1本で全体を見せ、
-// 各カードから詳細（/beans/[slug]）へ、または直接BASEの個別商品ページへ進めるようにする。
-// カードとものさしは TOP と共通（components/beans/BeanTile・TasteRuler）。
+// 正本は Figma「PC｜豆の一覧」51:295 /「スマホ｜豆の一覧」58:101。
+// 構成: パンくず → ページの頭 → 味で選ぶ（Light←→Darkの線） → 豆の行 → はじめての方へ
+// 各行から BASE の個別商品ページ（購入）と豆の詳細（/beans/[slug]）の両方へ進める。
 
 import type { Metadata } from "next";
-import Link from "next/link";
-import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
-import BeanTile, { beanLabel } from "@/components/beans/BeanTile";
-import TasteRuler from "@/components/beans/TasteRuler";
+import SiteChrome from "@/components/site/SiteChrome";
+import Breadcrumbs from "@/components/site/Breadcrumbs";
+import PageHead from "@/components/site/PageHead";
+import GuideBlock from "@/components/site/GuideBlock";
+import site from "@/components/site/site.module.css";
+import TasteMap, { beanName } from "@/components/beanPage/TasteMap";
+import BeanRow from "@/components/beanPage/BeanRow";
+import s from "@/components/beanPage/beanPage.module.css";
 import { getBeanViews } from "@/lib/beans";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
@@ -31,56 +35,62 @@ export default async function BeansPage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "灯台の珈琲焙煎所mumuの珈琲豆",
-    itemListElement: beans.map((b, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: `${BASE_URL}/beans/${b.slug}`,
-      name: beanLabel(b),
-    })),
+    "@graph": [
+      {
+        "@type": "ItemList",
+        name: "灯台の珈琲焙煎所mumuの珈琲豆",
+        itemListElement: beans.map((b, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${BASE_URL}/beans/${b.slug}`,
+          name: beanName(b),
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "ホーム", item: BASE_URL },
+          { "@type": "ListItem", position: 2, name: "珈琲豆", item: `${BASE_URL}/beans` },
+        ],
+      },
+    ],
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SiteChromeV2>
-        <div className="min-h-screen pt-32 pb-24 px-6">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="font-mincho text-ink-primary text-2xl md:text-3xl font-medium leading-relaxed tracking-wide mb-4">
-              mumuの珈琲豆
-            </h1>
-            <p className="text-ink-secondary text-[15px] leading-loose mb-12">
-              自家焙煎のスペシャルティコーヒーを、100gから。
-              <br className="hidden sm:block" />
-              購入はBASE（オンラインショップ）で、送料は全国一律¥350です。
-            </p>
+      <SiteChrome>
+        <Breadcrumbs items={[{ href: "/", label: "ホーム" }, { label: "珈琲豆" }]} />
+        <PageHead label="Beans" en="The Beans" title="mumuの珈琲豆">
+          自家焙煎のスペシャルティコーヒーを、100gから。
+          <br className={site.brPc} />
+          購入はBASE（オンラインショップ）で、送料は全国一律¥350です。
+        </PageHead>
 
-            {beans.length === 0 ? (
-              <p className="text-ink-secondary text-sm">現在準備中です。しばらくお待ちください。</p>
-            ) : (
-              <>
-                <div className="mb-14">
-                  <TasteRuler beans={beans} />
-                </div>
-
-                <h2 className="sr-only">豆の一覧</h2>
-                <ul className="space-y-5 mb-14">
-                  {beans.map((b) => (
-                    <BeanTile key={b.slug} bean={b} medium="beans" campaign="index" />
+        {beans.length === 0 ? (
+          <p className={`${site.wrap} ${s.note}`}>ただいま準備中です。しばらくお待ちください。</p>
+        ) : (
+          <>
+            <TasteMap beans={beans} />
+            <section className={s.list} aria-label="豆の一覧">
+              <div className={site.wrap}>
+                <ul className={s.rows}>
+                  {beans.map((b, i) => (
+                    <li key={b.slug}>
+                      <BeanRow bean={b} index={i} />
+                    </li>
                   ))}
                 </ul>
-              </>
-            )}
+                <p className={s.note}>
+                  豆のままでお届けします。粉をご希望の方は、ご注文時の備考欄に「粉希望」とご記入ください。
+                </p>
+              </div>
+            </section>
+          </>
+        )}
 
-            <p className="text-[13px] text-ink-secondary leading-relaxed">
-              送料・お届け日数・豆と粉の選び方は
-              <Link href="/guide" className="text-ink-primary underline underline-offset-4 hover:opacity-75 mx-1">はじめての方へ</Link>
-              にまとめています。
-            </p>
-          </div>
-        </div>
-      </SiteChromeV2>
+        <GuideBlock tone="pale" button={{ href: "/guide", label: "くわしく見る", arrow: true }} />
+      </SiteChrome>
     </>
   );
 }

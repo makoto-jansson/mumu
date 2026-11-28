@@ -1,9 +1,10 @@
-// トップページ（v3・リニューアル段階C）
-// ファーストビュー → 珈琲豆 → 安心材料 → よく読まれている読みもの → mumuについて → フッター
-// 表示は HomeV2（サーバーコンポーネント）と homeV2.module.css。データ取得はここで行う。
+// トップページ（v3・青×白 × 太いセリフ 2026-11 リニューアル）
+// ファーストビュー → 珈琲豆 → はじめての方へ → よく読まれている読みもの → mumuについて → フッター
+// 表示は components/home/Home.tsx と home.module.css。データ取得はここで行う。
 
 import type { Metadata } from "next";
-import HomeV2 from "@/components/home-v2/HomeV2";
+import Home from "@/components/home/Home";
+import { categoryOf, CATEGORY_LABEL } from "@/lib/columnCategory";
 import { getAllColumns } from "@/lib/microcms";
 import { getBeanViews } from "@/lib/beans";
 
@@ -41,7 +42,7 @@ const POPULAR_COLUMNS = [
   "kalita-dripper-guide",
 ];
 
-export default async function Home() {
+export default async function HomePage() {
   const [beans, columns] = await Promise.all([getBeanViews(), getAllColumns()]);
   const popular = POPULAR_COLUMNS.map((id) => columns.find((c) => c.id === id)).filter(
     (c): c is NonNullable<typeof c> => Boolean(c)
@@ -49,8 +50,11 @@ export default async function Home() {
   const latest = [...columns]
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1))
     .filter((c) => !POPULAR_COLUMNS.includes(c.id));
-  const columnPosts = [...popular, ...latest]
-    .slice(0, 4)
-    .map((p) => ({ id: p.id, title: p.title }));
-  return <HomeV2 beans={beans} columnPosts={columnPosts} />;
+  const readings = [...popular, ...latest].slice(0, 3).map((p) => ({
+    id: p.id,
+    title: p.title,
+    category: CATEGORY_LABEL[categoryOf(p.id)],
+    image: p.eyecatch?.url,
+  }));
+  return <Home beans={beans} readings={readings} />;
 }

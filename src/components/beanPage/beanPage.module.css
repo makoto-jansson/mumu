@@ -1,0 +1,920 @@
+/* 豆の一覧 /beans と 豆の詳細 /beans/[slug]（v3・青×白）
+   正本は Figma「PC｜豆の一覧」51:295・「PC｜豆の詳細」6:117・スマホ 58:101・61:137。
+   900px で PC とスマホを切り替える（PCの値は 900px 以上）。 */
+
+.pcOnly {
+  display: none;
+}
+@media (min-width: 900px) {
+  .pcOnly {
+    display: inline;
+  }
+}
+
+/* ============ 豆の一覧 ============ */
+
+/* ---------- 味で選ぶ ---------- */
+.taste {
+  padding-block: 48px;
+  background: var(--mumu-pale);
+}
+.tasteTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.tasteLabel {
+  font-size: 14px;
+}
+.tasteLead {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+.ruler {
+  margin-top: 16px;
+}
+.rulerEnds,
+.rulerNotes {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.rulerEnds {
+  font-size: 14px;
+}
+.rulerLine {
+  position: relative;
+  height: 2px;
+  margin-top: 12px;
+  background: var(--mumu-blue);
+}
+.rulerDot {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--mumu-blue);
+  transform: translate(-50%, -50%);
+}
+.rulerNotes {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+/* スマホ: 豆の名前は左右に振り分けて並べる */
+.rulerPills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.rulerPills li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.rulerPills li:last-child:not(:first-child) {
+  align-items: flex-end;
+}
+.pill {
+  display: inline-flex;
+  padding: 7px 12px;
+  letter-spacing: 0;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 999px;
+  background: var(--mumu-white);
+  font-family: var(--f-heading);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+.pill:hover {
+  background: var(--mumu-blue);
+  color: var(--mumu-white);
+}
+@media (min-width: 900px) {
+  .taste {
+    padding-block: 64px;
+  }
+  .tasteTitle {
+    gap: 14px;
+    font-size: 26px;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+  }
+  .tasteLabel {
+    font-size: 18px;
+  }
+  .tasteLead {
+    margin-top: 28px;
+    font-size: 15px;
+    line-height: 1.85;
+    letter-spacing: 0.02em;
+  }
+  .ruler {
+    margin-top: 28px;
+  }
+  .rulerEnds {
+    font-size: 18px;
+  }
+  .rulerLine {
+    margin-top: 18px;
+  }
+  .rulerDot {
+    width: 18px;
+    height: 18px;
+  }
+  .rulerNotes {
+    font-size: 13px;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+  /* PC: 豆の名前を線の上の点の真下に置く */
+  .rulerPills {
+    position: relative;
+    display: block;
+    height: calc(var(--rows) * 47px + (var(--rows) - 1) * 8px);
+    margin-top: 8px;
+  }
+  .rulerPills li,
+  .rulerPills li:last-child:not(:first-child) {
+    position: absolute;
+    top: 0;
+    left: var(--pos);
+    align-items: center;
+    transform: translateX(-50%);
+  }
+  .pill {
+    padding: 8px 18px;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ---------- 豆の行 ---------- */
+.list {
+  padding-block: 48px 56px;
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid var(--mumu-blue);
+}
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-block: 32px 36px;
+  border-top: 2px solid var(--mumu-blue);
+}
+/* アーチ窓（上は幅の半分の半円。半径は窓の幅で計算する） */
+.rowArch {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  container-type: inline-size;
+}
+.rowArchBox {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  aspect-ratio: 350 / 330;
+  padding-bottom: 8cqw;
+  background: var(--mumu-pale);
+  border-radius: 50cqw 50cqw 24px 24px;
+}
+.rowPkg {
+  position: relative;
+  display: block;
+  width: 50.3%;
+  aspect-ratio: 176 / 248;
+}
+.rowPkg img {
+  object-fit: cover;
+}
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+.rowLabel {
+  margin-top: 4px;
+  font-size: 14px;
+}
+.rowNameBox {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rowName {
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.rowName a {
+  text-decoration: none;
+}
+.rowName a:hover {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+.rowEn {
+  font-size: 13px;
+}
+.rowFlavor {
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+  margin: 0;
+  letter-spacing: 0;
+}
+.priceNum {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 34px;
+  line-height: 1;
+}
+.priceUnit {
+  font-size: 14px;
+}
+.priceCup {
+  font-size: 12px;
+}
+.rowBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding-top: 4px;
+}
+.rowBtns .off {
+  margin: 0;
+  font-size: 14px;
+}
+.note {
+  margin: 20px 0 0;
+  font-size: 12px;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+@media (min-width: 900px) {
+  .list {
+    padding-block: 80px 96px;
+  }
+  .row {
+    flex-direction: row;
+    align-items: center;
+    gap: 64px;
+    padding-block: 48px;
+  }
+  .rowArch {
+    flex: none;
+    width: 320px;
+  }
+  .rowArchBox {
+    aspect-ratio: 320 / 380;
+    padding-bottom: 32px;
+  }
+  .rowPkg {
+    width: 62.5%;
+  }
+  .rowInfo {
+    flex: 1;
+    gap: 16px;
+  }
+  .rowLabel {
+    margin-top: 0;
+    font-size: 18px;
+  }
+  .rowNameBox {
+    gap: 4px;
+  }
+  .rowName {
+    font-size: 40px;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+  }
+  .rowEn {
+    font-size: 15px;
+  }
+  .rowFlavor {
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+  .price {
+    gap: 0 10px;
+  }
+  .priceUnit {
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  .priceCup {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .rowBtns {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    width: auto;
+    padding-top: 8px;
+  }
+  .note {
+    margin-top: 24px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ============ 豆の詳細 ============ */
+
+/* ---------- ファーストビュー（パッケージ＋名前・値段・購入） ---------- */
+.product {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-block: 20px 48px;
+}
+.pkg {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  container-type: inline-size;
+}
+.pkgArch {
+  display: flex;
+  align-items: flex-start; /* 写真を窓の高さに引き伸ばさない */
+  justify-content: center;
+  aspect-ratio: 350 / 400;
+  padding-top: 21.7cqw;
+  background: var(--mumu-pale);
+  border-radius: 50cqw 50cqw 24px 24px;
+}
+.pkgImg {
+  position: relative;
+  display: block;
+  width: 60%;
+  aspect-ratio: 290 / 408;
+  filter: drop-shadow(0 10px 18px rgb(4 4 254 / 0.12));
+}
+.pkgImg img {
+  object-fit: cover;
+}
+/* 焙煎度の丸い印（Light 浅煎り） */
+.roastStamp {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 88px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--mumu-blue);
+  color: var(--mumu-white);
+}
+.roastStampEn {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.roastStampJa {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.buy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding-top: 8px;
+}
+/* スマホは番号を名前の上に置く（長い欧文名が横幅いっぱいを使えるように） */
+.nameBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.no {
+  flex: none;
+  font-size: 14px;
+}
+.title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.titleEn {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: clamp(40px, 14.4vw, 56px);
+  line-height: 0.92;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+}
+.titleJa {
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.desc {
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+.howTo {
+  margin: -4px 0 0;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.buyBox {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-block: 18px 6px;
+  border-top: 2px solid var(--mumu-blue);
+}
+.buyPrice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+  margin: 0;
+  letter-spacing: 0;
+}
+.buyPriceNum {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 48px;
+  line-height: 1;
+}
+.buyPriceUnit {
+  font-size: 13px;
+}
+.buyPriceCup {
+  font-size: 13px;
+  font-weight: 700;
+}
+.buyBtn {
+  display: flex;
+  width: 100%;
+}
+.facts {
+  margin: 0;
+}
+.facts div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 10px;
+  border-bottom: 2px solid var(--mumu-blue);
+}
+.facts dt {
+  font-size: 14px;
+}
+.facts dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: right;
+  letter-spacing: 0;
+}
+
+/* 焙煎度のものさし */
+.roast {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.roastTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.85;
+}
+.roastLine {
+  position: relative;
+  height: 28px;
+}
+.roastLine::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 13px;
+  height: 2px;
+  background: var(--mumu-blue);
+}
+/* 点の中心は両端から7pxの内側（Figmaのまま） */
+.roastDot {
+  position: absolute;
+  top: 50%;
+  left: calc(7px + (100% - 14px) * var(--i) / 4);
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 999px;
+  background: var(--mumu-white);
+  transform: translate(-50%, -50%);
+}
+.roastHere {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: var(--mumu-blue);
+}
+.roastNames {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.85;
+}
+@media (min-width: 900px) {
+  .product {
+    display: grid;
+    grid-template-columns: minmax(0, 520px) minmax(0, 584px);
+    justify-content: space-between;
+    align-items: start;
+    gap: 72px;
+    padding-block: 40px 96px;
+  }
+  .pkg {
+    max-width: none;
+  }
+  .pkgArch {
+    aspect-ratio: 520 / 560;
+    padding-top: 18.5cqw;
+  }
+  .pkgImg {
+    width: 55.8%;
+  }
+  .roastStamp {
+    top: 56px;
+    right: -12px;
+    width: 112px;
+  }
+  .roastStampEn {
+    font-size: 30px;
+  }
+  .roastStampJa {
+    font-size: 11px;
+  }
+  .buy {
+    gap: 26px;
+    padding-top: 12px;
+  }
+  .nameBlock {
+    flex-direction: row;
+    gap: 14px;
+  }
+  /* PCは番号を縦書きにして名前の左に立てる */
+  .no {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 18px;
+    padding-top: 0;
+  }
+  .title {
+    gap: 14px;
+  }
+  .titleEn {
+    font-size: 84px;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+  .titleJa {
+    font-size: 30px;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+  }
+  .desc {
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+  .howTo {
+    margin-top: -10px;
+    font-size: 15px;
+  }
+  .buyBox {
+    gap: 20px;
+    padding-block: 24px;
+    border-bottom: 2px solid var(--mumu-blue);
+  }
+  .buyPrice {
+    gap: 0 18px;
+  }
+  .buyPriceNum {
+    font-size: 64px;
+  }
+  .buyPriceCup {
+    margin-left: auto;
+    font-size: 14px;
+  }
+  .buyBtn {
+    padding-block: 20px;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .facts div {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 2px;
+    padding: 0;
+    border: 0;
+  }
+  .facts dd {
+    text-align: left;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ---------- 共通：セクション ---------- */
+.section {
+  padding-block: 56px;
+}
+.pale {
+  background: var(--mumu-pale);
+}
+.spLink {
+  display: block;
+  text-align: right;
+}
+@media (min-width: 900px) {
+  .section {
+    padding-block: 96px;
+  }
+  .spLink {
+    display: none;
+  }
+}
+
+/* ---------- 産地の情報 ---------- */
+.origin {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.originTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  font-weight: inherit;
+}
+.originEn {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.originJa {
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.originPic {
+  position: relative;
+  display: block;
+  aspect-ratio: 350 / 220;
+  overflow: hidden;
+  border-radius: 20px;
+}
+.originPic img {
+  object-fit: cover;
+}
+.originList {
+  margin: 0;
+  padding-top: 8px;
+}
+.originList div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block: 14px;
+  border-bottom: 2px solid var(--mumu-blue);
+}
+.originList dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+.originDtEn {
+  font-size: 14px;
+}
+.originDtJa {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.originList dd {
+  margin: 0;
+  font-family: var(--f-heading);
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+@media (min-width: 900px) {
+  .origin {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-areas:
+      "title list"
+      "pic list";
+    column-gap: 72px;
+    row-gap: 22px;
+    align-items: end;
+  }
+  .originTitle {
+    grid-area: title;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: start;
+  }
+  .originEn {
+    font-size: 72px;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+  .originJa {
+    font-size: 20px;
+  }
+  .originPicWrap {
+    grid-area: pic;
+    container-type: inline-size;
+  }
+  .originPic {
+    aspect-ratio: 300 / 375;
+    border: 2px solid var(--mumu-blue);
+    border-radius: 50cqw 50cqw 24px 24px;
+  }
+  .originList {
+    grid-area: list;
+    padding-top: 0;
+    border-bottom: 2px solid var(--mumu-blue);
+  }
+  .originList div {
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    padding-block: 18px;
+    border-top: 2px solid var(--mumu-blue);
+    border-bottom: 0;
+  }
+  .originList dt {
+    flex: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 160px;
+  }
+  .originDtEn {
+    font-size: 17px;
+  }
+  .originDtJa {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .originList dd {
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ---------- この豆をもっと知る（記事カード） ---------- */
+.reading {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-right: 0;
+}
+.reading .titleRow,
+.reading .spLink {
+  padding-right: var(--gutter);
+}
+/* スマホは右端まで横にすべらせる */
+.readingList {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--gutter) 4px 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.readingList::-webkit-scrollbar {
+  display: none;
+}
+.readingList li {
+  flex: none;
+  width: 220px;
+  scroll-snap-align: start;
+}
+@media (min-width: 900px) {
+  .reading {
+    gap: 32px;
+    padding-right: var(--gutter);
+  }
+  .reading .titleRow {
+    padding-right: 0;
+  }
+  .readingList {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    padding: 0;
+    overflow: visible;
+  }
+  .readingList li {
+    width: auto;
+  }
+}
+
+/* ---------- ほかの豆 ---------- */
+.others {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.otherList {
+  display: grid;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 900px) {
+  .others {
+    gap: 32px;
+  }
+  .otherList {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+  }
+}

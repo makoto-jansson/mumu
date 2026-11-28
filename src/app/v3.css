@@ -1,0 +1,32 @@
+/* ===== v3（青×白 × 太いセリフ・2026-11 リニューアル）=====
+   色は青・白・淡い青の3色だけ（灰色・透明度は使わない）。正本は Figma「mumu HPデザイン（青×白）」。 */
+:root {
+  --mumu-blue: #0404fe;
+  --mumu-white: #ffffff;
+  --mumu-pale: #eef0ff;
+  /* 追従するヘッダー（青い帯）の高さ。ページ内リンクで飛んだ先が帯の下に隠れないように使う */
+  --site-header-h: 60px;
+  /* いま画面に出ているヘッダーの高さ（引っ込んでいる間は0）。PCの記事の目次の止まる位置に使う */
+  --site-header-shown: var(--site-header-h);
+}
+html[data-header-hidden] {
+  --site-header-shown: 0px;
+}
+@media (min-width: 900px) {
+  :root {
+    --site-header-h: 70px;
+  }
+}
+
+/* v3ページは本文の地を白に、キャンバス（上下のオーバースクロールで覗く部分）を青にする。
+   上端のヘッダーと下端のフッターがどちらも青なので、引っぱっても色の切れ目が見えない。 */
+html:has([data-site-root]) {
+  background-color: var(--mumu-blue);
+  /* 目次・カテゴリへのリンクで飛んだとき、追従するヘッダーの下に見出しが隠れないようにする */
+  scroll-padding-top: var(--site-header-h);
+}
+body:has([data-site-root]) {
+  background-color: var(--mumu-white);
+  color: var(--mumu-blue);
+  font-weight: 400;
+}

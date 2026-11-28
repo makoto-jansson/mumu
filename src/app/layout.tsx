@@ -6,10 +6,14 @@ import localFont from "next/font/local";
 import {
   Zen_Maru_Gothic,
   Zen_Kaku_Gothic_New,
+  Zen_Old_Mincho,
+  Playfair_Display,
   Shippori_Mincho,
   Klee_One,
 } from "next/font/google";
 import "./globals.css";
+// v3（青×白）の色の変数とページ全体の地色
+import "./v3.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import InstallBanner from "@/components/layout/InstallBanner";
 
@@ -34,10 +38,30 @@ const zenMaru = Zen_Maru_Gothic({
 // 和文フォントは全unicode-rangeスライスがpreloadされると壊滅的なため preload:false 必須。
 // CSS変数 --font-gothic / --font-mincho / --font-hand として module.css から参照する。
 const zenKaku = Zen_Kaku_Gothic_New({
-  weight: ["400", "500"],
+  // 700 は v3（青×白）のボタン・ラベル用
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
   preload: false,
   variable: "--font-gothic",
+  display: "swap",
+});
+
+// v3（青×白 × 太いセリフ・2026-11 リニューアル）の見出し用2書体。
+// Playfair Display: 欧文の大見出し（900）とイタリックのラベル（700 italic）。欧文のみで軽いので preload する。
+// Zen Old Mincho: 和文の見出し（900）と記事カードの題（700）。和文なので preload:false 必須。
+const playfair = Playfair_Display({
+  weight: ["700", "900"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const zenOldMincho = Zen_Old_Mincho({
+  weight: ["500", "700", "900"], // 500 は記事本文（雑誌風の明朝組み）用
+  subsets: ["latin"],
+  preload: false,
+  variable: "--font-old-mincho",
   display: "swap",
 });
 
@@ -158,7 +182,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${cormorant.variable} ${zenMaru.variable} ${zenKaku.variable} ${shippori.variable} ${kleeOne.variable}`}
+      className={`${cormorant.variable} ${zenMaru.variable} ${zenKaku.variable} ${shippori.variable} ${kleeOne.variable} ${playfair.variable} ${zenOldMincho.variable}`}
     >
       <head>
         {/* Google Tag Manager */}
