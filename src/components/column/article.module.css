@@ -151,38 +151,40 @@
   margin: 0;
   font-size: 15px;
 }
-/* 左に細い線（レール）を敷き、今読んでいる章だけ青い線にする（ArticleToc が aria-current を付ける） */
+/* 今読んでいる章は、題の下半分に蛍光ペンのようなマーカーを引く（ArticleToc が aria-current を付ける）。
+   雑誌の目次らしさを残すため、縦線や箱は使わない */
 .toc ol {
   display: grid;
-  gap: 4px;
+  gap: 10px;
   list-style: none;
   margin: 12px 0 0;
   padding: 0;
-  border-left: 2px solid var(--mumu-white);
 }
 .toc a {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-left: -2px;
-  padding: 3px 0 3px 12px;
-  border-left: 2px solid transparent;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.6;
   letter-spacing: 0;
   text-decoration: none;
-  transition:
-    border-color 0.2s,
-    background-color 0.2s;
+}
+.toc a span:last-child {
+  background-image: linear-gradient(transparent 58%, var(--mumu-white) 58%);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition: background-size 0.35s ease;
 }
 .toc a:hover span:last-child {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 .toc a[aria-current] {
-  border-left-color: var(--mumu-blue);
   font-weight: 700;
+}
+.toc a[aria-current] span:last-child {
+  background-size: 100% 100%;
 }
 .tocNo {
   flex: none;
@@ -190,7 +192,7 @@
   font-size: 13px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .toc a {
+  .toc a span:last-child {
     transition: none;
   }
 }
@@ -208,18 +210,15 @@
     font-size: 18px;
   }
   .toc ol {
-    gap: 6px;
+    gap: 14px;
     margin-top: 14px;
-    border-left-color: var(--mumu-pale);
   }
   .toc a {
-    padding-block: 4px;
     letter-spacing: 0.02em;
   }
-  /* PCは今読んでいる章に、淡い青のマーカーも敷く */
-  .toc a[aria-current] {
-    border-radius: 0 6px 6px 0;
-    background: var(--mumu-pale);
+  /* PCは白地なので、マーカーは淡い青 */
+  .toc a span:last-child {
+    background-image: linear-gradient(transparent 58%, var(--mumu-pale) 58%);
   }
 }
 
