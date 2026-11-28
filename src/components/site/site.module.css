@@ -89,7 +89,20 @@
 .logo {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   color: var(--mumu-blue);
+  text-decoration: none;
+}
+/* カラーの灯台（生成り＋黒い線）。高さは文字ロゴ2行ぶんより少し大きく */
+.logoMark {
+  position: relative;
+  flex: none;
+  display: block;
+  height: 40px;
+  aspect-ratio: 290 / 415;
+}
+.logoMark img {
+  object-fit: contain;
 }
 .logoText {
   display: flex;
@@ -125,6 +138,12 @@
 @media (min-width: 900px) {
   .logoText {
     gap: 6px;
+  }
+  .logo {
+    gap: 12px;
+  }
+  .logoMark {
+    height: 54px;
   }
   .logoWithMark {
     gap: 14px;
@@ -223,8 +242,13 @@
 }
 
 /* ---------- ヘッダー ---------- */
+/* ヘッダーは青い帯（文字・ロゴは白）。2026-11-28 告知バーをやめて、帯そのものをここに */
 .header {
-  background: var(--mumu-white);
+  background: var(--mumu-blue);
+  color: var(--mumu-white);
+}
+.header .logo {
+  color: var(--mumu-white);
 }
 .headerInner {
   display: flex;
@@ -274,7 +298,7 @@
   border: 2px solid currentColor;
   border-radius: 999px;
   background: transparent;
-  color: var(--mumu-blue);
+  color: var(--mumu-white);
   cursor: pointer;
 }
 .menuBtn span {

@@ -1,9 +1,9 @@
-// v3（青×白）の外枠 — 告知バー・ヘッダー・本文・フッター
+// v3（青×白）の外枠 — ヘッダー（青い帯）・本文・フッター
+// 2026-11-28 ユーザー判断で、最上部の告知バー（100gから・送料…）はやめ、ヘッダーそのものを青い帯にした
 // data-site-root: v3.css で html（上下に引っぱった時に覗く部分）を青にする目印
 
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
-import { NOTICE } from "./nav";
 import s from "./site.module.css";
 
 export default function SiteChrome({
@@ -18,7 +18,6 @@ export default function SiteChrome({
       <a href="#main" className={s.skip}>
         本文へ移動
       </a>
-      <p className={s.notice}>{NOTICE}</p>
       <SiteHeader />
       <main id="main">{children}</main>
       <SiteFooter ctaSpace={ctaSpace} />

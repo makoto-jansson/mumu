@@ -47,7 +47,7 @@ export default function SiteHeader() {
   }, [open, close]);
 
   return (
-    <header className={s.header}>
+    <header className={`${s.header} ${s.onBlue}`}>
       <div className={`${s.wrap} ${s.headerInner}`}>
         <Logo />
 
@@ -58,14 +58,14 @@ export default function SiteHeader() {
               {it.ja}
             </Link>
           ))}
-          <a href={SHOP_URL} target="_blank" rel="noopener" className={buttonClass("primary", "S", s.shopBtn)}>
+          <a href={SHOP_URL} target="_blank" rel="noopener" className={buttonClass("white", "S", s.shopBtn)}>
             Shop<span className={s.srOnly}>（BASEのオンラインショップ・新しいタブで開きます）</span>
           </a>
         </nav>
 
         {/* スマホ */}
         <div className={s.headerActions}>
-          <a href={SHOP_URL} target="_blank" rel="noopener" className={buttonClass("primary", "S", s.shopBtn)}>
+          <a href={SHOP_URL} target="_blank" rel="noopener" className={buttonClass("white", "S", s.shopBtn)}>
             Shop<span className={s.srOnly}>（BASEのオンラインショップ・新しいタブで開きます）</span>
           </a>
           <button
