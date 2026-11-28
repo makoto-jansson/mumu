@@ -37,6 +37,9 @@ export default function Home({ beans = [], readings = [] }: { beans?: BeanView[]
               sizes="(min-width: 900px) 420px, calc(100vw - 40px)"
             />
           </span>
+          {/* 灯台のマーク: 前は周りの文字が回る印だったが、コンセプト（感性がふと戻る・情報に追われる毎日から離れる）
+              に対して動きで目を引くので、回る文字をやめて丸窓だけを置く（2026-11-28 ユーザー判断） */}
+          <LighthouseWindow size={128} className={h.heroMark} />
         </div>
         <h1 id="hero-title" className={h.catch}>
           <span className={s.srOnly}>灯台の珈琲焙煎所mumu　</span>

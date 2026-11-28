@@ -49,7 +49,7 @@ export default function SiteHeader() {
   return (
     <header className={s.header}>
       <div className={`${s.wrap} ${s.headerInner}`}>
-        <Logo mark={pathname === "/"} />
+        <Logo />
 
         {/* PC のメニュー */}
         <nav className={s.nav} aria-label="サイト内メニュー">

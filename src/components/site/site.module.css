@@ -96,21 +96,6 @@
   flex-direction: column;
   gap: 4px;
 }
-/* トップページだけ: 文字ロゴの左に灯台の線画（丸い枠なし・元の黒い線画のまま）。
-   高さは文字ロゴ2行ぶんより少し大きく */
-.logoWithMark {
-  gap: 8px;
-}
-.logoMark {
-  position: relative;
-  flex: none;
-  display: block;
-  height: 40px;
-  aspect-ratio: 900 / 1255;
-}
-.logoMark img {
-  object-fit: contain;
-}
 .logoTagline,
 .logoScript {
   display: block;
@@ -125,8 +110,9 @@
 .logoTagline {
   width: 96px;
   height: 11px;
-  -webkit-mask-image: url("/v2/tagline.png");
-  mask-image: url("/v2/tagline.png");
+  /* 筆記体（mumu-script-thin）と同じ「かすれ」の質感にそろえた版。太さは元のまま（2026-11-28） */
+  -webkit-mask-image: url("/v2/tagline-kasure.png");
+  mask-image: url("/v2/tagline-kasure.png");
 }
 .logoScript {
   width: 116px;
@@ -142,12 +128,6 @@
   }
   .logoWithMark {
     gap: 14px;
-  }
-  .logoWithMark {
-    gap: 10px;
-  }
-  .logoMark {
-    height: 52px;
   }
   .logoTagline {
     width: 120px;

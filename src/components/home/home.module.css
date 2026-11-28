@@ -54,6 +54,13 @@
 .picFrame img {
   object-fit: cover;
 }
+/* 絵の右上の灯台の丸窓（回る文字なし）。白い丸＋青い枠に元の黒い線画 */
+.pic .heroMark {
+  position: absolute;
+  top: 10px;
+  right: -12px;
+  width: 92px;
+}
 .catch {
   grid-area: catch;
   margin: 0;
@@ -103,6 +110,11 @@
   .picFrame {
     aspect-ratio: 4 / 5;
     border-radius: 50cqw 50cqw 24px 24px;
+  }
+  .pic .heroMark {
+    top: 20px;
+    right: -32px;
+    width: 128px;
   }
   .catch {
     font-size: clamp(40px, 4.1vw, 52px);
