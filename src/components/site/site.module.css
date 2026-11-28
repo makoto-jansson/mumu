@@ -93,12 +93,12 @@
   color: var(--mumu-blue);
   text-decoration: none;
 }
-/* カラーの灯台（生成り＋黒い線）。高さは文字ロゴ2行ぶんより少し大きく */
+/* カラーの灯台（生成り＋黒い線）。高さは文字ロゴ2行ぶんとそろえる（帯を細く保つため・2026-11-28） */
 .logoMark {
   position: relative;
   flex: none;
   display: block;
-  height: 40px;
+  height: 34px;
   aspect-ratio: 290 / 415;
 }
 .logoMark img {
@@ -143,7 +143,7 @@
     gap: 12px;
   }
   .logoMark {
-    height: 54px;
+    height: 46px;
   }
   .logoWithMark {
     gap: 14px;
@@ -254,7 +254,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 16px;
+  padding-block: 10px;
 }
 .nav {
   display: none;
@@ -266,7 +266,7 @@
 }
 @media (min-width: 900px) {
   .headerInner {
-    padding-block: 22px;
+    padding-block: 12px;
   }
   .nav {
     display: flex;
