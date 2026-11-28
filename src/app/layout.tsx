@@ -58,7 +58,7 @@ const playfair = Playfair_Display({
 });
 
 const zenOldMincho = Zen_Old_Mincho({
-  weight: ["700", "900"],
+  weight: ["500", "700", "900"], // 500 は記事本文（雑誌風の明朝組み）用
   subsets: ["latin"],
   preload: false,
   variable: "--font-old-mincho",

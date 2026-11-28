@@ -204,10 +204,15 @@
 }
 
 /* ---------- 本文（microCMS のHTML） ---------- */
+/* 雑誌の組み: 本文は明朝（Zen Old Mincho 500）、両端揃え、段落の頭を1字下げ */
 .body {
+  font-family: var(--f-heading);
+  font-weight: 500;
   font-size: 16px;
-  line-height: 2.05;
-  letter-spacing: 0.04em;
+  line-height: 2.1;
+  letter-spacing: 0.06em;
+  text-align: justify;
+  text-justify: inter-character;
   overflow-wrap: break-word;
   /* 段落の最後の行が1〜2文字だけにならないようにする（対応ブラウザのみ）。
      文節での折り返し（word-break: auto-phrase）は右端が大きく不ぞろいになり、かえって読みにくかったので使わない */
@@ -219,30 +224,50 @@
   margin-bottom: 0;
 }
 .body > * + * {
-  margin-top: 28px;
+  margin-top: 24px;
 }
-/* 冒頭の段落は少し大きく（読み始めの入口） */
+.body > p {
+  text-indent: 1em;
+}
+/* 冒頭の段落はリード文（少し大きく太く）。最初の1文字を3行分の大きさにする（ドロップキャップ） */
 .body > p:first-child {
+  font-weight: 700;
   font-size: 17px;
-  font-weight: 500;
   line-height: 2;
+  text-indent: 0;
 }
-/* 話の区切りの見出しは淡い青の箱にして、スクロール中でも区切りが目に入るようにする */
+.body > p:first-child::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-weight: 900;
+  font-size: 4.9em;
+  line-height: 0.9;
+}
+/* 表・豆カード・ボタンはゴシックのまま（数字と操作部分は見やすさ優先） */
+.body table,
+.body .bc {
+  font-family: var(--f-body);
+  font-weight: 400;
+  text-align: left;
+}
+/* 話の区切りの見出しは雑誌の章扉のように: 上に線、左に大きな数字、右に題 */
 .body h2 {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 18px 20px 20px;
-  border-radius: 20px;
-  background: var(--mumu-pale);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  column-gap: 14px;
+  padding-top: 16px;
+  border-top: 2px solid var(--mumu-blue);
   font-family: var(--f-heading);
   font-weight: 900;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.5;
+  letter-spacing: 0.04em;
+  text-align: left;
   scroll-margin-top: 16px;
 }
 .body > h2 {
-  margin-top: 64px;
+  margin-top: 72px;
 }
 .body > h2:first-child {
   margin-top: 0;
@@ -251,19 +276,25 @@
   margin-top: 24px;
 }
 .h2No {
-  flex: none;
   font-family: var(--f-display);
   font-weight: 900;
-  font-size: 30px;
-  line-height: 1;
+  font-size: 52px;
+  line-height: 0.78;
+  letter-spacing: -0.02em;
 }
 .body h3 {
-  padding-left: 12px;
-  border-left: 4px solid var(--mumu-blue);
   font-family: var(--f-heading);
   font-weight: 900;
   font-size: 17px;
   line-height: 1.6;
+}
+.body h3::before {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin-bottom: 12px;
+  background: var(--mumu-blue);
 }
 .body > h3 {
   margin-top: 48px;
@@ -339,35 +370,31 @@
 @media (min-width: 900px) {
   .body {
     font-size: 17px;
-    line-height: 2.1;
-    letter-spacing: 0.05em;
+    line-height: 2.15;
+    letter-spacing: 0.06em;
   }
   .body > * + * {
-    margin-top: 36px;
+    margin-top: 28px;
   }
   .body > p:first-child {
-    font-size: 18px;
+    font-size: 19px;
     line-height: 2.05;
   }
   .body h2 {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 18px;
-    padding: 26px 32px 28px;
-    border-radius: 24px;
-    font-size: 26px;
+    column-gap: 20px;
+    padding-top: 22px;
+    font-size: 25px;
     line-height: 1.45;
   }
   .body > h2 {
-    margin-top: 96px;
+    margin-top: 104px;
   }
   .body > h2 + * {
     margin-top: 32px;
   }
   .h2No {
-    font-size: 40px;
-    line-height: 0.9;
-    letter-spacing: -0.02em;
+    font-size: 76px;
+    line-height: 0.76;
   }
   .body h3 {
     font-size: 20px;
