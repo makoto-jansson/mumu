@@ -1,163 +1,35 @@
-// 読みもの（コラム）の詳細ページ /column/[id]（microCMS「columns」の1記事）
-// v2の帯レイアウト(SiteChromeV2)で囲み、本文HTMLを .article-body でprose整形する。
+// 読みもの（コラム）の記事ページ /column/[id]（v3・青×白 2026-11 リニューアル）
+//
+// 正本は Figma「PC｜読みもの記事」6:270 /「スマホ｜読みもの記事」63:162。
+// 構成: 記事の頭（パンくず・カテゴリ・題名・書いた人） → 目次＋本文 → 書いた人 → 次に読む
+// 本文は microCMS のHTML。表示するときに lib/articleHtml で整える（要点の箱・見出しの番号・
+// 豆カードの組み直し・旧デザインの色の置き換え・表の横すべり）。原稿は書き換えない。
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
-import SiteChromeV2 from "@/components/home-v2/SiteChromeV2";
-import RoasterProfile from "@/components/about/RoasterProfile";
-import RelatedColumns from "@/components/column/RelatedColumns";
-import ColumnBeans from "@/components/column/ColumnBeans";
-import { getColumn, formatPostDate, type Bean } from "@/lib/microcms";
+import Link from "next/link";
+import SiteChrome from "@/components/site/SiteChrome";
+import Breadcrumbs from "@/components/site/Breadcrumbs";
+import SectionTitle from "@/components/site/SectionTitle";
+import ReadingCard, { type ReadingItem } from "@/components/site/ReadingCard";
+import site from "@/components/site/site.module.css";
+import AuthorBox from "@/components/column/AuthorBox";
+import ArticleBeans from "@/components/column/ArticleBeans";
+import { getAllColumns, getColumn, formatPostDate } from "@/lib/microcms";
 import { getBeanViews } from "@/lib/beans";
+import { CATEGORY_LABEL, categoryOf } from "@/lib/columnCategory";
+import { hasBeanCard, parseFaq, renderArticle, toPlain } from "@/lib/articleHtml";
+import a from "@/components/column/article.module.css";
 
 const BASE_URL = "https://www.mumucoffee-feel.com";
 
 export const revalidate = 60;
 
-// 記事本文から meta description / og:description を作る。
-// microCMSに説明文の専用フィールドがないため本文の冒頭を使う。単純に文字数で切ると
-// 「〜そして正」のように文の途中で途切れるので句点で切る。また要点を先に置く引用ブロックが
-// あればそれを優先するが、ブロック内は「導入1行＋ハイフン箇条書き」の形なので、
-// そのまま流すと検索結果に「- 粉12g」のようにハイフンが出てしまう。箇条書きだけを拾って
-// 記号を外し、導入の1行（「先に要点を置いておきます」等）は情報量がないので捨てる。
-function toPlain(html: string, len = 120): string {
-  const strip = (s: string) =>
-    s
-      .replace(/<figure[\s\S]*?<\/figure>/gi, "")
-      .replace(/<(?:br|hr)\s*\/?>/gi, "\n")
-      .replace(/<\/(?:p|li|h[1-6]|div|td|th|tr|blockquote)>/gi, "\n")
-      .replace(/<[^>]+>/g, "")
-      .replace(/[ \t\u3000]+/g, " ")
-      .replace(/\s*\n\s*/g, "\n")
-      .trim();
+// 記事の頭に出すカテゴリ名（一覧ページの見出しと同じ）
+const CATEGORY_JA = { basics: "コーヒーの基礎知識", origins: "産地・豆の図鑑", reading: "そのほかの読みもの" } as const;
 
-  const quote = html.match(/<blockquote[\s\S]*?<\/blockquote>/i);
-  let source: string;
-  if (quote) {
-    const lines = strip(quote[0]).split("\n").filter(Boolean);
-    const bullets = lines
-      .filter((l) => /^[-・*]\s/.test(l))
-      .map((l) => l.replace(/^[-・*]\s*/, "").trim());
-    source = bullets.length ? bullets.join("／") : lines.join(" ");
-  } else {
-    source = strip(html).replace(/\n/g, " ");
-  }
-
-  if (source.length <= len) return source;
-  // len を超えない範囲で切る。読点より句点を優先しないと「〜そして、」のように
-  // 接続詞で終わってしまう（2026-11-20に coffee-focus-brain で判明）。
-  // 箇条書きを繋いだ場合は区切りの「／」がいちばん自然な切れ目になる。
-  const head = source.slice(0, len);
-  const bullet = source.includes("／");
-  const period = head.lastIndexOf("。");
-  const slash = head.lastIndexOf("／");
-  const comma = head.lastIndexOf("、");
-  if (bullet && slash >= len * 0.5) return head.slice(0, slash);
-  if (period >= len * 0.5) return head.slice(0, period + 1);
-  if (slash >= len * 0.5) return head.slice(0, slash);
-  if (comma >= len * 0.5) return head.slice(0, comma + 1);
-  return head;
-}
-
-// 本文HTMLの「よくある質問」節から Q&A を抽出（FAQPage構造化データ用）。
-// 基礎記事(<strong>Q. …</strong>)・産地記事(<strong>質問？</strong>)の両形式に対応。
-function parseFaq(html: string): { q: string; a: string }[] {
-  const h = html.search(/<h2[^>]*>\s*よくある質問/);
-  if (h < 0) return [];
-  let seg = html.slice(h);
-  const after = seg.slice(5).search(/<h2/i);
-  if (after > 0) seg = seg.slice(0, after + 5);
-  const items: { q: string; a: string }[] = [];
-  const re = /<p>\s*<strong>\s*([\s\S]*?)<\/strong>\s*([\s\S]*?)<\/p>/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(seg))) {
-    const q = m[1].replace(/^Q[.．]?\s*/, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-    const a = m[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-    if (q && a) items.push({ q, a });
-  }
-  return items;
-}
-
-// 本文内のショップ（mumucoffee.theshop.jp）へのリンクにUTMを付ける。
-// ショップはGA4のクロスドメイン設定で「内部」扱いのため外部クリックが記録されず、
-// 参照元もドメイン名までしか残らない。UTMで「どの記事のどのリンクから来たか」を
-// ショップ側のセッション参照元として取れるようにする。
-// 原稿（microCMS）は書き換えず表示時に付与するので、今後の記事にも自動で効く。
-// style付きの<a>は豆カード（visual-style.mdの豆カード）、それ以外は本文中の文字リンク。
-function addShopUtm(html: string, slug: string): string {
-  return html.replace(/<a\b[^>]*>/gi, (tag) => {
-    const m = tag.match(/href="(https:\/\/mumucoffee\.theshop\.jp[^"]*)"/i);
-    if (!m || /utm_source=/.test(m[1])) return tag;
-    const [base, hash = ""] = m[1].split("#");
-    const params = new URLSearchParams({
-      utm_source: "mumucoffee-feel",
-      utm_medium: "column",
-      utm_campaign: slug,
-      utm_content: /\sstyle="/i.test(tag) ? "card" : "text",
-    });
-    const sep = base.includes("?") ? "&" : "?";
-    const next = `${base}${sep}${params.toString()}${hash ? `#${hash}` : ""}`;
-    return tag.replace(m[0], `href="${next.replace(/&/g, "&amp;")}"`);
-  });
-}
-
-// 銘柄名の比較用（半角・全角スペースの揺れを吸収）
-const normName = (s: string) => s.replace(/[\s\u3000]/g, "");
-
-// 本文の豆カード（style付き<a>）は原稿上どれもショップのトップを指している（2026-11-24時点で
-// 45記事・77枚）。トップに飛ばすと読者が豆を探し直すことになるので、カード内の銘柄名
-// （<strong>）を microCMS beans の name と照合し、その豆の個別商品ページへ差し替える。
-// 原稿は書き換えず表示時に置換する。照合できないカードはトップのまま残す。
-function linkBeanCards(html: string, beans: Bean[]): string {
-  const byName = new Map(beans.map((b) => [normName(b.name), b.shopUrl]));
-  return html.replace(
-    /(<a\b[^>]*\bstyle="[^"]*"[^>]*>)([\s\S]*?<\/a>)/gi,
-    (whole, open: string, rest: string) => {
-      if (!/href="https:\/\/mumucoffee\.theshop\.jp\/?"/i.test(open)) return whole;
-      const name = rest.match(/<strong\b[^>]*>([^<]+)<\/strong>/i)?.[1];
-      const url = name ? byName.get(normName(name)) : undefined;
-      if (!url) return whole;
-      return open.replace(/href="[^"]*"/i, `href="${url}"`) + rest;
-    }
-  );
-}
-
-// 冒頭の要点ブロック（「先に要点を置いておきます。」＋ハイフン箇条書き）を、表示用に本物の箇条書きにする。
-// 原稿は引用ブロック内に導入1行と「- 」の行を続けて書く形で、markdown変換では全体が1つの<p>になる。
-// そのままだと改行が詰められ「… - 粉12g… - 粉24g…」と1段落につながって表示される（2026-11-25に20記事で判明）。
-// meta description（toPlain）は変換前の本文から作るので、ここでの変換は検索結果の文面に影響しない。
-// 「導入の行 → 箇条書きの行」の順に並んでいるブロックだけを対象にし、それ以外の形は触らない。
-function formatSummaryLists(html: string): string {
-  return html.replace(
-    /<blockquote>\s*<p>([\s\S]*?)<\/p>\s*<\/blockquote>/gi,
-    (all, inner: string) => {
-      const lines = inner.split("\n").map((l) => l.trim()).filter(Boolean);
-      const isItem = (l: string) => /^[-・*]\s+/.test(l);
-      const first = lines.findIndex(isItem);
-      if (first < 0 || !lines.slice(first).every(isItem)) return all;
-      const intro = lines.slice(0, first);
-      const items = lines.slice(first).map((l) => l.replace(/^[-・*]\s+/, ""));
-      return (
-        "<blockquote>" +
-        (intro.length ? `<p>${intro.join("<br>")}</p>` : "") +
-        `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>` +
-        "</blockquote>"
-      );
-    },
-  );
-}
-
-// 本文に豆カードがあるか（ない記事だけ末尾に豆ブロックを出し、二重に売り込まない）
-const hasBeanCard = (html: string) =>
-  /<a\b[^>]*href="https:\/\/mumucoffee\.theshop\.jp[^"]*"[^>]*\bstyle="|<a\b[^>]*\bstyle="[^"]*"[^>]*href="https:\/\/mumucoffee\.theshop\.jp/i.test(html);
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const post = await getColumn(id);
   if (!post) return { title: "記事が見つかりません" };
@@ -176,20 +48,25 @@ export async function generateMetadata({
   };
 }
 
-export default async function ColumnPostPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ColumnPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [post, beans] = await Promise.all([getColumn(id), getBeanViews()]);
+  const [post, beans, all] = await Promise.all([getColumn(id), getBeanViews(), getAllColumns()]);
   if (!post) notFound();
+
+  const onSale = beans.filter((b) => b.onSale);
   // 販売中の豆だけに差し替える（BASEで非公開の豆へは飛ばさず、ショップトップのまま残す）
-  const body = addShopUtm(
-    linkBeanCards(formatSummaryLists(post.content), beans.filter((b) => b.onSale)),
-    id,
-  );
+  const { html: body, toc } = renderArticle(post.content, { slug: id, beans: onSale, classes: a });
   const showBeanBlock = !hasBeanCard(post.content);
+  const cat = categoryOf(id);
+
+  // 次に読む: 同じカテゴリの新しい記事を先に、足りなければほかのカテゴリから（最大3本）
+  const others = [...all].filter((p) => p.id !== id).sort((x, y) => (x.publishedAt < y.publishedAt ? 1 : -1));
+  const next: ReadingItem[] = [
+    ...others.filter((p) => categoryOf(p.id) === cat),
+    ...others.filter((p) => categoryOf(p.id) !== cat),
+  ]
+    .slice(0, 3)
+    .map((p) => ({ id: p.id, title: p.title, category: CATEGORY_LABEL[categoryOf(p.id)], image: p.eyecatch?.url }));
 
   const url = `${BASE_URL}/column/${id}`;
   const description = toPlain(post.content, 140);
@@ -216,15 +93,17 @@ export default async function ColumnPostPage({
         isPartOf: { "@type": "CollectionPage", "@id": `${BASE_URL}/column` },
       },
       ...(faq.length
-        ? [{
-            "@type": "FAQPage",
-            "@id": `${url}#faq`,
-            mainEntity: faq.map((f) => ({
-              "@type": "Question",
-              name: f.q,
-              acceptedAnswer: { "@type": "Answer", text: f.a },
-            })),
-          }]
+        ? [
+            {
+              "@type": "FAQPage",
+              "@id": `${url}#faq`,
+              mainEntity: faq.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            },
+          ]
         : []),
       {
         "@type": "BreadcrumbList",
@@ -239,59 +118,111 @@ export default async function ColumnPostPage({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <SiteChromeV2>
-      <article className="min-h-screen pt-32 pb-24 px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* 可視パンくず（BreadcrumbList構造化データと対応） */}
-          <nav aria-label="パンくず" className="mb-14 text-[11px] tracking-[0.15em] text-ink-secondary/70 flex items-center gap-2 flex-wrap">
-            <Link href="/" className="hover:text-ink-primary transition-colors">ホーム</Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/column" className="hover:text-ink-primary transition-colors">読みもの</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink-primary/80 truncate max-w-[16rem]">{post.title}</span>
-          </nav>
-
-          <p className="text-ink-secondary/60 text-[11px] tracking-[0.2em] mb-4">
-            {formatPostDate(post.publishedAt)}
-          </p>
-          <h1 className="font-mincho text-ink-primary text-2xl md:text-3xl font-medium leading-relaxed tracking-wide mb-10">
-            {post.title}
-          </h1>
-
-          {post.eyecatch && (
-            <div className="relative mb-12 overflow-hidden rounded-xl">
-              <Image
-                src={post.eyecatch.url}
-                alt={post.title}
-                width={post.eyecatch.width}
-                height={post.eyecatch.height}
-                className="w-full h-auto"
-                sizes="(max-width: 768px) 100vw, 672px"
-                priority
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <SiteChrome>
+        <article>
+          {/* ---------- 記事の頭 ---------- */}
+          <header className={a.head}>
+            <div className={`${site.wrap} ${a.headInner}`}>
+              <Breadcrumbs
+                inline
+                items={[{ href: "/", label: "ホーム" }, { href: "/column", label: "読みもの" }, { label: post.title }]}
               />
+              <div className={a.headMain}>
+                <span className={`${site.label} ${a.headLabel}`} aria-hidden="true">
+                  Reading
+                </span>
+                <div className={a.headText}>
+                  <p className={a.headCat} aria-hidden="true">
+                    {CATEGORY_LABEL[cat]}
+                  </p>
+                  <h1 className={a.title}>{post.title}</h1>
+                  <p className={a.meta}>
+                    <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
+                    <span>{CATEGORY_JA[cat]}</span>
+                    <span>文・マコ（灯台の珈琲焙煎所 mumu）</span>
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+          </header>
 
-          <div
-            className="article-body"
-            dangerouslySetInnerHTML={{ __html: body }}
-          />
+          {/* ---------- 目次＋本文 ---------- */}
+          <div className={`${site.wrap} ${a.layout}`}>
+            {toc.length > 1 && (
+              <nav className={a.toc} aria-labelledby="toc-title">
+                <p id="toc-title" className={`${site.label} ${a.tocTitle}`}>
+                  Contents<span className={site.srOnly}>（目次）</span>
+                </p>
+                <ol>
+                  {toc.map((t) => (
+                    <li key={t.id}>
+                      <a href={`#${t.id}`}>
+                        <span className={`${site.label} ${a.tocNo}`} aria-hidden="true">
+                          {t.no}
+                        </span>
+                        <span>{t.text}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+            <div className={a.main}>
+              {post.eyecatch && (
+                <div className={a.eyecatch}>
+                  <Image
+                    src={post.eyecatch.url}
+                    alt=""
+                    width={post.eyecatch.width}
+                    height={post.eyecatch.height}
+                    sizes="(min-width: 900px) 720px, 100vw"
+                    loading="eager"
+                    fetchPriority="high"
+                  />
+                </div>
+              )}
+              <div className={a.body} dangerouslySetInnerHTML={{ __html: body }} />
 
-          {/* 本文に豆カードが無い記事だけ、末尾で mumu の豆を紹介する */}
-          {showBeanBlock && <ColumnBeans beans={beans.filter((b) => b.onSale)} slug={id} />}
+              {/* 本文に豆カードが無い記事だけ、末尾で mumu の豆を紹介する */}
+              {showBeanBlock && <ArticleBeans beans={onSale} slug={id} />}
+            </div>
+          </div>
+        </article>
 
-          {/* 記事末尾に著者プロフィール（about下部と同一・E-E-A-T強化） */}
-          <RoasterProfile />
+        {/* ---------- 書いた人（E-E-A-T） ---------- */}
+        <AuthorBox />
 
-          {/* プロフィールの下に関連記事レコメンド（カード型） */}
-          <RelatedColumns currentId={id} />
-        </div>
-      </article>
-      </SiteChromeV2>
+        {/* ---------- 次に読む ---------- */}
+        {next.length > 0 && (
+          <section className={a.next} aria-labelledby="next-title">
+            <div className={`${site.wrap} ${a.nextInner}`}>
+              <div className={a.nextTitleRow}>
+                <SectionTitle
+                  id="next-title"
+                  en={
+                    <>
+                      <span className={site.pcOnly}>Next </span>Reading
+                    </>
+                  }
+                  ja="次に読む"
+                  link={{ href: "/column", label: "すべて見る" }}
+                />
+              </div>
+              <ul className={a.nextList}>
+                {next.map((r, i) => (
+                  <li key={r.id}>
+                    <ReadingCard item={r} index={i} sizes="(min-width: 900px) 373px, 220px" />
+                  </li>
+                ))}
+              </ul>
+              <Link href="/column" className={`${site.textLink} ${a.spLink}`}>
+                すべて見る <span className={site.arrow} aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </section>
+        )}
+      </SiteChrome>
     </>
   );
 }

@@ -9,6 +9,7 @@
 
 export type BeanDetail = {
   slug: string; // /beans/[slug] のURL
+  nameEn: string; // 欧文の名前（豆の詳細の大見出し・カードの小さなラベル）
   origin: {
     country?: string; // 生産国
     region?: string; // 生産地
@@ -24,6 +25,7 @@ export const BEAN_DETAILS: Record<string, BeanDetail> = {
   // エチオピア シダモ（浅煎り）
   f67_byqzi2l: {
     slug: "ethiopia-sidamo",
+    nameEn: "Ethiopia Sidamo",
     origin: {
       country: "エチオピア",
       region: "シダモ県ベンサ（ボナズリア、セダカ）",
@@ -36,6 +38,7 @@ export const BEAN_DETAILS: Record<string, BeanDetail> = {
   // インドネシア マンデリン（BASEでの商品名は「マンデリン ポルン」・深煎り）
   "n_-lpl1l3-1w": {
     slug: "mandheling-polung",
+    nameEn: "Indonesia Mandheling",
     origin: {
       country: "インドネシア",
       region: "スマトラ ポルン地区",
@@ -50,6 +53,7 @@ export const BEAN_DETAILS: Record<string, BeanDetail> = {
   // ★ BASEの商品ページ（items/147942086）が2026-11-25時点で404のため、産地の詳細は未転記
   "mandheling-tobako": {
     slug: "mandheling-tobako",
+    nameEn: "Mandheling Tobako",
     origin: { country: "インドネシア" },
     howToEnjoy: "ミルクをいれて飲むのもおすすめです。",
     relatedColumns: ["mandheling-coffee", "coffee-milk-drinks", "coffee-bitterness-beans", "roast-levels"],

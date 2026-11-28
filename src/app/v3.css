@@ -1,0 +1,18 @@
+/* ===== v3（青×白 × 太いセリフ・2026-11 リニューアル）=====
+   色は青・白・淡い青の3色だけ（灰色・透明度は使わない）。正本は Figma「mumu HPデザイン（青×白）」。 */
+:root {
+  --mumu-blue: #0404fe;
+  --mumu-white: #ffffff;
+  --mumu-pale: #eef0ff;
+}
+
+/* v3ページは本文の地を白に、キャンバス（上下のオーバースクロールで覗く部分）を青にする。
+   上端の告知バーと下端のフッターがどちらも青なので、引っぱっても色の切れ目が見えない。 */
+html:has([data-site-root]) {
+  background-color: var(--mumu-blue);
+}
+body:has([data-site-root]) {
+  background-color: var(--mumu-white);
+  color: var(--mumu-blue);
+  font-weight: 400;
+}
