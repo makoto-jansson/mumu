@@ -55,12 +55,13 @@
   object-fit: cover;
 }
 /* 絵の右上の灯台の丸窓（回る文字なし）。白い丸＋青い枠に元の黒い線画 */
+/* 青い輪の太さ・全体の大きさ・位置は、前の回る印（全体112/156px、輪は幅の約15%）に合わせる */
 .pic .heroMark {
   position: absolute;
-  top: 10px;
-  right: -12px;
-  width: 92px;
-  border-width: 3px;
+  top: 2px;
+  right: -20px;
+  width: 112px;
+  border-width: 16px;
 }
 .catch {
   grid-area: catch;
@@ -113,10 +114,10 @@
     border-radius: 50cqw 50cqw 24px 24px;
   }
   .pic .heroMark {
-    top: 20px;
-    right: -32px;
-    width: 128px;
-    border-width: 4px;
+    top: 4px;
+    right: -40px;
+    width: 156px;
+    border-width: 23px;
   }
   .catch {
     font-size: clamp(40px, 4.1vw, 52px);
