@@ -93,16 +93,18 @@
   color: var(--mumu-blue);
   text-decoration: none;
 }
-/* カラーの灯台（生成り＋黒い線）。高さは文字ロゴ2行ぶんとそろえる（帯を細く保つため・2026-11-28） */
-.logoMark {
-  position: relative;
+/* 白い丸に灯台の線画（LighthouseWindow）。青い帯の上なので枠線は付けない。
+   丸が小さいので、線画は丸窓の標準より大きめに入れる（丸からはみ出さない範囲） */
+.logo .logoMark {
   flex: none;
-  display: block;
-  height: 34px;
-  aspect-ratio: 290 / 415;
+  width: 40px;
+  border: 0;
 }
-.logoMark img {
-  object-fit: contain;
+.logo .logoMark img {
+  left: 22%;
+  top: 11%;
+  width: 56%;
+  height: 78%;
 }
 .logoText {
   display: flex;
@@ -142,11 +144,8 @@
   .logo {
     gap: 12px;
   }
-  .logoMark {
-    height: 46px;
-  }
-  .logoWithMark {
-    gap: 14px;
+  .logo .logoMark {
+    width: 46px;
   }
   .logoTagline {
     width: 120px;
@@ -245,13 +244,23 @@
 /* ヘッダーは青い帯（文字・ロゴは白）。2026-11-28 告知バーをやめて、帯そのものをここに。
    同日、スクロールしても画面の上に付いてくる（追従）形にした。重なり順は
    画面下の固定ボタン（40）より上、スマホの全画面メニュー（60・このヘッダーの中）が開いても問題ない値。
-   帯の高さ（スマホ60px・PC70px）は v3.css の --site-header-h と合わせること */
+   帯の高さ（スマホ60px・PC70px）は v3.css の --site-header-h と合わせること。
+   さらに同日、スクロール中だけ出して、止まって少しすると上へ引っ込む形に（SiteHeader が .headerHidden を付ける） */
 .header {
   position: sticky;
   top: 0;
   z-index: 50;
   background: var(--mumu-blue);
   color: var(--mumu-white);
+  transition: transform 0.3s ease;
+}
+.headerHidden {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
+  }
 }
 .header .logo {
   color: var(--mumu-white);

@@ -201,8 +201,9 @@
 @media (min-width: 900px) {
   .toc {
     position: sticky;
-    /* 追従するヘッダーの下に24pxあけて止める */
-    top: calc(var(--site-header-h) + 24px);
+    /* 出ているヘッダーの下に24pxあけて止める（ヘッダーが引っ込んだら上へ詰める） */
+    top: calc(var(--site-header-shown) + 24px);
+    transition: top 0.3s ease;
     padding: 0;
     border-radius: 0;
     background: none;
@@ -1003,5 +1004,12 @@
   .faqA p {
     font-size: 15px;
     line-height: 1.95;
+  }
+}
+
+/* 目次がヘッダーに合わせて上下する動きは、動きを減らす設定では止める */
+@media (prefers-reduced-motion: reduce) {
+  .toc {
+    transition: none;
   }
 }

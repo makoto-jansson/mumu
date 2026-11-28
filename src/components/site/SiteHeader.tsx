@@ -2,6 +2,9 @@
 
 // ヘッダー（PC：ロゴ＋メニュー＋Shop／スマホ：ロゴ＋Shop＋丸いメニューボタン）
 // スマホのメニューは全画面の青。開いている間は後ろのページを動かさず、Esc か×で閉じる。
+// 帯は画面の上に付いてくるが、出ているのはスクロール中だけ。止まって HIDE_DELAY たつと上へ引っ込み、
+// またスクロールすると出る（2026-11-28 ユーザー指定）。ページの一番上・メニューを開いている間・
+// マウスやキーボードの操作先がヘッダーにある間は引っ込めない。
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -13,11 +16,21 @@ import { buttonClass } from "./ui";
 import { SHOP_URL } from "@/components/home-v2/links";
 import s from "./site.module.css";
 
+const HIDE_DELAY = 1000; // スクロールが止まってから引っ込むまで（ミリ秒）
+
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const openBtnRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const hideTimer = useRef<number | undefined>(undefined);
+  const holdRef = useRef(false); // マウスやフォーカスがヘッダーにある間は true
+  const openRef = useRef(false);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   const close = useCallback(() => {
@@ -25,6 +38,48 @@ export default function SiteHeader() {
     // 閉じたら、開いたボタンへ戻す（キーボード操作で迷子にならないように）
     requestAnimationFrame(() => openBtnRef.current?.focus());
   }, []);
+
+  // 止まってしばらくしたら引っ込める。一番上（帯の高さぶん以内）にいる間は出したまま
+  const scheduleHide = useCallback(() => {
+    window.clearTimeout(hideTimer.current);
+    hideTimer.current = window.setTimeout(() => {
+      const h = headerRef.current?.offsetHeight ?? 0;
+      if (window.scrollY > h && !holdRef.current && !openRef.current) setHidden(true);
+    }, HIDE_DELAY);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setHidden(false);
+      scheduleHide();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    scheduleHide(); // 途中の位置で開いたページ（戻る・ページ内リンク）も、少しして引っ込む
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(hideTimer.current);
+    };
+  }, [scheduleHide]);
+
+  // ヘッダーが引っ込んでいるかを html に印として出す（PCの記事の目次が、空いた分だけ上に詰めるため）
+  useEffect(() => {
+    const root = document.documentElement;
+    if (hidden) root.dataset.headerHidden = "";
+    else delete root.dataset.headerHidden;
+    return () => {
+      delete root.dataset.headerHidden;
+    };
+  }, [hidden]);
+
+  const hold = () => {
+    holdRef.current = true;
+    window.clearTimeout(hideTimer.current);
+    setHidden(false);
+  };
+  const release = () => {
+    holdRef.current = false;
+    scheduleHide();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +102,16 @@ export default function SiteHeader() {
   }, [open, close]);
 
   return (
-    <header className={`${s.header} ${s.onBlue}`}>
+    <header
+      ref={headerRef}
+      className={`${s.header} ${s.onBlue} ${hidden ? s.headerHidden : ""}`}
+      onMouseEnter={hold}
+      onMouseLeave={release}
+      onFocus={hold}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) release();
+      }}
+    >
       <div className={`${s.wrap} ${s.headerInner}`}>
         <Logo />
 

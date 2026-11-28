@@ -6,6 +6,11 @@
   --mumu-pale: #eef0ff;
   /* 追従するヘッダー（青い帯）の高さ。ページ内リンクで飛んだ先が帯の下に隠れないように使う */
   --site-header-h: 60px;
+  /* いま画面に出ているヘッダーの高さ（引っ込んでいる間は0）。PCの記事の目次の止まる位置に使う */
+  --site-header-shown: var(--site-header-h);
+}
+html[data-header-hidden] {
+  --site-header-shown: 0px;
 }
 @media (min-width: 900px) {
   :root {
