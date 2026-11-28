@@ -170,7 +170,9 @@
   letter-spacing: 0;
   text-decoration: none;
 }
-.toc a span:last-child {
+/* マーカーは文字そのもの（inline の .tocMark）に引く。2行になる題も、各行の文字の下に引かれる
+   （外側の span は flex の子で箱になるため、そこに引くと最後の行にしか出なかった） */
+.tocMark {
   background-image: linear-gradient(transparent 58%, var(--mumu-white) 58%);
   background-repeat: no-repeat;
   background-size: 0% 100%;
@@ -183,7 +185,7 @@
 .toc a[aria-current] {
   font-weight: 700;
 }
-.toc a[aria-current] span:last-child {
+.toc a[aria-current] .tocMark {
   background-size: 100% 100%;
 }
 .tocNo {
@@ -192,7 +194,7 @@
   font-size: 13px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .toc a span:last-child {
+  .tocMark {
     transition: none;
   }
 }
@@ -217,7 +219,7 @@
     letter-spacing: 0.02em;
   }
   /* PCは白地なので、マーカーは淡い青 */
-  .toc a span:last-child {
+  .tocMark {
     background-image: linear-gradient(transparent 58%, var(--mumu-pale) 58%);
   }
 }

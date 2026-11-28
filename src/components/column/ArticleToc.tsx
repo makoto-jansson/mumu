@@ -55,7 +55,10 @@ export default function ArticleToc({ items }: { items: TocItem[] }) {
               <span className={`${site.label} ${a.tocNo}`} aria-hidden="true">
                 {t.no}
               </span>
-              <span>{t.text}</span>
+              {/* 外側は並べるための箱、内側は文字そのもの（マーカーを行ごとに引くため inline のまま） */}
+              <span>
+                <span className={a.tocMark}>{t.text}</span>
+              </span>
             </a>
           </li>
         ))}
