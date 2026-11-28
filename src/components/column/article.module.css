@@ -204,7 +204,9 @@
 }
 
 /* ---------- 本文（microCMS のHTML） ---------- */
+/* 読む文字は墨紺（--mumu-ink）、見出し・番号・リンク・太字・箱などの目印は青 */
 .body {
+  color: var(--mumu-ink);
   font-size: 16px;
   line-height: 2.05;
   letter-spacing: 0.04em;
@@ -229,6 +231,7 @@
 }
 /* 話の区切りの見出しは淡い青の箱にして、スクロール中でも区切りが目に入るようにする */
 .body h2 {
+  color: var(--mumu-blue);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -258,6 +261,7 @@
   line-height: 1;
 }
 .body h3 {
+  color: var(--mumu-blue);
   padding-left: 12px;
   border-left: 4px solid var(--mumu-blue);
   font-family: var(--f-heading);
@@ -272,10 +276,12 @@
   margin-top: 12px;
 }
 .body strong {
+  color: var(--mumu-blue);
   font-weight: 700;
   background: linear-gradient(transparent 60%, var(--mumu-pale) 60%);
 }
 .body a:not([data-bean-card]) {
+  color: var(--mumu-blue);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -314,6 +320,7 @@
 }
 .body li::marker {
   color: var(--mumu-blue);
+  font-weight: 700;
 }
 .body img {
   max-width: 100%;
@@ -452,6 +459,7 @@
 
 /* 図解（原稿の SVG。色は lib/articleHtml で青に置き換え済み） */
 .body figure {
+  color: var(--mumu-blue);
   margin-left: 0;
   margin-right: 0;
   padding: 20px 18px;
@@ -506,6 +514,7 @@
   vertical-align: top;
 }
 .body td:first-child {
+  color: var(--mumu-blue);
   font-weight: 700;
 }
 @media (min-width: 900px) {
@@ -857,6 +866,7 @@
   background: var(--mumu-pale);
 }
 .faqQ {
+  color: var(--mumu-blue);
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -899,6 +909,7 @@
   color: var(--mumu-blue);
 }
 .faqA p {
+  color: var(--mumu-ink);
   margin: 0;
   font-size: 14px;
   line-height: 1.9;
