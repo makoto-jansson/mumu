@@ -2,7 +2,13 @@
    正本は Figma「PC｜読みもの記事」6:270 /「スマホ｜読みもの記事」63:162。
    900px で PC とスマホを切り替える（PCの値は 900px 以上）。
    .body の中は microCMS の本文HTML（lib/articleHtml で整えたもの）なので、要素名で整形する。
-   原稿の図解・豆カードの囲みは style 属性を持つため、一部は !important で上書きしている。 */
+   原稿の図解・豆カードの囲みは style 属性を持つため、一部は !important で上書きしている。
+
+   書体の役割（2026-11-28 整理。記事の中で日本語の書体が混ざって「カオス」に見えたため）:
+   - 明朝（Zen Old Mincho）: 見出しと「読む文章」すべて（題名・目次・本文・よくある質問・書いた人の紹介）
+       500＝読む文章 / 700＝リード・太字 / 900＝見出し
+   - ゴシック（Zen Kaku Gothic New）: 操作と情報（パンくず・日付などの情報行・図の説明・表・豆カード・ボタン）
+   - Playfair: 大きな文字と章番号は 900 の立体（見出しも目次も同じ姿）、小さなラベルは 700 の斜体 */
 
 .srOnly {
   position: absolute;
@@ -63,7 +69,7 @@
   gap: 2px 14px;
   margin: 0;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.6;
   letter-spacing: 0;
 }
@@ -155,20 +161,25 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-size: 13px;
+  font-family: var(--f-heading);
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.6;
-  letter-spacing: 0;
+  letter-spacing: 0.03em;
   text-decoration: none;
 }
 .toc a:hover span:last-child {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.tocNo {
+/* 番号は site.label（斜体のラベル）ではなく、見出しの章番号と同じ立体の太字にする */
+.toc .tocNo {
   flex: none;
-  min-width: 1.4em;
-  font-size: 13px;
+  min-width: 1.5em;
+  font-style: normal;
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1;
 }
 @media (min-width: 900px) {
   .toc {
@@ -188,7 +199,7 @@
     margin-top: 14px;
   }
   .toc a {
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
   }
 }
 
@@ -493,9 +504,11 @@
   padding-top: 10px;
   border-top: 2px solid var(--mumu-blue);
   color: var(--mumu-blue) !important;
+  font-family: var(--f-body);
   font-size: 12px !important;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.7;
+  letter-spacing: 0.02em;
   text-align: left !important;
 }
 @media (min-width: 900px) {
@@ -554,8 +567,12 @@
 }
 .body div[aria-label] > p:first-child {
   margin-bottom: 12px !important;
+  font-family: var(--f-body);
+  font-weight: 400;
   font-size: 13px !important;
   line-height: 1.8;
+  letter-spacing: 0.02em;
+  text-align: left;
 }
 .bc {
   display: grid;
@@ -779,8 +796,11 @@
 .authorBio {
   max-width: 720px;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.75;
+  font-family: var(--f-heading);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: 0.04em;
 }
 @media (min-width: 900px) {
   .author {
@@ -805,8 +825,8 @@
     font-size: 13px;
   }
   .authorBio {
-    font-size: 14px;
-    line-height: 1.8;
+    font-size: 15px;
+    line-height: 2;
   }
 }
 

@@ -189,6 +189,10 @@
   letter-spacing: 0;
   padding: 5px 14px;
 }
+/* メニューの文字（.nav a の 500）に負けて、読み込んでいない太さで描かれていたので明示する */
+.root .shopBtn {
+  font-weight: 700;
+}
 @media (min-width: 900px) {
   .shopBtn {
     padding: 9px 20px;
