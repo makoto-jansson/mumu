@@ -514,30 +514,92 @@
 
 /* 図解（原稿の SVG。色は lib/articleHtml で青に置き換え済み）
    2026-11-28「図のデザインがClaudeっぽい」の指摘を受けて、原稿は変えずに表示の時だけサイトの型に寄せる。
-   原因は ①ヒラギノ太字600の文字 ②細い線（1〜1.4・スマホでは0.6px相当） ③角丸＋細枠＋淡い地の「UIカード」
-   ④図全体を角丸の箱で囲む作り。サイトの型（2pxの線・明朝の見出し・枠のない淡い面・雑誌の図番号）に置き換える。
+   原因は ①ヒラギノ太字600の文字 ②細い線（1〜1.4・スマホでは0.6px相当） ③角丸＋細枠＋淡い地の「UIカード」。
+   サイトの型（2pxの線・明朝の見出し・角の立った箱・図番号の札）に置き換える。図を囲む境界の箱は残す。
    図はどれも viewBox 幅640・同じ作りなので、属性の値で狙って上書きできる（CSS が SVG の属性より優先される）。 */
 .body {
   counter-reset: fig;
 }
-/* 図の枠: 角丸の箱をやめ、上に2pxの線と「Fig. 01」の番号を置く雑誌の図版の形に。左右の余白をなくして図を大きく */
+/* 図の枠: 「ここは図」と分かる境界の箱は残す（2026-11-28 ユーザー指示）。2pxの青い線の角丸の箱に、
+   左上の線をまたぐ「Fig. 01」の札を付ける。札は白い表の板と青い裏の板の2枚重ねで、
+   表の板がときどき「ポチッ」と2回沈む（参考: HugMug の CHECK 札。表を左上に4pxずらし、2秒ごとに2pxへ戻す）。
+   札の形はサイトのボタンと同じ丸い端、文字は Playfair の斜体 */
 .body figure {
   counter-increment: fig;
+  position: relative;
   margin-left: 0;
   margin-right: 0;
-  padding: 0;
-  border-top: 2px solid var(--mumu-blue);
+  margin-top: 48px;
+  padding: 34px 16px 18px;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 20px;
 }
-.body figure::before {
+.body figure::before,
+.body figure::after {
   content: "Fig. " counter(fig, decimal-leading-zero);
-  display: block;
-  margin: 10px 0 14px;
+  position: absolute;
+  top: -15px;
+  left: 18px;
+  padding: 0 14px;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 999px;
   font-family: var(--f-display);
   font-style: italic;
   font-weight: 700;
-  font-size: 15px;
-  line-height: 1;
+  font-size: 14px;
+  line-height: 24px;
   letter-spacing: 0;
+  white-space: nowrap;
+}
+/* 裏の板（青）。文字は地と同じ色で見えないが、表の板と同じ大きさにするために入れている */
+.body figure::before {
+  background: var(--mumu-blue);
+  color: var(--mumu-blue);
+}
+/* 表の板（白に青い文字）。左上に4pxずらして、裏の板を影のように見せる */
+.body figure::after {
+  background: var(--mumu-white);
+  color: var(--mumu-blue);
+  transform: translate(-4px, -4px);
+  animation: figTabPress 2.4s linear infinite;
+}
+@keyframes figTabPress {
+  0%,
+  30% {
+    transform: translate(-4px, -4px);
+  }
+  31%,
+  35% {
+    transform: translate(-2px, -2px);
+  }
+  36%,
+  40% {
+    transform: translate(-4px, -4px);
+  }
+  41%,
+  45% {
+    transform: translate(-2px, -2px);
+  }
+  46%,
+  100% {
+    transform: translate(-4px, -4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body figure::after {
+    animation: none;
+  }
+}
+@media (min-width: 900px) {
+  .body figure {
+    margin-top: 56px;
+    padding: 40px 32px 22px;
+    border-radius: 24px;
+  }
+  .body figure::before,
+  .body figure::after {
+    left: 28px;
+  }
 }
 .body figure svg {
   display: block;
@@ -571,8 +633,8 @@
 }
 .body figcaption {
   margin-top: 14px !important;
-  padding-top: 0;
-  border-top: 0;
+  padding-top: 12px;
+  border-top: 2px solid var(--mumu-pale);
   color: var(--mumu-blue) !important;
   font-family: var(--f-heading);
   font-size: 13px !important;
