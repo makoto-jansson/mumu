@@ -512,33 +512,74 @@
   }
 }
 
-/* 図解（原稿の SVG。色は lib/articleHtml で青に置き換え済み） */
+/* 図解（原稿の SVG。色は lib/articleHtml で青に置き換え済み）
+   2026-11-28「図のデザインがClaudeっぽい」の指摘を受けて、原稿は変えずに表示の時だけサイトの型に寄せる。
+   原因は ①ヒラギノ太字600の文字 ②細い線（1〜1.4・スマホでは0.6px相当） ③角丸＋細枠＋淡い地の「UIカード」
+   ④図全体を角丸の箱で囲む作り。サイトの型（2pxの線・明朝の見出し・枠のない淡い面・雑誌の図番号）に置き換える。
+   図はどれも viewBox 幅640・同じ作りなので、属性の値で狙って上書きできる（CSS が SVG の属性より優先される）。 */
+.body {
+  counter-reset: fig;
+}
+/* 図の枠: 角丸の箱をやめ、上に2pxの線と「Fig. 01」の番号を置く雑誌の図版の形に。左右の余白をなくして図を大きく */
 .body figure {
+  counter-increment: fig;
   margin-left: 0;
   margin-right: 0;
-  padding: 20px 18px;
-  border: 2px solid var(--mumu-blue);
-  border-radius: 24px;
+  padding: 0;
+  border-top: 2px solid var(--mumu-blue);
+}
+.body figure::before {
+  content: "Fig. " counter(fig, decimal-leading-zero);
+  display: block;
+  margin: 10px 0 14px;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0;
 }
 .body figure svg {
   display: block;
 }
-.body figcaption {
-  margin-top: 12px !important;
-  padding-top: 10px;
-  border-top: 2px solid var(--mumu-blue);
-  color: var(--mumu-blue) !important;
+/* 文字: ヒラギノをやめ、情報はサイトのゴシック、太字（見出し役）は明朝に */
+.body figure svg text {
   font-family: var(--f-body);
-  font-size: 12px !important;
   font-weight: 500;
+}
+.body figure svg [font-weight="600"],
+.body figure svg [font-weight="700"],
+.body figure svg [font-weight="bold"] {
+  font-family: var(--f-heading);
+  font-weight: 900;
+}
+/* 線: 図の大きさに関係なく、サイトと同じ 2px（細い補助線・点線は 1.5px） */
+.body figure svg [stroke] {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2px;
+}
+.body figure svg [stroke-width="1"],
+.body figure svg [stroke-width="1.1"],
+.body figure svg [stroke-dasharray] {
+  stroke-width: 1.5px;
+}
+/* 箱: 角丸＋細枠のUIカードをやめ、箱も棒も角を立てる（枠は上の2pxのまま）。
+   淡い地の箱の枠を消す案は、やかんの胴など絵の部品まで輪郭が消えたのでやめた */
+.body figure svg rect {
+  rx: 0;
+  ry: 0;
+}
+.body figcaption {
+  margin-top: 14px !important;
+  padding-top: 0;
+  border-top: 0;
+  color: var(--mumu-blue) !important;
+  font-family: var(--f-heading);
+  font-size: 13px !important;
+  font-weight: 700;
   line-height: 1.7;
   letter-spacing: 0.02em;
   text-align: left !important;
-}
-@media (min-width: 900px) {
-  .body figure {
-    padding: 28px 32px 20px;
-  }
 }
 
 /* 表（横にはみ出す表は、箱の中で横にすべらせる） */
