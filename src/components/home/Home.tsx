@@ -12,7 +12,6 @@ import BeanCard from "@/components/site/BeanCard";
 import GuideBlock from "@/components/site/GuideBlock";
 import ReadingCard, { type ReadingItem } from "@/components/site/ReadingCard";
 import LighthouseWindow from "@/components/site/LighthouseWindow";
-import Stamp from "@/components/site/Stamp";
 import StickyCta from "@/components/site/StickyCta";
 import { buttonClass, siteStyles as s } from "@/components/site/ui";
 import type { BeanView } from "@/lib/beans";
@@ -38,7 +37,6 @@ export default function Home({ beans = [], readings = [] }: { beans?: BeanView[]
               sizes="(min-width: 900px) 420px, calc(100vw - 40px)"
             />
           </span>
-          <Stamp className={h.heroStamp} size={156} />
         </div>
         <h1 id="hero-title" className={h.catch}>
           <span className={s.srOnly}>灯台の珈琲焙煎所mumu　</span>

@@ -54,12 +54,6 @@
 .picFrame img {
   object-fit: cover;
 }
-.pic .heroStamp {
-  position: absolute;
-  top: 2px;
-  right: -20px;
-  width: 112px;
-}
 .catch {
   grid-area: catch;
   margin: 0;
@@ -109,11 +103,6 @@
   .picFrame {
     aspect-ratio: 4 / 5;
     border-radius: 50cqw 50cqw 24px 24px;
-  }
-  .pic .heroStamp {
-    top: 4px;
-    right: -40px;
-    width: 156px;
   }
   .catch {
     font-size: clamp(40px, 4.1vw, 52px);

@@ -88,9 +88,29 @@
 /* ---------- ロゴ（手書きの透過PNGを型にして色で塗る） ---------- */
 .logo {
   display: inline-flex;
+  align-items: center;
+  color: var(--mumu-blue);
+}
+.logoText {
+  display: flex;
   flex-direction: column;
   gap: 4px;
-  color: var(--mumu-blue);
+}
+/* トップページだけ: 文字ロゴの左に灯台の丸窓（文字ロゴ2行ぶんより一回り大きく） */
+.logoWithMark {
+  gap: 10px;
+}
+.logo .logoMark {
+  flex: none;
+  width: 44px;
+  border-width: 1.5px;
+}
+/* 小さな丸窓では線画が小さくなりすぎるので、丸の中で大きめに収める（色は変えない） */
+.logo .logoMark img {
+  left: 19%;
+  top: 9%;
+  width: 62%;
+  height: 82%;
 }
 .logoTagline,
 .logoScript {
@@ -116,8 +136,14 @@
   mask-image: url("/v2/mumu-script.png");
 }
 @media (min-width: 900px) {
-  .logo {
+  .logoText {
     gap: 6px;
+  }
+  .logoWithMark {
+    gap: 14px;
+  }
+  .logo .logoMark {
+    width: 58px;
   }
   .logoTagline {
     width: 120px;
