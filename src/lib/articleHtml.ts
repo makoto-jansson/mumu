@@ -228,18 +228,48 @@ function addShopUtm(html: string, slug: string): string {
   });
 }
 
-// 図解（SVG）や紹介文に直接書かれた旧デザインの色を、v3 の青・淡い青に置き換える。
-// 置き換えるのはサイトの地の色（深緑・灰色・淡い緑）だけ。焙煎度の茶色や注意の赤など、
-// 図の中で意味を持つ色はそのまま残す（2026-11-28 全47記事を調べて決めた）。
+// 図解（SVG）や紹介文に直接書かれた旧デザインの色を、v3 の青に合う色へ置き換える（表示の時だけ。原稿は変えない）。
+// 方針（2026-11-28 ユーザー指示「コーヒーの色は茶色でいい。それ以外のグラフの色は青と相性のいい色に」）:
+// - 残す: コーヒーそのものの色。焙煎の茶色（#8a5a2b ほか）、ミルク・泡の生成り、コーヒーの実の断面
+//   （果肉・ミューシレージ・パーチメント・生豆の緑）、ハニープロセスの色見本
+// - 青の濃淡へ: 旧サイトの緑・青緑（水・地図・グラフの系列・部品）と灰色。濃い→#4343fe、中→#8282fe、淡い→#c8c8ff
+// - 朱へ: 注意・よくない例の赤（#c0392b）。サイトの青（クラインブルー）と補色に近い朱 #d4380a（白地で 4.8:1）
+// 全記事の図（162枚）を一覧にして目で確かめて決めた。
 const RECOLOR: [RegExp, string][] = [
+  // 旧サイトの地の色
   [/#004648\b/gi, "#0404fe"], // 深緑（線・文字）
   [/#5a5f5c\b/gi, "#0404fe"], // 灰色（補足の文字）
   [/#f7f9f7\b/gi, "#eef0ff"], // 淡い緑（箱の地）
   [/#eef3f0\b/gi, "#eef0ff"], // 淡い緑（箱の地）
   [/rgba\(0,\s*70,\s*72,/gi, "rgba(4,4,254,"], // 深緑の半透明（罫線）
+  // 緑・青緑 → 青の濃淡（水・地図の陸地・グラフの系列・器具の部品）
+  [/#(?:3f827d|3d6f6b|5a7f78)\b/gi, "#4343fe"], // 濃い青緑（系列の線・等級の丸）
+  [/#4a90a4\b/gi, "#6868fe"], // 水の青緑（湯の流れ・水位）
+  [/#(?:6fa8a3|7fa89e|7fb3ac|5f9b83)\b/gi, "#8282fe"], // 中くらいの青緑（棒・面・器具）
+  [/#(?:cfe0dc|cfe6e2|cdddd4|cbd6ce|c9d3ce)\b/gi, "#c8c8ff"], // 淡い青緑（陸地・面の地）
+  // 灰色 → 青
+  [/#b0b5b5\b/gi, "#9b9bfe"], // 引き出し線
+  [/#2b2b28\b/gi, "#0404fe"], // 文字
+  [/#9a8f80\b/gi, "#4343fe"], // 控えめな文字
+  // 注意・よくない例の赤 → 朱
+  [/#c0392b\b/gi, "#d4380a"],
+  [/#a5493c\b/gi, "#b32c06"],
+  [/#(?:fbf1ef|fbeceb)\b/gi, "#fff0ea"], // 注意の箱の地
+  [/#fbe4e0\b/gi, "#ffe2d6"],
 ];
-function recolor(html: string): string {
-  return RECOLOR.reduce((h, [re, to]) => h.replace(re, to), html);
+// 記事ごとの例外（同じ色コードが、その記事では別の意味で使われているもの）。全体の置き換えより先に当てる
+const RECOLOR_BY_SLUG: Record<string, [RegExp, string][]> = {
+  // 葉っぱのアイコン（#6fa8a3）は、青ではなく生豆と同じ植物の緑に
+  "coffee-production-process": [[/#6fa8a3\b/gi, "#8a9a5b"]],
+  // 品種の割合の棒グラフ（リベリカの系列）。ほかの記事ではハニープロセスの色なので、ここだけ青の濃淡に
+  "coffee-bean-types": [
+    [/#cfa14e\b/gi, "#c8c8ff"],
+    [/#8a6a1e\b/gi, "#4343fe"],
+  ],
+};
+function recolor(html: string, slug: string): string {
+  const rules = [...(RECOLOR_BY_SLUG[slug] ?? []), ...RECOLOR];
+  return rules.reduce((h, [re, to]) => h.replace(re, to), html);
 }
 
 // 見出し（h2）に通し番号とページ内リンク用のidを付け、目次を作る
@@ -271,7 +301,7 @@ export function renderArticle(
   h = linkBeanCards(h, beans);
   h = rebuildBeanCards(h, beans, classes);
   h = addShopUtm(h, slug);
-  h = recolor(h);
+  h = recolor(h, slug);
   h = wrapTables(h, classes);
   return numberHeadings(h, classes);
 }
