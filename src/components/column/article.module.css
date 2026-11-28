@@ -255,8 +255,9 @@
   margin-top: 0;
   margin-bottom: 0;
 }
+/* 段落の間は1行ぶん以上空ける（文字が続いて見えないように） */
 .body > * + * {
-  margin-top: 24px;
+  margin-top: 36px;
 }
 .body > p {
   text-indent: 1em;
@@ -406,7 +407,7 @@
     letter-spacing: 0.06em;
   }
   .body > * + * {
-    margin-top: 28px;
+    margin-top: 44px;
   }
   .body > p:first-child {
     font-size: 19px;

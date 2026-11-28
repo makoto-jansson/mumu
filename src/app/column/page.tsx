@@ -11,7 +11,7 @@ import Image from "next/image";
 import SiteChrome from "@/components/site/SiteChrome";
 import Breadcrumbs from "@/components/site/Breadcrumbs";
 import PageHead from "@/components/site/PageHead";
-import ReadingCard from "@/components/site/ReadingCard";
+import ReadingCard, { FALLBACK } from "@/components/site/ReadingCard";
 import { buttonClass } from "@/components/site/ui";
 import site from "@/components/site/site.module.css";
 import { getAllColumns } from "@/lib/microcms";
@@ -201,16 +201,22 @@ export default async function ColumnPage() {
                     </li>
                   ))}
                 </ul>
+                {/* 残りの記事: 小さな灯台の絵つきのカード（PCは2列）。欄の見出しで分かるのでカテゴリ名は出さない */}
                 {rest.length > 0 && (
-                  <ul className={c.rows}>
-                    {rest.map((p) => (
+                  <ul className={c.minis}>
+                    {rest.map((p, i) => (
                       <li key={p.id}>
-                        <Link href={`/column/${p.id}`} className={c.row}>
-                          <span className={`${site.label} ${c.rowLabel}`} aria-hidden="true">
-                            {CATEGORY_LABEL[s.key]}
+                        <Link href={`/column/${p.id}`} className={c.mini}>
+                          <span className={c.miniPic}>
+                            <Image
+                              src={p.eyecatch?.url ?? FALLBACK[(i + 3) % FALLBACK.length]}
+                              alt=""
+                              fill
+                              sizes="72px"
+                            />
                           </span>
-                          <span className={c.rowTitle}>{p.title}</span>
-                          <span className={`${site.arrow} ${c.rowArrow}`} aria-hidden="true">
+                          <span className={c.miniTitle}>{p.title}</span>
+                          <span className={`${site.arrow} ${c.miniArrow}`} aria-hidden="true">
                             →
                           </span>
                         </Link>

@@ -182,7 +182,7 @@
   padding-right: 0;
 }
 .catHead,
-.rows {
+.minis {
   margin-right: var(--gutter);
 }
 .catHead {
@@ -244,41 +244,54 @@
   width: 220px;
   scroll-snap-align: start;
 }
-/* 残りの記事（1行リスト） */
-.rows {
+/* 残りの記事（小さな灯台の絵つきのカード。線で区切らず、淡い青の面で区切る） */
+.minis {
+  display: grid;
+  gap: 10px;
   list-style: none;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 6px 0 0;
+  /* 右はスマホの余白を取る（上の .catHead と同じ。カードの列だけ右端まで流す） */
+  margin: 8px var(--gutter) 0 0;
+  padding: 0;
 }
-.rows li {
-  border-top: 2px solid var(--mumu-blue);
-}
-.rows li:last-child {
-  border-bottom: 2px solid var(--mumu-blue);
-}
-.row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-block: 14px;
+.mini {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  height: 100%;
+  padding: 12px 16px 12px 12px;
+  border-radius: 18px;
+  background: var(--mumu-pale);
   text-decoration: none;
+  transition: background-color 0.2s;
 }
-.rowLabel {
-  font-size: 13px;
+.miniPic {
+  position: relative;
+  display: block;
+  aspect-ratio: 64 / 76;
+  overflow: hidden;
+  /* 上が半円のアーチ（カードの絵と同じ形を小さく） */
+  border-radius: 32px 32px 10px 10px;
 }
-.rowTitle {
+.miniPic img {
+  object-fit: cover;
+}
+.miniTitle {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-family: var(--f-heading);
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.55;
-  letter-spacing: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
 }
-.row:hover .rowTitle {
+.mini:hover .miniTitle {
   text-decoration: underline;
   text-underline-offset: 5px;
 }
-.rowArrow {
+.miniArrow {
   display: none;
 }
 @media (min-width: 900px) {
@@ -290,7 +303,7 @@
     padding-right: var(--gutter);
   }
   .catHead,
-  .rows {
+  .minis {
     margin-right: 0;
   }
   .catHead {
@@ -330,30 +343,27 @@
   .cards li {
     width: auto;
   }
-  .rows {
-    padding-top: 0;
+  .minis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+    margin-top: 12px;
   }
-  .row {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 24px;
-    padding-block: 20px;
+  .mini {
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    gap: 20px;
+    padding: 16px 24px 16px 16px;
+    border-radius: 22px;
   }
-  .rowLabel {
-    flex: none;
-    width: 96px;
-    font-size: 15px;
+  .miniPic {
+    border-radius: 40px 40px 12px 12px;
   }
-  .rowTitle {
-    flex: 1;
-    min-width: 0;
-    font-size: 18px;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
+  .miniTitle {
+    font-size: 16px;
+    -webkit-line-clamp: 2;
   }
-  .rowArrow {
+  .miniArrow {
     display: inline;
-    font-size: 18px;
+    font-size: 16px;
   }
 }
 

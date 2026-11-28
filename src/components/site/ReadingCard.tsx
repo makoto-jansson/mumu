@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import s from "./site.module.css";
 
-const FALLBACK = ["/v2/yuu-e.jpg", "/v2/asa-e.jpg", "/v2/yoru-e.jpg"];
+export const FALLBACK = ["/v2/yuu-e.jpg", "/v2/asa-e.jpg", "/v2/yoru-e.jpg"];
 
 export type ReadingItem = {
   id: string;
