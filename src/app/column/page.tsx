@@ -201,9 +201,10 @@ export default async function ColumnPage() {
                     </li>
                   ))}
                 </ul>
-                {/* 残りの記事: 小さな灯台の絵つきのカード（PCは2列）。欄の見出しで分かるのでカテゴリ名は出さない */}
+                {/* 残りの記事: 雑誌の目次のように、小さな灯台の絵・通し番号・明朝の題で並べる（PCは2列）。
+                    線や箱で区切らず余白で区切る。番号は上のカード3本（01〜03）の続き */}
                 {rest.length > 0 && (
-                  <ul className={c.minis}>
+                  <ol className={c.minis} start={4}>
                     {rest.map((p, i) => (
                       <li key={p.id}>
                         <Link href={`/column/${p.id}`} className={c.mini}>
@@ -212,17 +213,19 @@ export default async function ColumnPage() {
                               src={p.eyecatch?.url ?? FALLBACK[(i + 3) % FALLBACK.length]}
                               alt=""
                               fill
-                              sizes="72px"
+                              sizes="88px"
                             />
                           </span>
-                          <span className={c.miniTitle}>{p.title}</span>
-                          <span className={`${site.arrow} ${c.miniArrow}`} aria-hidden="true">
-                            →
+                          <span className={c.miniText}>
+                            <span className={`${site.label} ${c.miniNo}`} aria-hidden="true">
+                              No. {String(i + 4).padStart(2, "0")}
+                            </span>
+                            <span className={c.miniTitle}>{p.title}</span>
                           </span>
                         </Link>
                       </li>
                     ))}
-                  </ul>
+                  </ol>
                 )}
               </div>
             </section>

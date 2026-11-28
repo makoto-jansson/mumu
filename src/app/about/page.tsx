@@ -3,6 +3,7 @@
 // 正本は Figma「PC｜mumuについて」66:371 /「スマホ｜mumuについて」67:155。
 // 構成: パンくず → 頭（About mumu・キャッチ・アーチの絵） → mumuのこと → ストーリー → 焙煎しているひと → 次へ
 // ★ ストーリーとプロフィールの文章はユーザー自筆。言い回しを直したり書き足したりしないこと。
+//    2026-11-28 ユーザー判断で、プロフィールから音楽制作・瞑想アプリの話を外した（珈琲の話だけにする）。
 
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -45,9 +46,9 @@ const personSchema = {
   alternateName: "Mako",
   url: `${BASE_URL}/about`,
   image: `${BASE_URL}/images/profile.jpg`,
-  jobTitle: "焙煎者・アプリ開発者",
+  jobTitle: "焙煎者",
   description:
-    "灯台の珈琲焙煎所mumuを運営。「感性が、ふと、戻ってくる」をコンセプトに、自家焙煎珈琲豆のオンラインショップと瞑想アプリの開発を行っています。",
+    "灯台の珈琲焙煎所mumuを運営。「感性が、ふと、戻ってくる」をコンセプトに、自家焙煎珈琲豆のオンラインショップを営んでいます。",
   worksFor: {
     "@type": "Organization",
     "@id": `${BASE_URL}/#organization`,
@@ -58,10 +59,6 @@ const personSchema = {
     "スペシャルティコーヒー",
     "コーヒー焙煎",
     "Aillio焙煎機",
-    "瞑想",
-    "ウェルビーイング",
-    "集中・リラックス・発想の習慣化",
-    "Webアプリケーション開発",
   ],
   sameAs: [INSTAGRAM_URL, NOTE_URL],
 };
@@ -220,7 +217,7 @@ export default async function AboutPage() {
                   <span className={s.roasterRole}>焙煎しているひと・灯台の珈琲焙煎所mumu</span>
                 </h2>
                 <p>
-                  自家焙煎珈琲豆のオンラインショップを運営。「感性が、ふと、戻ってくる」をコンセプトに、珈琲豆の焙煎や、音楽制作、瞑想アプリ等の開発に従事しています。
+                  自家焙煎珈琲豆のオンラインショップを運営。「感性が、ふと、戻ってくる」をコンセプトに、珈琲豆を焙煎しています。
                 </p>
 
                 <h3 className={s.sub}>
@@ -241,20 +238,9 @@ export default async function AboutPage() {
                   の2種類。初めての方にも気軽に試していただけるように「まず100gから」お届けしています。
                 </p>
 
-                <h3 className={s.sub}>
-                  <span className={site.label} aria-hidden="true">
-                    App
-                  </span>
-                  <Link href="/app">アプリ</Link>
-                </h3>
-                <p>
-                  感性を、取り戻す。つくる人の、集中とひらめきのアプリです。モードは、Focus（集中）・Relax（リラックス）・Spark（発想）・Reclaim（振り返り）の4モード構成。すべて無料・インストール不要で使えます。
-                </p>
-                <p>SNSなどで情報疲れしている方は、ぜひ使ってみてください。</p>
-
                 <span className={s.rule} aria-hidden="true" />
                 <p>
-                  読んでくださって、ありがとうございます。豆のこと、アプリのこと、mumuのことについて、Instagram や note でも少しずつ綴っています。お気軽に覗いてみてください。
+                  読んでくださって、ありがとうございます。豆のこと、mumuのことについて、Instagram や note でも少しずつ綴っています。お気軽に覗いてみてください。
                 </p>
                 <p className={`${site.label} ${s.roasterSign}`}>— マコ</p>
                 <ul className={`${s.sns} ${s.snsSp}`}>

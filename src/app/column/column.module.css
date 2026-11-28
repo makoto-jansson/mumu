@@ -244,37 +244,45 @@
   width: 220px;
   scroll-snap-align: start;
 }
-/* 残りの記事（小さな灯台の絵つきのカード。線で区切らず、淡い青の面で区切る） */
+/* 残りの記事（雑誌の目次風: 小さな灯台の絵・通し番号・明朝の題。線や箱は使わず余白で区切る） */
 .minis {
   display: grid;
-  gap: 10px;
+  gap: 24px;
   list-style: none;
   /* 右はスマホの余白を取る（上の .catHead と同じ。カードの列だけ右端まで流す） */
-  margin: 8px var(--gutter) 0 0;
+  margin: 16px var(--gutter) 0 0;
   padding: 0;
 }
 .mini {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  height: 100%;
-  padding: 12px 16px 12px 12px;
-  border-radius: 18px;
-  background: var(--mumu-pale);
+  gap: 18px;
   text-decoration: none;
-  transition: background-color 0.2s;
 }
 .miniPic {
   position: relative;
   display: block;
-  aspect-ratio: 64 / 76;
+  aspect-ratio: 72 / 86;
   overflow: hidden;
-  /* 上が半円のアーチ（カードの絵と同じ形を小さく） */
-  border-radius: 32px 32px 10px 10px;
+  /* 上が半円のアーチ（大きなカードの絵と同じ形を小さく） */
+  border-radius: 36px 36px 10px 10px;
 }
 .miniPic img {
   object-fit: cover;
+  transition: transform 0.4s;
+}
+.mini:hover .miniPic img {
+  transform: scale(1.05);
+}
+.miniText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.miniNo {
+  font-size: 13px;
 }
 .miniTitle {
   display: -webkit-box;
@@ -282,17 +290,23 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: var(--f-heading);
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 900;
+  font-size: 16px;
   line-height: 1.6;
   letter-spacing: 0.02em;
 }
 .mini:hover .miniTitle {
   text-decoration: underline;
   text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
 }
-.miniArrow {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .miniPic img {
+    transition: none;
+  }
+  .mini:hover .miniPic img {
+    transform: none;
+  }
 }
 @media (min-width: 900px) {
   .cat {
@@ -345,25 +359,23 @@
   }
   .minis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 20px;
-    margin-top: 12px;
+    gap: 40px 56px;
+    margin-top: 24px;
   }
   .mini {
-    grid-template-columns: 80px minmax(0, 1fr) auto;
-    gap: 20px;
-    padding: 16px 24px 16px 16px;
-    border-radius: 22px;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 24px;
   }
   .miniPic {
-    border-radius: 40px 40px 12px 12px;
+    border-radius: 44px 44px 12px 12px;
+  }
+  .miniNo {
+    font-size: 14px;
   }
   .miniTitle {
-    font-size: 16px;
+    font-size: 18px;
+    line-height: 1.55;
     -webkit-line-clamp: 2;
-  }
-  .miniArrow {
-    display: inline;
-    font-size: 16px;
   }
 }
 
