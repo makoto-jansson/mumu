@@ -121,6 +121,37 @@ function formatSummaryLists(html: string, a: ArticleClasses): string {
   });
 }
 
+// 「よくある質問」の節を、1問ずつの箱（Q と A の印つき）に組み直す。
+// 原稿は「<h2>よくある質問</h2>」の下に「<p><strong>質問</strong>答え</p>」が並ぶ形（2026-11-28 時点で47本中44本）。
+// この形に当てはまる段落だけを置き換え、ほかの書き方の段落はそのまま残す。
+// FAQ構造化データ（parseFaq）は加工前の本文から作るので、ここでの変換は影響しない。
+function formatFaq(html: string, a: ArticleClasses): string {
+  const start = html.search(/<h2[^>]*>\s*よくある質問\s*<\/h2>/);
+  if (start < 0) return html;
+  const headEnd = html.indexOf("</h2>", start) + 5;
+  const next = html.slice(headEnd).search(/<h2\b/i);
+  const end = next < 0 ? html.length : headEnd + next;
+  const section = html.slice(headEnd, end);
+
+  let count = 0;
+  const items = section.replace(
+    /<p>\s*<strong>\s*([\s\S]*?)<\/strong>\s*([\s\S]*?)<\/p>/g,
+    (_all, q: string, ans: string) => {
+      const question = q.replace(/^Q[.．]?\s*/, "").trim();
+      if (!question || !ans.trim()) return _all;
+      count++;
+      return (
+        `<div class="${a.faqItem}">` +
+        `<p class="${a.faqQ}"><span class="${a.faqMark}" aria-hidden="true">Q</span><span>${question}</span></p>` +
+        `<div class="${a.faqA}"><span class="${a.faqMark}" aria-hidden="true">A</span><p>${ans.trim()}</p></div>` +
+        `</div>`
+      );
+    }
+  );
+  if (count === 0) return html;
+  return html.slice(0, headEnd) + `<div class="${a.faq}">${items}</div>` + html.slice(end);
+}
+
 // 銘柄名の比較用（半角・全角スペースの揺れを吸収）
 const normName = (s: string) => s.replace(/[\s　]/g, "");
 
@@ -236,6 +267,7 @@ export function renderArticle(
   { slug, beans, classes }: { slug: string; beans: BeanView[]; classes: ArticleClasses }
 ): { html: string; toc: { id: string; no: string; text: string }[] } {
   let h = formatSummaryLists(content, classes);
+  h = formatFaq(h, classes);
   h = linkBeanCards(h, beans);
   h = rebuildBeanCards(h, beans, classes);
   h = addShopUtm(h, slug);
