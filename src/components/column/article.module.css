@@ -124,7 +124,7 @@
 @media (min-width: 900px) {
   .layout {
     display: grid;
-    grid-template-columns: 240px minmax(0, 680px);
+    grid-template-columns: 240px minmax(0, 640px);
     align-items: start;
     gap: 80px;
     padding-block: 72px 96px;
@@ -205,30 +205,36 @@
 
 /* ---------- 本文（microCMS のHTML） ---------- */
 .body {
-  font-size: 15px;
-  line-height: 2;
-  letter-spacing: 0.03em;
+  font-size: 16px;
+  line-height: 2.05;
+  letter-spacing: 0.04em;
   overflow-wrap: break-word;
+  /* 段落の最後の行が1〜2文字だけにならないようにする（対応ブラウザのみ）。
+     文節での折り返し（word-break: auto-phrase）は右端が大きく不ぞろいになり、かえって読みにくかったので使わない */
+  text-wrap: pretty;
+  line-break: strict;
 }
 .body > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 .body > * + * {
-  margin-top: 26px;
+  margin-top: 28px;
 }
 /* 冒頭の段落は少し大きく（読み始めの入口） */
 .body > p:first-child {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 500;
-  line-height: 1.95;
+  line-height: 2;
 }
+/* 話の区切りの見出しは淡い青の箱にして、スクロール中でも区切りが目に入るようにする */
 .body h2 {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--mumu-blue);
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 20px;
+  border-radius: 20px;
+  background: var(--mumu-pale);
   font-family: var(--f-heading);
   font-weight: 900;
   font-size: 20px;
@@ -236,13 +242,13 @@
   scroll-margin-top: 16px;
 }
 .body > h2 {
-  margin-top: 72px;
+  margin-top: 64px;
 }
 .body > h2:first-child {
   margin-top: 0;
 }
 .body > h2 + * {
-  margin-top: 18px;
+  margin-top: 24px;
 }
 .h2No {
   flex: none;
@@ -260,7 +266,7 @@
   line-height: 1.6;
 }
 .body > h3 {
-  margin-top: 44px;
+  margin-top: 48px;
 }
 .body > h3 + * {
   margin-top: 12px;
@@ -332,28 +338,31 @@
 }
 @media (min-width: 900px) {
   .body {
-    font-size: 16px;
-    line-height: 2.05;
+    font-size: 17px;
+    line-height: 2.1;
     letter-spacing: 0.05em;
   }
   .body > * + * {
-    margin-top: 32px;
+    margin-top: 36px;
   }
   .body > p:first-child {
-    font-size: 17px;
-    line-height: 2;
+    font-size: 18px;
+    line-height: 2.05;
   }
   .body h2 {
-    gap: 16px;
-    padding-bottom: 14px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 18px;
+    padding: 26px 32px 28px;
+    border-radius: 24px;
     font-size: 26px;
     line-height: 1.45;
   }
   .body > h2 {
-    margin-top: 104px;
+    margin-top: 96px;
   }
   .body > h2 + * {
-    margin-top: 24px;
+    margin-top: 32px;
   }
   .h2No {
     font-size: 40px;
