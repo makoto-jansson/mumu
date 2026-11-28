@@ -16,6 +16,7 @@ import ReadingCard, { type ReadingItem } from "@/components/site/ReadingCard";
 import site from "@/components/site/site.module.css";
 import AuthorBox from "@/components/column/AuthorBox";
 import ArticleBeans from "@/components/column/ArticleBeans";
+import ArticleToc from "@/components/column/ArticleToc";
 import { getAllColumns, getColumn, formatPostDate } from "@/lib/microcms";
 import { getBeanViews } from "@/lib/beans";
 import { CATEGORY_LABEL, categoryOf } from "@/lib/columnCategory";
@@ -149,25 +150,8 @@ export default async function ColumnPostPage({ params }: { params: Promise<{ id:
 
           {/* ---------- 目次＋本文 ---------- */}
           <div className={`${site.wrap} ${a.layout}`}>
-            {toc.length > 1 && (
-              <nav className={a.toc} aria-labelledby="toc-title">
-                <p id="toc-title" className={`${site.label} ${a.tocTitle}`}>
-                  Contents<span className={site.srOnly}>（目次）</span>
-                </p>
-                <ol>
-                  {toc.map((t) => (
-                    <li key={t.id}>
-                      <a href={`#${t.id}`}>
-                        <span className={`${site.label} ${a.tocNo}`} aria-hidden="true">
-                          {t.no}
-                        </span>
-                        <span>{t.text}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            )}
+            {/* 目次（スクロールに合わせて、今読んでいる章に印を付ける） */}
+            {toc.length > 1 && <ArticleToc items={toc} />}
             <div className={a.main}>
               {post.eyecatch && (
                 <div className={a.eyecatch}>

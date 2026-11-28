@@ -5,9 +5,10 @@
    原稿の図解・豆カードの囲みは style 属性を持つため、一部は !important で上書きしている。
 
    書体の役割（2026-11-28 整理。記事の中で日本語の書体が混ざって「カオス」に見えたため）:
-   - 明朝（Zen Old Mincho）: 見出しと「読む文章」すべて（題名・目次・本文・よくある質問・書いた人の紹介）
+   - 明朝（Zen Old Mincho）: 見出しと「読む文章」すべて（題名・本文・よくある質問・書いた人の紹介）
        500＝読む文章 / 700＝リード・太字 / 900＝見出し
-   - ゴシック（Zen Kaku Gothic New）: 操作と情報（パンくず・日付などの情報行・図の説明・表・豆カード・ボタン）
+   - ゴシック（Zen Kaku Gothic New）: 操作と情報（目次・パンくず・日付などの情報行・図の説明・表・豆カード・ボタン）
+       目次は一度明朝にしたが、ユーザー判断でゴシック＋斜体の番号に戻した（2026-11-28）
    - Playfair: 大きな文字と章番号は 900 の立体（見出しも目次も同じ姿）、小さなラベルは 700 の斜体 */
 
 .srOnly {
@@ -150,36 +151,48 @@
   margin: 0;
   font-size: 15px;
 }
+/* 左に細い線（レール）を敷き、今読んでいる章だけ青い線にする（ArticleToc が aria-current を付ける） */
 .toc ol {
   display: grid;
-  gap: 10px;
+  gap: 4px;
   list-style: none;
   margin: 12px 0 0;
   padding: 0;
+  border-left: 2px solid var(--mumu-white);
 }
 .toc a {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-family: var(--f-heading);
-  font-size: 14px;
+  margin-left: -2px;
+  padding: 3px 0 3px 12px;
+  border-left: 2px solid transparent;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.6;
-  letter-spacing: 0.03em;
+  letter-spacing: 0;
   text-decoration: none;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 }
 .toc a:hover span:last-child {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-/* 番号は site.label（斜体のラベル）ではなく、見出しの章番号と同じ立体の太字にする */
-.toc .tocNo {
+.toc a[aria-current] {
+  border-left-color: var(--mumu-blue);
+  font-weight: 700;
+}
+.tocNo {
   flex: none;
-  min-width: 1.5em;
-  font-style: normal;
-  font-weight: 900;
-  font-size: 15px;
-  line-height: 1;
+  min-width: 1.4em;
+  font-size: 13px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toc a {
+    transition: none;
+  }
 }
 @media (min-width: 900px) {
   .toc {
@@ -195,11 +208,18 @@
     font-size: 18px;
   }
   .toc ol {
-    gap: 14px;
+    gap: 6px;
     margin-top: 14px;
+    border-left-color: var(--mumu-pale);
   }
   .toc a {
-    letter-spacing: 0.04em;
+    padding-block: 4px;
+    letter-spacing: 0.02em;
+  }
+  /* PCは今読んでいる章に、淡い青のマーカーも敷く */
+  .toc a[aria-current] {
+    border-radius: 0 6px 6px 0;
+    background: var(--mumu-pale);
   }
 }
 
