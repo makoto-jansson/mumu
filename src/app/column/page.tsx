@@ -55,6 +55,15 @@ const SECTIONS: { key: ColumnCategory; en: string; label: string; lead: string }
   { key: "reading", en: "Others", label: "そのほかの読みもの", lead: "コーヒーにまつわる、その他の話題。" },
 ];
 
+// 読むのにかかる時間（分）。日本語の黙読は1分あたり約500字として、図解を除いた本文の文字数から出す
+function readMinutes(html: string): number {
+  const chars = (html || "")
+    .replace(/<figure[\s\S]*?<\/figure>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, "").length;
+  return Math.max(1, Math.round(chars / 500));
+}
+
 export default async function ColumnPage() {
   const posts = await getAllColumns();
   // 新しい順
@@ -201,31 +210,32 @@ export default async function ColumnPage() {
                     </li>
                   ))}
                 </ul>
-                {/* 残りの記事: 雑誌の目次のように、通し番号・明朝の題で並べる（PCは2列）。
-                    記事にアイキャッチが無く、灯台の絵3枚を40回以上くり返して不自然だったので、
-                    小さな絵の代わりにアーチ形の枠に大きな番号を入れる（番号は上のカード3本 01〜03 の続き）。
-                    アイキャッチがある記事だけは、その画像を枠に入れる。線や箱で区切らず余白で区切る */}
+                {/* 残りの記事: 雑誌の索引のような1行リスト（2026-11-28 設計し直し）。
+                    最初の1行リストは題名だけで、どの行も同じ重さだったため「線と文字の連続」に見えた。
+                    一覧は拾い読みして選ぶ場所なので、1行ごとに「番号 → 題名（太い明朝）→ 書き出し1行（細いゴシック）
+                    → 読む時間」の階層を持たせ、題名と書き出しにははっきり差をつける。
+                    各行のカテゴリ名は欄の見出しと重複するので出さない。番号は上のカード3本（01〜03）の続き */}
                 {rest.length > 0 && (
-                  <ol className={c.minis} start={4}>
-                    {rest.map((p, i) => {
-                      const no = String(i + 4).padStart(2, "0");
-                      return (
-                        <li key={p.id}>
-                          <Link href={`/column/${p.id}`} className={c.mini}>
-                            {p.eyecatch ? (
-                              <span className={c.miniPic}>
-                                <Image src={p.eyecatch.url} alt="" fill sizes="88px" />
-                              </span>
-                            ) : (
-                              <span className={c.miniNo} aria-hidden="true">
-                                {no}
-                              </span>
-                            )}
-                            <span className={c.miniTitle}>{p.title}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                  <ol className={c.index} start={4}>
+                    {rest.map((p, i) => (
+                      <li key={p.id}>
+                        <Link href={`/column/${p.id}`} className={c.indexRow}>
+                          <span className={c.indexNo} aria-hidden="true">
+                            {String(i + 4).padStart(2, "0")}
+                          </span>
+                          <span className={c.indexText}>
+                            <span className={c.indexTitle}>{p.title}</span>
+                            <span className={c.indexDek}>{excerpt(p.content, 80)}</span>
+                          </span>
+                          <span className={c.indexMeta}>
+                            <span className={site.label}>{readMinutes(p.content)} min</span>
+                            <span className={`${site.arrow} ${c.indexArrow}`} aria-hidden="true">
+                              →
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
                   </ol>
                 )}
               </div>
