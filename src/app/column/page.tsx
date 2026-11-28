@@ -11,7 +11,7 @@ import Image from "next/image";
 import SiteChrome from "@/components/site/SiteChrome";
 import Breadcrumbs from "@/components/site/Breadcrumbs";
 import PageHead from "@/components/site/PageHead";
-import ReadingCard, { FALLBACK } from "@/components/site/ReadingCard";
+import ReadingCard from "@/components/site/ReadingCard";
 import { buttonClass } from "@/components/site/ui";
 import site from "@/components/site/site.module.css";
 import { getAllColumns } from "@/lib/microcms";
@@ -201,30 +201,31 @@ export default async function ColumnPage() {
                     </li>
                   ))}
                 </ul>
-                {/* 残りの記事: 雑誌の目次のように、小さな灯台の絵・通し番号・明朝の題で並べる（PCは2列）。
-                    線や箱で区切らず余白で区切る。番号は上のカード3本（01〜03）の続き */}
+                {/* 残りの記事: 雑誌の目次のように、通し番号・明朝の題で並べる（PCは2列）。
+                    記事にアイキャッチが無く、灯台の絵3枚を40回以上くり返して不自然だったので、
+                    小さな絵の代わりにアーチ形の枠に大きな番号を入れる（番号は上のカード3本 01〜03 の続き）。
+                    アイキャッチがある記事だけは、その画像を枠に入れる。線や箱で区切らず余白で区切る */}
                 {rest.length > 0 && (
                   <ol className={c.minis} start={4}>
-                    {rest.map((p, i) => (
-                      <li key={p.id}>
-                        <Link href={`/column/${p.id}`} className={c.mini}>
-                          <span className={c.miniPic}>
-                            <Image
-                              src={p.eyecatch?.url ?? FALLBACK[(i + 3) % FALLBACK.length]}
-                              alt=""
-                              fill
-                              sizes="88px"
-                            />
-                          </span>
-                          <span className={c.miniText}>
-                            <span className={`${site.label} ${c.miniNo}`} aria-hidden="true">
-                              No. {String(i + 4).padStart(2, "0")}
-                            </span>
+                    {rest.map((p, i) => {
+                      const no = String(i + 4).padStart(2, "0");
+                      return (
+                        <li key={p.id}>
+                          <Link href={`/column/${p.id}`} className={c.mini}>
+                            {p.eyecatch ? (
+                              <span className={c.miniPic}>
+                                <Image src={p.eyecatch.url} alt="" fill sizes="88px" />
+                              </span>
+                            ) : (
+                              <span className={c.miniNo} aria-hidden="true">
+                                {no}
+                              </span>
+                            )}
                             <span className={c.miniTitle}>{p.title}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ol>
                 )}
               </div>

@@ -244,7 +244,7 @@
   width: 220px;
   scroll-snap-align: start;
 }
-/* 残りの記事（雑誌の目次風: 小さな灯台の絵・通し番号・明朝の題。線や箱は使わず余白で区切る） */
+/* 残りの記事（雑誌の目次風: アーチ形の枠に大きな通し番号＋明朝の題。線や箱は使わず余白で区切る） */
 .minis {
   display: grid;
   gap: 24px;
@@ -275,14 +275,27 @@
 .mini:hover .miniPic img {
   transform: scale(1.05);
 }
-.miniText {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
+/* 番号のアーチ（灯台の絵と同じ形。白地に青い線、中に見出しの章番号と同じ太い数字） */
 .miniNo {
-  font-size: 13px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  aspect-ratio: 72 / 86;
+  padding-bottom: 12px;
+  border: 2px solid var(--mumu-blue);
+  border-radius: 36px 36px 10px 10px;
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+.mini:hover .miniNo {
+  background: var(--mumu-blue);
+  color: var(--mumu-white);
 }
 .miniTitle {
   display: -webkit-box;
@@ -301,6 +314,9 @@
   text-decoration-thickness: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
+  .miniNo {
+    transition: none;
+  }
   .miniPic img {
     transition: none;
   }
@@ -370,7 +386,9 @@
     border-radius: 44px 44px 12px 12px;
   }
   .miniNo {
-    font-size: 14px;
+    padding-bottom: 14px;
+    border-radius: 44px 44px 12px 12px;
+    font-size: 38px;
   }
   .miniTitle {
     font-size: 18px;
